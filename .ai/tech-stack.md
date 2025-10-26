@@ -1,4 +1,4 @@
-# Stos Technologiczny QuizMakerAI
+# Stos Technologiczny MroczneHistorie
 
 ## Backend
 
