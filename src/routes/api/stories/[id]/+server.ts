@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { isValidUUID, isValidUpdateStoryCommand } from '../../../../types';
 import { UpdateStorySchema } from '$lib/validation/story.validation';
 import { formatValidationError } from '$lib/utils/validation';
+import { ApiErrors } from '$lib/server/utils/api-error';
 import type { ErrorDTO, StoryDTO, UpdateStoryCommand } from '../../../../types';
 
 /**
@@ -219,5 +220,101 @@ export const PATCH: RequestHandler = async ({ params, locals, request }) => {
 			} satisfies ErrorDTO,
 			{ status: 500 }
 		);
+	}
+};
+
+/**
+ * Delete Story API Endpoint
+ *
+ * @route DELETE /api/stories/:id
+ * @auth Required (JWT Bearer token via Supabase)
+ *
+ * @param {string} id - Story UUID (URL parameter)
+ * @returns {void} 204 No Content on success
+ *
+ * @throws {400} VALIDATION_ERROR - Invalid UUID format
+ * @throws {401} AUTHENTICATION_ERROR - Missing or invalid token
+ * @throws {404} NOT_FOUND - Story not found or no access (RLS)
+ * @throws {500} INTERNAL_ERROR - Database error
+ *
+ * @description
+ * Permanently deletes a story from the database. This is an irreversible operation.
+ * Users can only delete their own stories (enforced by RLS policy stories_delete_own).
+ * Returns 404 for both non-existent stories and stories belonging to other users
+ * (prevents data leakage).
+ */
+export const DELETE: RequestHandler = async ({ params, locals }) => {
+	try {
+		// 1. Authentication check (handled by hooks.server.ts)
+		if (!locals.user) {
+			console.warn('[AUTHENTICATION_ERROR] DELETE request without valid user', {
+				timestamp: new Date().toISOString()
+			});
+			return ApiErrors.Unauthorized();
+		}
+
+		// 2. Validate UUID format
+		const { id } = params;
+
+		if (!isValidUUID(id)) {
+			console.warn('[VALIDATION_ERROR] Invalid UUID format in DELETE', {
+				providedId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
+			return ApiErrors.InvalidUUID();
+		}
+
+		// 3. Execute DELETE query
+		// RLS policy stories_delete_own ensures user can only delete their own stories
+		const { error, count } = await locals.supabase
+			.from('stories')
+			.delete({ count: 'exact' })
+			.eq('id', id);
+
+		// 4. Handle database errors
+		if (error) {
+			console.error('[DB_ERROR] DELETE failed', {
+				code: error.code,
+				message: error.message,
+				storyId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
+			return ApiErrors.InternalError();
+		}
+
+		// 5. Check if anything was deleted
+		// count === 0 means either:
+		// - Story doesn't exist, OR
+		// - Story belongs to another user (RLS blocked)
+		// We return 404 for both cases (security: don't reveal if story exists)
+		if (count === 0) {
+			console.info('[NOT_FOUND] Story not found or no access during DELETE', {
+				storyId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
+			return ApiErrors.NotFound();
+		}
+
+		// 6. Success - return 204 No Content
+		console.info('[SUCCESS] Story deleted', {
+			storyId: id,
+			userId: locals.user.id,
+			timestamp: new Date().toISOString()
+		});
+
+		return new Response(null, { status: 204 });
+	} catch (error: unknown) {
+		// 7. Handle unexpected errors
+		console.error('[API_ERROR] DELETE /api/stories/:id', {
+			error: error instanceof Error ? error.message : 'Unknown error',
+			stack: error instanceof Error ? error.stack : undefined,
+			storyId: params.id,
+			userId: locals.user?.id,
+			timestamp: new Date().toISOString()
+		});
+		return ApiErrors.InternalError();
 	}
 };
