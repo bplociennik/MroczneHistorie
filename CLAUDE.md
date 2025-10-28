@@ -1,6 +1,6 @@
 # AI Rules for MroczneHistorie
 
-## Description (in polish language)
+## Description (in Polish language)
 
 "MroczneHistorie" to aplikacja internetowa (mobile-first) zaprojektowana, aby rozwiązać problem trudności związanych z tworzeniem zagadek w stylu "Czarnych Historii". Dzięki integracji z AI (OpenAI), aplikacja umożliwia użytkownikom błyskawiczne generowanie unikalnych, mrocznych zagadek na podstawie ich własnych pomysłów.
 
