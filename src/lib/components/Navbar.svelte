@@ -1,0 +1,105 @@
+<script lang="ts">
+	import type { Session } from '@supabase/supabase-js';
+	import type { SupabaseClient } from '@supabase/supabase-js';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { toastStore } from '$lib/stores/toasts';
+
+	interface NavbarProps {
+		session: Session | null;
+		supabase: SupabaseClient;
+	}
+
+	let { session, supabase }: NavbarProps = $props();
+
+	/**
+	 * Handle logout
+	 * Client-side logout using Supabase
+	 */
+	async function handleLogout() {
+		try {
+			const { error } = await supabase.auth.signOut();
+
+			if (error) {
+				console.error('Logout error:', error);
+				toastStore.addToast('Nie udało się wylogować. Spróbuj ponownie.', 'error');
+				return;
+			}
+
+			// Invalidate all data and redirect
+			await invalidateAll();
+			await goto('/', { replaceState: true });
+			toastStore.addToast('Wylogowano pomyślnie', 'success');
+		} catch (error) {
+			console.error('Unexpected logout error:', error);
+			toastStore.addToast('Wystąpił nieoczekiwany błąd', 'error');
+		}
+	}
+</script>
+
+<nav class="navbar bg-base-100 shadow-lg">
+	<!-- Logo -->
+	<div class="flex-1">
+		<a href="/" class="btn btn-ghost text-xl font-bold"> MroczneHistorie </a>
+	</div>
+
+	<!-- Desktop Menu -->
+	<div class="flex-none hidden lg:flex">
+		<ul class="menu menu-horizontal px-1">
+			{#if session}
+				<li><a href="/">Moje Historie</a></li>
+				<li><a href="/generate">Generuj (+)</a></li>
+			{:else}
+				<li><a href="/">Strona główna</a></li>
+				<li><a href="/login">Zaloguj się</a></li>
+				<li><a href="/register">Stwórz konto</a></li>
+			{/if}
+		</ul>
+
+		{#if session}
+			<button type="button" class="btn btn-ghost" onclick={handleLogout}> Wyloguj </button>
+		{/if}
+	</div>
+
+	<!-- Mobile Menu -->
+	<div class="navbar-end lg:hidden">
+		<div class="dropdown dropdown-end">
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<!-- svelte-ignore a11y_label_has_associated_control -->
+			<label tabindex="0" class="btn btn-ghost" aria-label="Menu">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-5 w-5"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 6h16M4 12h16M4 18h16"
+					/>
+				</svg>
+			</label>
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<ul
+				tabindex="0"
+				class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+			>
+				{#if session}
+					<li><a href="/">Moje Historie</a></li>
+					<li><a href="/generate">Generuj (+)</a></li>
+					<li>
+						<button type="button" class="w-full text-left" onclick={handleLogout}>
+							Wyloguj
+						</button>
+					</li>
+				{:else}
+					<li><a href="/">Strona główna</a></li>
+					<li><a href="/login">Zaloguj się</a></li>
+					<li><a href="/register">Stwórz konto</a></li>
+				{/if}
+			</ul>
+		</div>
+	</div>
+</nav>
