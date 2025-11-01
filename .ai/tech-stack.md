@@ -31,6 +31,10 @@
 
 ## Testowanie
 
+- **Vitest**
+  - Framework do testów jednostkowych (unit tests) zbudowany na Vite.
+  - Szybkie wykonywanie testów dzięki natywnym ESM.
+  - Integracja z @testing-library/svelte do testowania komponentów.
 - **Playwright**
   - Framework do testów End-to-End (E2E).
 

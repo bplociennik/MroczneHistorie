@@ -4,9 +4,9 @@ Aplikacja webowa (mobile-first) do generowania zagadek w stylu "Czarnych Histori
 
 ## O Projekcie
 
-MroczneHistorie to narzdzie, które rozwizuje problem trudno[ci w tworzeniu anga|ujcych zagadek logicznych. Aplikacja wykorzystuje API OpenAI do generowania unikalnych, mrocznych historii na podstawie pomysBów u|ytkownika, umo|liwiajc ich przechowywanie i zarzdzanie w jednym miejscu.
+MroczneHistorie to narzdzie, ktï¿½re rozwizuje problem trudno[ci w tworzeniu anga|ujcych zagadek logicznych. Aplikacja wykorzystuje API OpenAI do generowania unikalnych, mrocznych historii na podstawie pomysBï¿½w u|ytkownika, umo|liwiajc ich przechowywanie i zarzdzanie w jednym miejscu.
 
-### GBówne Funkcjonalno[ci
+### GBï¿½wne Funkcjonalno[ci
 
 - Generowanie zagadek AI z kontrol trudno[ci i mroczno[ci
 - Prywatna biblioteka wygenerowanych historii
@@ -22,10 +22,10 @@ Projekt wykorzystuje nowoczesny stack technologiczny:
 - **Frontend:** SvelteKit + TypeScript + Tailwind CSS + DaisyUI
 - **Backend:** SvelteKit API Routes + Supabase (PostgreSQL, Auth, RLS)
 - **AI:** OpenAI API
-- **Testy:** Playwright
+- **Testy:** Playwright, Vitest
 - **CI/CD:** GitHub Actions + Cloudflare Pages
 
-SzczegóBowe informacje o stosie technologicznym znajduj si w [.ai/tech-stack.md](.ai/tech-stack.md).
+Szczegï¿½Bowe informacje o stosie technologicznym znajduj si w [.ai/tech-stack.md](.ai/tech-stack.md).
 
 ## Rozpoczcie Pracy
 
@@ -72,5 +72,5 @@ npm run test
 
 ## Dokumentacja
 
-- [Product Requirements Document (PRD)](.ai/prd.md) - szczegóBowe wymagania funkcjonalne i biznesowe
+- [Product Requirements Document (PRD)](.ai/prd.md) - szczegï¿½Bowe wymagania funkcjonalne i biznesowe
 - [Tech Stack](.ai/tech-stack.md) - peBny opis stosu technologicznego
