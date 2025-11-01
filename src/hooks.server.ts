@@ -29,39 +29,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const isApiRoute = event.url.pathname.startsWith('/api/');
 
 	if (isApiRoute) {
-		// Extract Bearer token from Authorization header
-		const authHeader = event.request.headers.get('authorization');
-		const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
-
-		// Step 1: Create Service Role client ONLY for token verification
-		// (This client bypasses RLS, so we NEVER use it for database queries)
-		const serviceRoleClient = createServerClient(
-			PUBLIC_SUPABASE_URL,
-			SUPABASE_SERVICE_ROLE_KEY,
-			{
-				cookies: {
-					get: (key) => event.cookies.get(key),
-					set: (key, value, options) => {
-						event.cookies.set(key, value, { ...options, path: '/' });
-					},
-					remove: (key, options) => {
-						event.cookies.delete(key, { ...options, path: '/' });
-					}
-				}
-			}
-		);
-
-		// Verify user via Bearer token using Service Role client
-		if (token) {
-			const { data } = await serviceRoleClient.auth.getUser(token);
-			event.locals.user = data.user ?? null;
-		} else {
-			event.locals.user = null;
-		}
-
-		// Step 2: Create Authenticated client for DATABASE queries (RLS enforced!)
-		// This client uses ANON_KEY + user's Bearer token = RLS is enforced
-		const dbClientOptions: any = {
+		// Create Supabase client with cookie handling (works for both Bearer and cookie auth)
+		event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 			cookies: {
 				get: (key) => event.cookies.get(key),
 				set: (key, value, options) => {
@@ -71,22 +40,38 @@ export const handle: Handle = async ({ event, resolve }) => {
 					event.cookies.delete(key, { ...options, path: '/' });
 				}
 			}
-		};
+		});
 
-		// Add global headers with Bearer token if available
+		// Extract Bearer token from Authorization header
+		const authHeader = event.request.headers.get('authorization');
+		const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
 		if (token) {
-			dbClientOptions.global = {
-				headers: {
-					Authorization: `Bearer ${token}` // ✅ User token for RLS context
+			// External API call with Bearer token - verify using Service Role client
+			const serviceRoleClient = createServerClient(
+				PUBLIC_SUPABASE_URL,
+				SUPABASE_SERVICE_ROLE_KEY,
+				{
+					cookies: {
+						get: (key) => event.cookies.get(key),
+						set: (key, value, options) => {
+							event.cookies.set(key, value, { ...options, path: '/' });
+						},
+						remove: (key, options) => {
+							event.cookies.delete(key, { ...options, path: '/' });
+						}
+					}
 				}
-			};
+			);
+			const { data } = await serviceRoleClient.auth.getUser(token);
+			event.locals.user = data.user ?? null;
+		} else {
+			// Internal server-side fetch - use cookie-based session from ANON client
+			const {
+				data: { session }
+			} = await event.locals.supabase.auth.getSession();
+			event.locals.user = session?.user ?? null;
 		}
-
-		event.locals.supabase = createServerClient(
-			PUBLIC_SUPABASE_URL,
-			PUBLIC_SUPABASE_ANON_KEY, // ✅ ANON KEY enforces RLS
-			dbClientOptions
-		);
 	} else {
 		// For browser routes: Use Anon client with cookie-based auth
 		event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {

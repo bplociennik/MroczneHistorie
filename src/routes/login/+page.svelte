@@ -1,9 +1,19 @@
 <script lang="ts">
+	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { toastStore } from '$lib/stores/toasts';
+	import { goto } from '$app/navigation';
 
-	let loading = $state(false);
+	// Use $props() for Svelte 5 runes mode
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	// Loading state
+	let isSubmitting = $state(false);
 </script>
+
+<svelte:head>
+	<title>Logowanie - MroczneHistorie</title>
+	<meta name="description" content="Zaloguj się do swojego konta MroczneHistorie" />
+</svelte:head>
 
 <div class="hero min-h-[80vh]">
 	<div class="hero-content flex-col w-full max-w-md">
@@ -15,20 +25,42 @@
 		<div class="card bg-base-200 w-full shadow-2xl">
 			<form
 				method="POST"
+				action="?/login"
 				class="card-body space-y-4"
 				use:enhance={() => {
-					loading = true;
+					isSubmitting = true;
+
 					return async ({ result, update }) => {
-						loading = false;
-						if (result.type === 'failure') {
-							toastStore.addToast('Błąd logowania. Sprawdź dane.', 'error');
-						} else if (result.type === 'success') {
-							toastStore.addToast('Zalogowano pomyślnie!', 'success');
+						isSubmitting = false;
+
+						if (result.type === 'redirect') {
+							await goto(result.location);
 						}
+
 						await update();
 					};
 				}}
 			>
+				<!-- General Error Alert -->
+				{#if form?.error}
+					<div class="alert alert-error">
+						<svg
+							class="w-6 h-6 shrink-0"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+						<span>{form.error}</span>
+					</div>
+				{/if}
+
 				<!-- Email -->
 				<fieldset class="fieldset !gap-4">
 					<legend class="fieldset-legend text-base mb-2">Email</legend>
@@ -38,9 +70,17 @@
 						type="email"
 						placeholder="twoj@email.pl"
 						class="input w-full px-4 py-3"
+						class:input-error={form?.errors?.email}
 						required
-						disabled={loading}
+						autocomplete="email"
+						disabled={isSubmitting}
+						value={form?.email || ''}
 					/>
+					{#if form?.errors?.email}
+						<div class="label">
+							<span class="label-text-alt text-error">{form.errors.email}</span>
+						</div>
+					{/if}
 				</fieldset>
 
 				<!-- Password -->
@@ -52,18 +92,25 @@
 						type="password"
 						placeholder="••••••••"
 						class="input w-full px-4 py-3"
+						class:input-error={form?.errors?.password}
 						required
-						disabled={loading}
+						autocomplete="current-password"
+						disabled={isSubmitting}
 					/>
+					{#if form?.errors?.password}
+						<div class="label">
+							<span class="label-text-alt text-error">{form.errors.password}</span>
+						</div>
+					{/if}
 				</fieldset>
 
 				<!-- Submit -->
 				<button
 					type="submit"
 					class="btn btn-primary w-full !bg-primary !text-primary-content"
-					disabled={loading}
+					disabled={isSubmitting}
 				>
-					{#if loading}
+					{#if isSubmitting}
 						<span class="loading loading-spinner loading-sm"></span>
 						Logowanie...
 					{:else}

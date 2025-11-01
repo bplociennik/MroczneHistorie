@@ -47,17 +47,32 @@
 		<ul class="menu menu-horizontal px-1">
 			{#if session}
 				<li><a href="/">Moje Historie</a></li>
-				<li><a href="/generate">Generuj (+)</a></li>
+				<li>
+					<a href="/generate" class="flex items-center gap-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-5 w-5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4v16m8-8H4"
+							/>
+						</svg>
+						Generuj
+					</a>
+				</li>
+				<li><a onclick={handleLogout}>Wyloguj</a></li>
 			{:else}
 				<li><a href="/">Strona główna</a></li>
 				<li><a href="/login">Zaloguj się</a></li>
 				<li><a href="/register">Stwórz konto</a></li>
 			{/if}
 		</ul>
-
-		{#if session}
-			<button type="button" class="btn btn-ghost" onclick={handleLogout}> Wyloguj </button>
-		{/if}
 	</div>
 
 	<!-- Mobile Menu -->
@@ -88,12 +103,26 @@
 			>
 				{#if session}
 					<li><a href="/">Moje Historie</a></li>
-					<li><a href="/generate">Generuj (+)</a></li>
 					<li>
-						<button type="button" class="w-full text-left" onclick={handleLogout}>
-							Wyloguj
-						</button>
+						<a href="/generate" class="flex items-center gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 4v16m8-8H4"
+								/>
+							</svg>
+							Generuj
+						</a>
 					</li>
+					<li><a onclick={handleLogout}>Wyloguj</a></li>
 				{:else}
 					<li><a href="/">Strona główna</a></li>
 					<li><a href="/login">Zaloguj się</a></li>
