@@ -1,3 +1,7 @@
+<script lang="ts">
+	import { resolve } from '$app/paths';
+</script>
+
 <div class="hero min-h-[80vh] bg-base-200 rounded-lg">
 	<div class="hero-content text-center">
 		<div class="max-w-2xl">
@@ -9,8 +13,8 @@
 			</p>
 
 			<div class="flex gap-4 justify-center flex-wrap">
-				<a href="/login" class="btn btn-primary btn-lg"> Zaloguj się </a>
-				<a href="/register" class="btn btn-outline btn-lg"> Stwórz konto </a>
+				<a href={resolve('/login')} class="btn btn-primary btn-lg"> Zaloguj się </a>
+				<a href={resolve('/register')} class="btn btn-outline btn-lg"> Stwórz konto </a>
 			</div>
 		</div>
 	</div>

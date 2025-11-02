@@ -1,6 +1,6 @@
 import { type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
-import { ROUTES, FORM_LABELS, BUTTON_LABELS } from '../utils/test-data';
+import { ROUTES, BUTTON_LABELS } from '../utils/test-data';
 
 /**
  * Page Object for Login page (/login)

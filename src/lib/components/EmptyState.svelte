@@ -1,3 +1,7 @@
+<script lang="ts">
+	import { resolve } from '$app/paths';
+</script>
+
 <div class="hero min-h-[60vh] bg-base-200 rounded-lg">
 	<div class="hero-content text-center">
 		<div class="max-w-xl">
@@ -11,7 +15,7 @@
 				swoją kolekcję!
 			</p>
 
-			<a href="/generate" class="btn btn-primary btn-lg"> Wygeneruj nową historię </a>
+			<a href={resolve('/generate')} class="btn btn-primary btn-lg"> Wygeneruj nową historię </a>
 		</div>
 	</div>
 </div>

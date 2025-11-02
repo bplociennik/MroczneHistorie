@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { invalidateAll, goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { toastStore } from '$lib/stores/toasts';
 	import LandingPage from '$lib/components/LandingPage.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
@@ -132,7 +133,7 @@
 				// 401 - session expired
 				if (response.status === 401) {
 					toastStore.addToast('Sesja wygasła. Zaloguj się ponownie', 'error');
-					await goto('/login');
+					await goto(resolve('/login'));
 					return;
 				}
 
@@ -152,7 +153,7 @@
 			}
 
 			const story: StoryDTO = await response.json();
-			await goto(`/stories/${story.id}`);
+			await goto(resolve(`/stories/${story.id}`));
 		} catch (error) {
 			console.error('Random story error:', error);
 			toastStore.addToast('Błąd połączenia. Sprawdź internet.', 'error');

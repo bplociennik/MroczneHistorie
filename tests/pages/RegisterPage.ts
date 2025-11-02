@@ -60,8 +60,18 @@ export class RegisterPage extends BasePage {
 		// Type confirm password slowly
 		await this.confirmPasswordInput.pressSequentially(confirmPassword || password, { delay: 100 });
 
-		// Wait for Svelte to process
-		await this.page.waitForTimeout(300);
+		// Wait for Svelte to process and enable button (canSubmit reactivity)
+		await this.page.waitForTimeout(1000);
+
+		// Wait for button to be visible and enabled
+		await this.submitButton.waitFor({ state: 'visible', timeout: 3000 });
+
+		// Poll until button is enabled (canSubmit = true)
+		let attempts = 0;
+		while ((await this.submitButton.isDisabled()) && attempts < 30) {
+			await this.page.waitForTimeout(100);
+			attempts++;
+		}
 
 		await this.submitButton.click();
 	}

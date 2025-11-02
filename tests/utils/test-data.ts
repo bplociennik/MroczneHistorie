@@ -166,11 +166,12 @@ export const TIMEOUTS = {
 
 /**
  * Generate random email for new user registration tests
+ * Using .test domain to avoid Supabase rejecting @example.com emails
  */
 export function generateRandomEmail(): string {
 	const timestamp = Date.now();
 	const random = Math.random().toString(36).substring(7);
-	return `test-${timestamp}-${random}@example.com`;
+	return `test-${timestamp}-${random}@test.io`;
 }
 
 /**

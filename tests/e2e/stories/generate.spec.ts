@@ -7,8 +7,6 @@ import {
 	MOCK_OPENAI_RESPONSES,
 	TIMEOUTS
 } from '../../utils/test-data';
-import { GeneratePage } from '../../pages/GeneratePage';
-import { HomePage } from '../../pages/HomePage';
 
 /**
  * E2E Tests for Story Generation

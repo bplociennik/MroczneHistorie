@@ -2,6 +2,7 @@
 	import type { Session } from '@supabase/supabase-js';
 	import type { SupabaseClient } from '@supabase/supabase-js';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { toastStore } from '$lib/stores/toasts';
 
 	interface NavbarProps {
@@ -27,7 +28,7 @@
 
 			// Invalidate all data and redirect
 			await invalidateAll();
-			await goto('/', { replaceState: true });
+			await goto(resolve('/'), { replaceState: true });
 			toastStore.addToast('Wylogowano pomyślnie', 'success');
 		} catch (error) {
 			console.error('Unexpected logout error:', error);
@@ -39,16 +40,16 @@
 <nav class="navbar bg-base-100 shadow-lg">
 	<!-- Logo -->
 	<div class="flex-1">
-		<a href="/" class="btn btn-ghost text-xl font-bold"> MroczneHistorie </a>
+		<a href={resolve('/')} class="btn btn-ghost text-xl font-bold"> MroczneHistorie </a>
 	</div>
 
 	<!-- Desktop Menu -->
 	<div class="flex-none hidden lg:flex">
 		<ul class="menu menu-horizontal px-1">
 			{#if session}
-				<li><a href="/">Moje Historie</a></li>
+				<li><a href={resolve('/')}>Moje Historie</a></li>
 				<li>
-					<a href="/generate" class="flex items-center gap-2">
+					<a href={resolve('/generate')} class="flex items-center gap-2">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							class="h-5 w-5"
@@ -68,9 +69,9 @@
 				</li>
 				<li><a onclick={handleLogout}>Wyloguj</a></li>
 			{:else}
-				<li><a href="/">Strona główna</a></li>
-				<li><a href="/login">Zaloguj się</a></li>
-				<li><a href="/register">Stwórz konto</a></li>
+				<li><a href={resolve('/')}>Strona główna</a></li>
+				<li><a href={resolve('/login')}>Zaloguj się</a></li>
+				<li><a href={resolve('/register')}>Stwórz konto</a></li>
 			{/if}
 		</ul>
 	</div>
@@ -102,9 +103,9 @@
 				class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
 			>
 				{#if session}
-					<li><a href="/">Moje Historie</a></li>
+					<li><a href={resolve('/')}>Moje Historie</a></li>
 					<li>
-						<a href="/generate" class="flex items-center gap-2">
+						<a href={resolve('/generate')} class="flex items-center gap-2">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								class="h-5 w-5"
@@ -124,9 +125,9 @@
 					</li>
 					<li><a onclick={handleLogout}>Wyloguj</a></li>
 				{:else}
-					<li><a href="/">Strona główna</a></li>
-					<li><a href="/login">Zaloguj się</a></li>
-					<li><a href="/register">Stwórz konto</a></li>
+					<li><a href={resolve('/')}>Strona główna</a></li>
+					<li><a href={resolve('/login')}>Zaloguj się</a></li>
+					<li><a href={resolve('/register')}>Stwórz konto</a></li>
 				{/if}
 			</ul>
 		</div>

@@ -1,5 +1,4 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import { BUTTON_LABELS } from '../../utils/test-data';
 
 /**
  * E2E Tests for Story Detail page (game mode)

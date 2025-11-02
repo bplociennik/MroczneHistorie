@@ -66,30 +66,39 @@ test.describe('Login', () => {
 
 		// Try to submit with empty email
 		await loginPage.passwordInput.fill('Password123!');
+
+		// HTML5 required attribute prevents submission
+		// Verify we stay on the login page after attempted submit
+		const currentUrl = loginPage.page.url();
 		await loginPage.submitButton.click();
 
-		// Verify form validation prevents submission or shows error
-		// This might be browser validation or custom validation
-		const isDisabled = await loginPage.isSubmitDisabled();
-		if (!isDisabled) {
-			// If submit is allowed, check for validation error
-			const errorText = await loginPage.getValidationError('email');
-			expect(errorText.toLowerCase()).toContain('email');
-		}
+		// Wait a bit to ensure no navigation happens
+		await loginPage.page.waitForTimeout(1000);
+
+		// Verify still on login page (form didn't submit)
+		await expect(loginPage.page).toHaveURL(/\/login/);
+		expect(loginPage.page.url()).toBe(currentUrl);
 	});
 
 	test('TC-AUTH-004: Login with empty password', async ({ loginPage }) => {
 		await loginPage.navigate();
 
 		// Try to submit with empty password
-		await loginPage.emailInput.fill(E2E_USER.email);
+		await loginPage.emailInput.click();
+		await loginPage.page.waitForTimeout(500);
+		await loginPage.emailInput.pressSequentially(E2E_USER.email, { delay: 100 });
+		await loginPage.page.waitForTimeout(300);
+
+		// HTML5 required attribute prevents submission
+		// Verify we stay on the login page after attempted submit
+		const currentUrl = loginPage.page.url();
 		await loginPage.submitButton.click();
 
-		// Verify form validation
-		const isDisabled = await loginPage.isSubmitDisabled();
-		if (!isDisabled) {
-			const errorText = await loginPage.getValidationError('password');
-			expect(errorText.toLowerCase()).toContain('password');
-		}
+		// Wait a bit to ensure no navigation happens
+		await loginPage.page.waitForTimeout(1000);
+
+		// Verify still on login page (form didn't submit)
+		await expect(loginPage.page).toHaveURL(/\/login/);
+		expect(loginPage.page.url()).toBe(currentUrl);
 	});
 });

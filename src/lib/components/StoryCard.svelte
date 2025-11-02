@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { StoryDTO } from '../../types';
 	import { createEventDispatcher } from 'svelte';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		story: StoryDTO;
@@ -39,7 +40,7 @@
 
 		<!-- Question as link -->
 		<a
-			href="/stories/{story.id}"
+			href={resolve(`/stories/${story.id}`)}
 			class="card-title text-lg hover:text-primary transition-colors cursor-pointer line-clamp-3"
 		>
 			{story.question}
@@ -57,7 +58,11 @@
 
 		<!-- Actions -->
 		<div class="card-actions justify-end mt-4">
-			<a href="/stories/{story.id}/edit" class="btn btn-sm btn-ghost" title="Edytuj historię">
+			<a
+				href={resolve(`/stories/${story.id}/edit`)}
+				class="btn btn-sm btn-ghost"
+				title="Edytuj historię"
+			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"

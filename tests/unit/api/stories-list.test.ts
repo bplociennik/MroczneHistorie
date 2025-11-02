@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { RequestHandlerEvent } from '@sveltejs/kit';
 import { GET } from '../../../src/routes/api/stories/+server';
 import { createMockLocals, createMockRequest } from '../../mocks/supabase.mock';
-import { storiesListFixture, validStoryFixture } from '../../fixtures/stories.fixture';
+import { storiesListFixture } from '../../fixtures/stories.fixture';
 import type { ErrorDTO, ListStoriesDTO } from '../../../src/types';
 
 describe('GET /api/stories', () => {

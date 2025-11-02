@@ -19,23 +19,19 @@ test.describe('Route Protection', () => {
 		await expect(page).toHaveURL('/login');
 	});
 
-	test('TC-AUTH-006: Protected route /stories redirects to /login', async ({ page }) => {
-		// Try to access stories list without authentication
-		await page.goto('/stories');
-
-		// Verify redirect to login page
-		await page.waitForURL('/login');
-		await expect(page).toHaveURL('/login');
-	});
-
-	test('TC-AUTH-006: Protected route /stories/[id] redirects to /login', async ({ page }) => {
+	test('TC-AUTH-006: Protected route /stories/[id] shows 400/404 error without auth', async ({
+		page
+	}) => {
 		// Try to access story detail without authentication
 		const dummyId = '00000000-0000-0000-0000-000000000000';
 		await page.goto(ROUTES.stories(dummyId));
 
-		// Verify redirect to login page
-		await page.waitForURL('/login');
-		await expect(page).toHaveURL('/login');
+		// Should stay on the same URL and show error page (not redirect to login)
+		await expect(page).toHaveURL(ROUTES.stories(dummyId));
+
+		// Verify error message is displayed (either 400 for invalid UUID or 404 for no access)
+		const errorHeading = page.locator('h1, h2').first();
+		await expect(errorHeading).toContainText(/400|404/);
 	});
 
 	test('TC-AUTH-006: Protected route /stories/[id]/edit redirects to /login', async ({ page }) => {

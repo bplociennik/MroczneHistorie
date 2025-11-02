@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import type { StoryDTO } from '../../src/types';
 
 /**
  * Creates a mock Supabase client for testing with full chainable support
