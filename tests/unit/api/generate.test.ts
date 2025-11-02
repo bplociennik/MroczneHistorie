@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { RequestHandlerEvent } from '@sveltejs/kit';
 import { POST } from '../../../src/routes/api/stories/generate/+server';
 import { createMockLocals, createMockRequest } from '../../mocks/supabase.mock';
 import { validGenerateCommand } from '../../fixtures/stories.fixture';
@@ -35,7 +36,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: false });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -53,7 +54,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -71,7 +72,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -86,7 +87,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -105,7 +106,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -121,7 +122,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -136,7 +137,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -151,7 +152,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -166,7 +167,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -181,7 +182,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -200,7 +201,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: GeneratedStoryDTO = await response.json();
 
 			// Assert
@@ -224,7 +225,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: GeneratedStoryDTO = await response.json();
 
 			// Assert
@@ -244,7 +245,7 @@ describe('POST /api/stories/generate', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: GeneratedStoryDTO = await response.json();
 
 			// Assert
@@ -259,7 +260,10 @@ describe('POST /api/stories/generate', () => {
 				body: { ...validGenerateCommand, difficulty: 1 }
 			});
 			const locals1 = createMockLocals({ authenticated: true });
-			const response1 = await POST({ request: request1, locals: locals1 } as any);
+			const response1 = await POST({
+				request: request1,
+				locals: locals1
+			} as unknown as RequestHandlerEvent);
 			expect(response1.status).toBe(200);
 
 			// Test difficulty 2
@@ -268,7 +272,10 @@ describe('POST /api/stories/generate', () => {
 				body: { ...validGenerateCommand, difficulty: 2 }
 			});
 			const locals2 = createMockLocals({ authenticated: true });
-			const response2 = await POST({ request: request2, locals: locals2 } as any);
+			const response2 = await POST({
+				request: request2,
+				locals: locals2
+			} as unknown as RequestHandlerEvent);
 			expect(response2.status).toBe(200);
 
 			// Test difficulty 3
@@ -277,7 +284,10 @@ describe('POST /api/stories/generate', () => {
 				body: { ...validGenerateCommand, difficulty: 3 }
 			});
 			const locals3 = createMockLocals({ authenticated: true });
-			const response3 = await POST({ request: request3, locals: locals3 } as any);
+			const response3 = await POST({
+				request: request3,
+				locals: locals3
+			} as unknown as RequestHandlerEvent);
 			expect(response3.status).toBe(200);
 		});
 	});
@@ -298,7 +308,7 @@ describe('POST /api/stories/generate', () => {
 			vi.mocked(openaiService.generateStory).mockRejectedValueOnce(timeoutError);
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -322,7 +332,7 @@ describe('POST /api/stories/generate', () => {
 			vi.mocked(openaiService.generateStory).mockRejectedValueOnce(rateLimitError);
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -346,7 +356,7 @@ describe('POST /api/stories/generate', () => {
 			vi.mocked(openaiService.generateStory).mockRejectedValueOnce(externalApiError);
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -367,7 +377,7 @@ describe('POST /api/stories/generate', () => {
 			vi.mocked(openaiService.generateStory).mockRejectedValueOnce(new Error('Generic error'));
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert

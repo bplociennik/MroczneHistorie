@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { RequestHandlerEvent } from '@sveltejs/kit';
 import { GET } from '../../../src/routes/api/stories/random/+server';
 import { createMockLocals } from '../../mocks/supabase.mock';
 import { validStoryFixture } from '../../fixtures/stories.fixture';
@@ -15,7 +16,7 @@ describe('GET /api/stories/random', () => {
 			const locals = createMockLocals({ authenticated: false });
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -40,7 +41,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 			const body: StoryDTO = await response.json();
 
 			// Assert
@@ -72,7 +73,7 @@ describe('GET /api/stories/random', () => {
 			mockSupabase.rpc = rpcMock;
 
 			// Act
-			await GET({ locals } as any);
+			await GET({ locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(rpcMock).toHaveBeenCalledWith('get_random_story');
@@ -92,7 +93,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(response.headers.get('Content-Type')).toBe('application/json');
@@ -114,7 +115,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -144,7 +145,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -163,7 +164,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -194,7 +195,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			await GET({ locals } as any);
+			await GET({ locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -227,7 +228,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 			const body: StoryDTO = await response.json();
 
 			// Assert
@@ -251,7 +252,7 @@ describe('GET /api/stories/random', () => {
 			});
 
 			// Act
-			const response = await GET({ locals } as any);
+			const response = await GET({ locals } as unknown as RequestHandlerEvent);
 			const body: StoryDTO = await response.json();
 
 			// Assert

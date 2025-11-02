@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { RequestHandlerEvent } from '@sveltejs/kit';
 import { DELETE } from '../../../src/routes/api/stories/[id]/+server';
 import { createMockLocals } from '../../mocks/supabase.mock';
 import { validStoryFixture, invalidUUIDs, nonExistentUUID } from '../../fixtures/stories.fixture';
@@ -16,7 +17,7 @@ describe('DELETE /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: false });
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -33,7 +34,7 @@ describe('DELETE /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -66,7 +67,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(response.status).toBe(204);
@@ -92,7 +93,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			await DELETE({ params, locals } as any);
+			await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(deleteMock).toHaveBeenCalledWith({ count: 'exact' });
@@ -120,7 +121,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			await DELETE({ params, locals } as any);
+			await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(eqMock).toHaveBeenCalledWith('id', storyId);
@@ -145,7 +146,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -171,7 +172,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -201,7 +202,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -221,7 +222,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -252,7 +253,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			await DELETE({ params, locals } as any);
+			await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(consoleInfoSpy).toHaveBeenCalledWith(
@@ -288,7 +289,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			await DELETE({ params, locals } as any);
+			await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(consoleInfoSpy).toHaveBeenCalledWith(
@@ -327,7 +328,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			await DELETE({ params, locals } as any);
+			await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -362,7 +363,7 @@ describe('DELETE /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await DELETE({ params, locals } as any);
+			const response = await DELETE({ params, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert

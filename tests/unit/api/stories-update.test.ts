@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { RequestHandlerEvent } from '@sveltejs/kit';
 import { PATCH } from '../../../src/routes/api/stories/[id]/+server';
 import { createMockLocals, createMockRequest } from '../../mocks/supabase.mock';
 import {
@@ -25,7 +26,7 @@ describe('PATCH /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: false });
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -46,7 +47,7 @@ describe('PATCH /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -66,7 +67,7 @@ describe('PATCH /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -92,7 +93,7 @@ describe('PATCH /api/stories/[id]', () => {
 				const locals = createMockLocals({ authenticated: true });
 
 				// Act
-				const response = await PATCH({ params, request, locals } as any);
+				const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 				const body: ErrorDTO = await response.json();
 
 				// Assert
@@ -115,7 +116,7 @@ describe('PATCH /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -134,7 +135,7 @@ describe('PATCH /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -152,7 +153,7 @@ describe('PATCH /api/stories/[id]', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -176,7 +177,7 @@ describe('PATCH /api/stories/[id]', () => {
 				.mockResolvedValue({ data: validStoryFixture, error: null });
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(response.status).toBe(200);
@@ -207,7 +208,7 @@ describe('PATCH /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: StoryDTO = await response.json();
 
 			// Assert
@@ -239,7 +240,7 @@ describe('PATCH /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: StoryDTO = await response.json();
 
 			// Assert
@@ -274,7 +275,7 @@ describe('PATCH /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: StoryDTO = await response.json();
 
 			// Assert
@@ -305,7 +306,7 @@ describe('PATCH /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -335,7 +336,7 @@ describe('PATCH /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -365,7 +366,7 @@ describe('PATCH /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -390,7 +391,7 @@ describe('PATCH /api/stories/[id]', () => {
 			});
 
 			// Act
-			const response = await PATCH({ params, request, locals } as any);
+			const response = await PATCH({ params, request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert

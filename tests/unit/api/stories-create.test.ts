@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { RequestHandlerEvent } from '@sveltejs/kit';
 import { POST } from '../../../src/routes/api/stories/+server';
 import { createMockLocals, createMockRequest } from '../../mocks/supabase.mock';
 import { validCreateCommand, validStoryFixture } from '../../fixtures/stories.fixture';
@@ -19,7 +20,7 @@ describe('POST /api/stories', () => {
 			const locals = createMockLocals({ authenticated: false });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -37,7 +38,7 @@ describe('POST /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -60,7 +61,7 @@ describe('POST /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -80,7 +81,7 @@ describe('POST /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -100,7 +101,7 @@ describe('POST /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -118,7 +119,7 @@ describe('POST /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -136,7 +137,7 @@ describe('POST /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -166,7 +167,7 @@ describe('POST /api/stories', () => {
 				.mockResolvedValue({ data: validStoryFixture, error: null });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(response.status).toBe(201);
@@ -191,7 +192,7 @@ describe('POST /api/stories', () => {
 				.mockResolvedValue({ data: validStoryFixture, error: null });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: StoryDTO = await response.json();
 
 			// Assert
@@ -233,7 +234,7 @@ describe('POST /api/stories', () => {
 			});
 
 			// Act
-			await POST({ request, locals } as any);
+			await POST({ request, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(insertMock).toHaveBeenCalledWith(
@@ -265,7 +266,7 @@ describe('POST /api/stories', () => {
 				.mockResolvedValue({ data: validStoryFixture, error: null });
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(response.status).toBe(201);
@@ -294,7 +295,7 @@ describe('POST /api/stories', () => {
 			});
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -324,7 +325,7 @@ describe('POST /api/stories', () => {
 			});
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -347,7 +348,7 @@ describe('POST /api/stories', () => {
 			});
 
 			// Act
-			const response = await POST({ request, locals } as any);
+			const response = await POST({ request, locals } as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert

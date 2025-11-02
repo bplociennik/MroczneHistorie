@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { RequestHandlerEvent } from '@sveltejs/kit';
 import { GET } from '../../../src/routes/api/stories/+server';
 import { createMockLocals, createMockRequest } from '../../mocks/supabase.mock';
 import { storiesListFixture, validStoryFixture } from '../../fixtures/stories.fixture';
@@ -16,7 +17,11 @@ describe('GET /api/stories', () => {
 			const locals = createMockLocals({ authenticated: false });
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -46,7 +51,7 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			await GET({ request, locals, url: request.url } as any);
+			await GET({ request, locals, url: request.url } as unknown as RequestHandlerEvent);
 
 			// Assert - Should use default limit=25, offset=0
 			expect(rangeMock).toHaveBeenCalledWith(0, 24); // from=0, to=24 (25 items)
@@ -61,7 +66,11 @@ describe('GET /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -78,7 +87,11 @@ describe('GET /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -96,7 +109,11 @@ describe('GET /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -113,7 +130,11 @@ describe('GET /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -130,7 +151,11 @@ describe('GET /api/stories', () => {
 			const locals = createMockLocals({ authenticated: true });
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -153,7 +178,11 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ListStoriesDTO = await response.json();
 
 			// Assert
@@ -175,7 +204,11 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ListStoriesDTO = await response.json();
 
 			// Assert
@@ -206,7 +239,7 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			await GET({ request, locals, url: request.url } as any);
+			await GET({ request, locals, url: request.url } as unknown as RequestHandlerEvent);
 
 			// Assert - Should use limit=10, offset=0
 			expect(rangeMock).toHaveBeenCalledWith(0, 9); // from=0, to=9 (10 items)
@@ -234,7 +267,7 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			await GET({ request, locals, url: request.url } as any);
+			await GET({ request, locals, url: request.url } as unknown as RequestHandlerEvent);
 
 			// Assert - Should use default limit=25, offset=25
 			expect(rangeMock).toHaveBeenCalledWith(25, 49); // from=25, to=49 (25 items)
@@ -262,7 +295,7 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			await GET({ request, locals, url: request.url } as any);
+			await GET({ request, locals, url: request.url } as unknown as RequestHandlerEvent);
 
 			// Assert - Should use limit=50, offset=100
 			expect(rangeMock).toHaveBeenCalledWith(100, 149); // from=100, to=149 (50 items)
@@ -292,7 +325,7 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			await GET({ request, locals, url: request.url } as any);
+			await GET({ request, locals, url: request.url } as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
@@ -317,7 +350,11 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -338,7 +375,11 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ErrorDTO = await response.json();
 
 			// Assert
@@ -370,7 +411,11 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 
 			// Assert
 			expect(response.status).toBe(200);
@@ -399,7 +444,11 @@ describe('GET /api/stories', () => {
 			});
 
 			// Act
-			const response = await GET({ request, locals, url: request.url } as any);
+			const response = await GET({
+				request,
+				locals,
+				url: request.url
+			} as unknown as RequestHandlerEvent);
 			const body: ListStoriesDTO = await response.json();
 
 			// Assert
