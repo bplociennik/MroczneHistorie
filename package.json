@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
+		"dev:e2e": "dotenv -e .env.e2e -- vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -15,11 +16,16 @@
 		"test": "vitest",
 		"test:unit": "vitest run",
 		"test:ui": "vitest --ui",
-		"test:coverage": "vitest run --coverage"
+		"test:coverage": "vitest run --coverage",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:debug": "playwright test --debug",
+		"test:e2e:report": "playwright show-report"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.36.0",
+		"@playwright/test": "^1.56.1",
 		"@sveltejs/adapter-auto": "^6.1.0",
 		"@sveltejs/kit": "^2.43.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.0",
@@ -28,6 +34,7 @@
 		"autoprefixer": "^10.4.21",
 		"daisyui": "^5.3.10",
 		"dotenv": "^17.2.3",
+		"dotenv-cli": "^11.0.0",
 		"eslint": "^9.36.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",
