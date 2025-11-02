@@ -52,8 +52,12 @@ test.describe('Stories List', () => {
 		await expect(firstCard).toBeVisible();
 
 		// Verify story card has action buttons (edit, delete)
-		const editButton = firstCard.locator(`button:has-text("${BUTTON_LABELS.edit}"), a:has-text("${BUTTON_LABELS.edit}")`);
-		const deleteButton = firstCard.locator(`button:has-text("${BUTTON_LABELS.delete}"), [data-testid="delete-button"]`);
+		const editButton = firstCard.locator(
+			`button:has-text("${BUTTON_LABELS.edit}"), a:has-text("${BUTTON_LABELS.edit}")`
+		);
+		const deleteButton = firstCard.locator(
+			`button:has-text("${BUTTON_LABELS.delete}"), [data-testid="delete-button"]`
+		);
 
 		await expect(editButton).toBeVisible();
 		await expect(deleteButton).toBeVisible();
@@ -64,7 +68,10 @@ test.describe('Stories List', () => {
 		expect(firstCardText).toContain('#5');
 	});
 
-	test('TC-CRUD-002: Navigate to story detail by clicking card', async ({ homePage, seededStories }) => {
+	test('TC-CRUD-002: Navigate to story detail by clicking card', async ({
+		homePage,
+		seededStories
+	}) => {
 		await homePage.navigate();
 
 		// Click on first story card
@@ -74,7 +81,10 @@ test.describe('Stories List', () => {
 		await homePage.page.waitForURL(/\/stories\/[a-f0-9-]+/);
 	});
 
-	test('TC-CRUD-002: Navigate to edit page via edit button', async ({ homePage, seededStories }) => {
+	test('TC-CRUD-002: Navigate to edit page via edit button', async ({
+		homePage,
+		seededStories
+	}) => {
 		await homePage.navigate();
 
 		// Click edit button on first story

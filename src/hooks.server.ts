@@ -48,21 +48,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 		if (token) {
 			// External API call with Bearer token - verify using Service Role client
-			const serviceRoleClient = createServerClient(
-				PUBLIC_SUPABASE_URL,
-				SUPABASE_SERVICE_ROLE_KEY,
-				{
-					cookies: {
-						get: (key) => event.cookies.get(key),
-						set: (key, value, options) => {
-							event.cookies.set(key, value, { ...options, path: '/' });
-						},
-						remove: (key, options) => {
-							event.cookies.delete(key, { ...options, path: '/' });
-						}
+			const serviceRoleClient = createServerClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+				cookies: {
+					get: (key) => event.cookies.get(key),
+					set: (key, value, options) => {
+						event.cookies.set(key, value, { ...options, path: '/' });
+					},
+					remove: (key, options) => {
+						event.cookies.delete(key, { ...options, path: '/' });
 					}
 				}
-			);
+			});
 			const { data } = await serviceRoleClient.auth.getUser(token);
 			event.locals.user = data.user ?? null;
 		} else {

@@ -1,7 +1,12 @@
 import { expect, mergeTests } from '@playwright/test';
 import { test as testFixtures } from '../../fixtures/test-fixtures';
 import { test as mockTest } from '../../fixtures/openai-mock.fixture';
-import { SAMPLE_SUBJECTS, SUCCESS_MESSAGES, MOCK_OPENAI_RESPONSES, TIMEOUTS } from '../../utils/test-data';
+import {
+	SAMPLE_SUBJECTS,
+	SUCCESS_MESSAGES,
+	MOCK_OPENAI_RESPONSES,
+	TIMEOUTS
+} from '../../utils/test-data';
 import { GeneratePage } from '../../pages/GeneratePage';
 import { HomePage } from '../../pages/HomePage';
 

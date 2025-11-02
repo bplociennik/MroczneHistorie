@@ -45,7 +45,9 @@ async function verifyE2EUser() {
 
 		// Check if user ID matches
 		if (data.user?.id !== process.env.E2E_USER_ID) {
-			console.log(`⚠️  Warning: User ID in .env.e2e (${process.env.E2E_USER_ID}) doesn't match logged in user (${data.user?.id})`);
+			console.log(
+				`⚠️  Warning: User ID in .env.e2e (${process.env.E2E_USER_ID}) doesn't match logged in user (${data.user?.id})`
+			);
 			console.log(`💡 Update E2E_USER_ID in .env.e2e to: ${data.user?.id}`);
 		} else {
 			console.log('✅ User ID matches .env.e2e');

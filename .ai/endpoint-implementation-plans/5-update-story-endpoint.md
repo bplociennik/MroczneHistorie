@@ -5,6 +5,7 @@
 Endpoint `PATCH /api/stories/:id` odpowiada za aktualizację treści istniejącej historii. Użytkownik może edytować **tylko** pole `question` (zagadka) i/lub `answer` (rozwiązanie). Wszystkie inne pola są read-only i nie mogą być modyfikowane.
 
 **Kluczowe cechy:**
+
 - Aktualizacja question i/lub answer w tabeli `public.stories`
 - RLS automatycznie filtruje po user_id (user edytuje tylko swoje historie)
 - Read-only fields: subject, difficulty, darkness, user_id, created_at
@@ -12,11 +13,13 @@ Endpoint `PATCH /api/stories/:id` odpowiada za aktualizację treści istniejące
 - Zwraca pełny zaktualizowany obiekt StoryDTO
 
 **Powiązane User Stories:**
+
 - Epic 3, ID 3.8: "Jako użytkownik chcę edytować treść pytania (zagadki) w zapisanej historii"
 - Epic 3, ID 3.9: "Jako użytkownik chcę edytować treść odpowiedzi (rozwiązania) w zapisanej historii"
 - Epic 3, ID 3.10: "Jako użytkownik chcę zapisać edytowaną historię"
 
 **Relacja z innymi endpoints:**
+
 - **Poprzedza:** `GET /api/stories/:id` (szczegóły historii, formularz edycji)
 - **Następuje:** `GET /api/stories/:id` (ponowne wyświetlenie szczegółów)
 
@@ -25,14 +28,17 @@ Endpoint `PATCH /api/stories/:id` odpowiada za aktualizację treści istniejące
 ## 2. Szczegóły żądania
 
 ### 2.1. Metoda HTTP
+
 `PATCH`
 
 ### 2.2. Struktura URL
+
 ```
 PATCH /api/stories/:id
 ```
 
 **Przykłady:**
+
 ```
 PATCH /api/stories/550e8400-e29b-41d4-a716-446655440000
 PATCH /api/stories/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
@@ -41,12 +47,14 @@ PATCH /api/stories/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
 ### 2.3. Nagłówki (Headers)
 
 **Wymagane:**
+
 ```
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
 ```
 
 **Opcjonalne:**
+
 ```
 Accept: application/json
 ```
@@ -56,19 +64,20 @@ Accept: application/json
 **URL Parameters:**
 
 | Parametr | Typ      | Wymagany | Format  | Opis                            |
-|----------|----------|----------|---------|---------------------------------|
-| `id`     | `string` | ✅ Tak    | UUID v4 | Unikalny identyfikator historii |
+| -------- | -------- | -------- | ------- | ------------------------------- |
+| `id`     | `string` | ✅ Tak   | UUID v4 | Unikalny identyfikator historii |
 
 **Request Body (JSON):**
 
 | Pole       | Typ      | Wymagany | Ograniczenia             | Opis                                          |
-|------------|----------|----------|--------------------------|-----------------------------------------------|
-| `question` | `string` | ❌ Nie*   | Min: 1 znak (after trim) | Zaktualizowana treść pytania (zagadki)        |
-| `answer`   | `string` | ❌ Nie*   | Min: 1 znak (after trim) | Zaktualizowana treść odpowiedzi (rozwiązania) |
+| ---------- | -------- | -------- | ------------------------ | --------------------------------------------- |
+| `question` | `string` | ❌ Nie\* | Min: 1 znak (after trim) | Zaktualizowana treść pytania (zagadki)        |
+| `answer`   | `string` | ❌ Nie\* | Min: 1 znak (after trim) | Zaktualizowana treść odpowiedzi (rozwiązania) |
 
 **\*WAŻNE:** Co najmniej **jedno pole** (`question` OR `answer`) MUSI być podane. Jeśli żadne pole nie jest podane → 400 Bad Request.
 
 **Read-only Fields (REJECTED if included):**
+
 - `subject` → 400 Bad Request: "Pole 'subject' jest tylko do odczytu i nie może być aktualizowane"
 - `difficulty` → 400 Bad Request: "Pole 'difficulty' jest tylko do odczytu i nie może być aktualizowane"
 - `darkness` → 400 Bad Request: "Pole 'darkness' jest tylko do odczytu i nie może być aktualizowane"
@@ -78,109 +87,110 @@ Accept: application/json
 **Przykładowe żądania:**
 
 **Update both question and answer:**
+
 ```json
 {
-  "question": "Zaktualizowano tekst pytania. Nowe szczegóły zostały dodane.",
-  "answer": "Zaktualizowano tekst odpowiedzi z bardziej szczegółowym wyjaśnieniem."
+	"question": "Zaktualizowano tekst pytania. Nowe szczegóły zostały dodane.",
+	"answer": "Zaktualizowano tekst odpowiedzi z bardziej szczegółowym wyjaśnieniem."
 }
 ```
 
 **Update only question:**
+
 ```json
 {
-  "question": "Zaktualizowano tylko pytanie, odpowiedź pozostaje bez zmian."
+	"question": "Zaktualizowano tylko pytanie, odpowiedź pozostaje bez zmian."
 }
 ```
 
 **Update only answer:**
+
 ```json
 {
-  "answer": "Zaktualizowano tylko odpowiedź, pytanie pozostaje bez zmian."
+	"answer": "Zaktualizowano tylko odpowiedź, pytanie pozostaje bez zmian."
 }
 ```
 
 ### 2.5. Walidacja danych wejściowych
 
 #### UUID Format Validation:
+
 ```typescript
 // Użyj isValidUUID() z types.ts (jak w GET /:id)
 if (!isValidUUID(id)) {
-  return json<ErrorDTO>(
-    {
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Nieprawidłowy format identyfikatora historii',
-        field: 'id'
-      }
-    },
-    { status: 400 }
-  );
+	return json<ErrorDTO>(
+		{
+			error: {
+				code: 'VALIDATION_ERROR',
+				message: 'Nieprawidłowy format identyfikatora historii',
+				field: 'id'
+			}
+		},
+		{ status: 400 }
+	);
 }
 ```
 
 #### Read-only Fields Check:
+
 ```typescript
 const readOnlyFields = ['subject', 'difficulty', 'darkness', 'user_id', 'created_at'];
 const bodyKeys = Object.keys(body);
 
 for (const field of bodyKeys) {
-  if (readOnlyFields.includes(field)) {
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: `Pole '${field}' jest tylko do odczytu i nie może być aktualizowane`,
-          field
-        }
-      },
-      { status: 400 }
-    );
-  }
+	if (readOnlyFields.includes(field)) {
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'VALIDATION_ERROR',
+					message: `Pole '${field}' jest tylko do odczytu i nie może być aktualizowane`,
+					field
+				}
+			},
+			{ status: 400 }
+		);
+	}
 }
 ```
 
 #### At Least One Field Required:
+
 ```typescript
 // After Zod validation
 if (!validation.data.question && !validation.data.answer) {
-  return json<ErrorDTO>(
-    {
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)'
-      }
-    },
-    { status: 400 }
-  );
+	return json<ErrorDTO>(
+		{
+			error: {
+				code: 'VALIDATION_ERROR',
+				message: 'Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)'
+			}
+		},
+		{ status: 400 }
+	);
 }
 
 // Alternatively, use isValidUpdateStoryCommand() from types.ts
 if (!isValidUpdateStoryCommand(validation.data)) {
-  return json<ErrorDTO>(
-    {
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)'
-      }
-    },
-    { status: 400 }
-  );
+	return json<ErrorDTO>(
+		{
+			error: {
+				code: 'VALIDATION_ERROR',
+				message: 'Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)'
+			}
+		},
+		{ status: 400 }
+	);
 }
 ```
 
 #### Question/Answer Validation:
+
 ```typescript
 // Zod schema
 const UpdateStorySchema = z.object({
-  question: z.string()
-    .min(1, 'Pytanie nie może być puste')
-    .trim()
-    .optional(),
+	question: z.string().min(1, 'Pytanie nie może być puste').trim().optional(),
 
-  answer: z.string()
-    .min(1, 'Odpowiedź nie może być pusta')
-    .trim()
-    .optional()
+	answer: z.string().min(1, 'Odpowiedź nie może być pusta').trim().optional()
 });
 ```
 
@@ -189,65 +199,69 @@ const UpdateStorySchema = z.object({
 ## 3. Wykorzystywane typy
 
 ### 3.1. Request DTO
+
 ```typescript
 // src/types.ts (istniejący typ)
-export type UpdateStoryCommand = Pick<
-  TablesUpdate<'stories'>,
-  'question' | 'answer'
->;
+export type UpdateStoryCommand = Pick<TablesUpdate<'stories'>, 'question' | 'answer'>;
 
 // Struktura:
 interface UpdateStoryCommand {
-  question?: string;  // optional, min 1 char if provided
-  answer?: string;    // optional, min 1 char if provided
+	question?: string; // optional, min 1 char if provided
+	answer?: string; // optional, min 1 char if provided
 }
 ```
 
 ### 3.2. Response DTO
+
 ```typescript
 // src/types.ts (istniejący typ)
 export type StoryDTO = Tables<'stories'>;
 
 // Rozwinięcie:
 interface StoryDTO {
-  id: string;           // uuid (unchanged)
-  user_id: string;      // uuid (unchanged)
-  subject: string;      // varchar(150) (READ-ONLY - unchanged)
-  difficulty: number;   // smallint (1-3) (READ-ONLY - unchanged)
-  darkness: number;     // smallint (1-3) (READ-ONLY - unchanged)
-  question: string;     // text (UPDATED)
-  answer: string;       // text (UPDATED)
-  created_at: string;   // timestamptz ISO 8601 (unchanged)
+	id: string; // uuid (unchanged)
+	user_id: string; // uuid (unchanged)
+	subject: string; // varchar(150) (READ-ONLY - unchanged)
+	difficulty: number; // smallint (1-3) (READ-ONLY - unchanged)
+	darkness: number; // smallint (1-3) (READ-ONLY - unchanged)
+	question: string; // text (UPDATED)
+	answer: string; // text (UPDATED)
+	created_at: string; // timestamptz ISO 8601 (unchanged)
 }
 ```
 
 ### 3.3. Utility Functions
+
 ```typescript
 // src/types.ts (już istnieją!)
 
 // UUID validation
 export function isValidUUID(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
+	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+	return uuidRegex.test(id);
 }
 
 // UpdateStoryCommand validation (at least one field)
 export function isValidUpdateStoryCommand(
-  cmd: UpdateStoryCommand
-): cmd is Required<Pick<UpdateStoryCommand, 'question'>> | Required<Pick<UpdateStoryCommand, 'answer'>> | Required<UpdateStoryCommand> {
-  return cmd.question !== undefined || cmd.answer !== undefined;
+	cmd: UpdateStoryCommand
+): cmd is
+	| Required<Pick<UpdateStoryCommand, 'question'>>
+	| Required<Pick<UpdateStoryCommand, 'answer'>>
+	| Required<UpdateStoryCommand> {
+	return cmd.question !== undefined || cmd.answer !== undefined;
 }
 ```
 
 ### 3.4. Error DTO
+
 ```typescript
 // src/types.ts (istniejący typ)
 export interface ErrorDTO {
-  error: {
-    code: ErrorCode;
-    message: string;
-    field?: string;
-  };
+	error: {
+		code: ErrorCode;
+		message: string;
+		field?: string;
+	};
 }
 ```
 
@@ -260,26 +274,29 @@ export interface ErrorDTO {
 **Content-Type:** `application/json`
 
 **Struktura:**
+
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "user_id": "660e8400-e29b-41d4-a716-446655440001",
-  "subject": "Tajemnicza latarnia morska",
-  "difficulty": 2,
-  "darkness": 3,
-  "question": "Zaktualizowano tekst pytania. Nowe szczegóły zostały dodane.",
-  "answer": "Zaktualizowano tekst odpowiedzi z bardziej szczegółowym wyjaśnieniem.",
-  "created_at": "2025-01-26T10:30:00.000Z"
+	"id": "550e8400-e29b-41d4-a716-446655440000",
+	"user_id": "660e8400-e29b-41d4-a716-446655440001",
+	"subject": "Tajemnicza latarnia morska",
+	"difficulty": 2,
+	"darkness": 3,
+	"question": "Zaktualizowano tekst pytania. Nowe szczegóły zostały dodane.",
+	"answer": "Zaktualizowano tekst odpowiedzi z bardziej szczegółowym wyjaśnieniem.",
+	"created_at": "2025-01-26T10:30:00.000Z"
 }
 ```
 
 **Charakterystyka odpowiedzi:**
+
 - Pełny obiekt StoryDTO z zaktualizowanymi polami
 - `question` i/lub `answer` zawierają nowe wartości
 - Wszystkie inne pola (subject, difficulty, darkness, created_at) pozostają niezmienione
 - Zwraca 200 OK (nie 204 No Content) - klient otrzymuje zaktualizowany obiekt
 
 **HTTP Headers:**
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -288,59 +305,64 @@ Content-Type: application/json
 ### 4.2. Błędy (4xx, 5xx)
 
 #### 400 Bad Request - Invalid UUID format
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Nieprawidłowy format identyfikatora historii",
-    "field": "id"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Nieprawidłowy format identyfikatora historii",
+		"field": "id"
+	}
 }
 ```
 
 #### 400 Bad Request - Empty question/answer
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Pytanie nie może być puste",
-    "field": "question"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Pytanie nie może być puste",
+		"field": "question"
+	}
 }
 ```
 
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Odpowiedź nie może być pusta",
-    "field": "answer"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Odpowiedź nie może być pusta",
+		"field": "answer"
+	}
 }
 ```
 
 #### 400 Bad Request - No fields provided
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)"
+	}
 }
 ```
 
 #### 400 Bad Request - Read-only field included
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Pole 'subject' jest tylko do odczytu i nie może być aktualizowane",
-    "field": "subject"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Pole 'subject' jest tylko do odczytu i nie może być aktualizowane",
+		"field": "subject"
+	}
 }
 ```
 
 **Przykłady read-only field attempts:**
+
 ```json
 // Attempt to update subject
 {
@@ -358,36 +380,40 @@ Content-Type: application/json
 ```
 
 #### 401 Unauthorized - Brak autoryzacji
+
 ```json
 {
-  "error": {
-    "code": "AUTHENTICATION_ERROR",
-    "message": "Brakujący lub nieprawidłowy token uwierzytelniający"
-  }
+	"error": {
+		"code": "AUTHENTICATION_ERROR",
+		"message": "Brakujący lub nieprawidłowy token uwierzytelniający"
+	}
 }
 ```
 
 #### 404 Not Found - Historia nie znaleziona
+
 ```json
 {
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Nie znaleziono historii lub nie masz do niej dostępu"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Nie znaleziono historii lub nie masz do niej dostępu"
+	}
 }
 ```
 
 **Przyczyny:**
+
 - Historia o podanym ID nie istnieje w bazie
 - Historia należy do innego użytkownika (RLS blocked)
 
 #### 500 Internal Server Error - Błąd bazy danych
+
 ```json
 {
-  "error": {
-    "code": "INTERNAL_ERROR",
-    "message": "Nie udało się zaktualizować historii. Spróbuj ponownie później"
-  }
+	"error": {
+		"code": "INTERNAL_ERROR",
+		"message": "Nie udało się zaktualizować historii. Spróbuj ponownie później"
+	}
 }
 ```
 
@@ -493,40 +519,48 @@ Content-Type: application/json
 ### 5.2. Szczegółowy opis kroków
 
 #### Krok 1: Client Request
+
 - Frontend wysyła PATCH request z zaktualizowanymi polami
 - Typowo z formularza edycji historii
 - Dołącza JWT token w nagłówku `Authorization`
 
 #### Krok 2: Extract & Validate ID
+
 - Extract `id` z URL params
 - Wywołaj `isValidUUID(id)`
 - Jeśli invalid → 400 Bad Request
 
 #### Krok 3: Authentication
+
 - SvelteKit middleware weryfikuje JWT
 - Jeśli invalid → 401 Unauthorized
 
 #### Krok 4: Check Read-only Fields
+
 - Parse request body
 - Sprawdź czy zawiera read-only fields (subject, difficulty, darkness, user_id, created_at)
 - **Jeśli TAK → 400 Bad Request** z message wskazującym które pole
 
 **Dlaczego to ważne:**
+
 - Zapobiega przypadkowej/celowej manipulacji metadanych
 - Explicit error message informuje użytkownika
 - Security by design
 
 #### Krok 5: Validate with Zod
+
 - Waliduj question/answer przez UpdateStorySchema
 - Sprawdź czy question/answer nie są puste (after trim)
 - Jeśli validation fails → 400 Bad Request
 
 #### Krok 6: Check At Least One Field
+
 - Wywołaj `isValidUpdateStoryCommand()` (już istnieje w types.ts!)
 - Sprawdź czy question OR answer jest podane
 - Jeśli żadne pole → 400 Bad Request
 
 #### Krok 7: Row Level Security Check
+
 - PostgreSQL wykonuje RLS policy `stories_update_own`
 - Sprawdza czy `auth.uid() = user_id`
 - **Jeśli historia należy do innego użytkownika:**
@@ -535,6 +569,7 @@ Content-Type: application/json
   - API endpoint zwraca 404 Not Found
 
 #### Krok 8: Database UPDATE
+
 - PostgreSQL wykonuje:
   ```sql
   UPDATE public.stories
@@ -549,10 +584,12 @@ Content-Type: application/json
 - Typowy czas: ~10-20ms
 
 **Rezultaty:**
+
 - **Found & Updated:** Zwraca zaktualizowany row
 - **Not Found:** Empty result (RLS blocked LUB ID doesn't exist) → 404
 
 #### Krok 9: Client Response
+
 - API route formatuje odpowiedź jako `StoryDTO`
 - Zwraca 200 OK z zaktualizowanym obiektem
 - Frontend może wyświetlić sukces i przekierować do szczegółów
@@ -560,6 +597,7 @@ Content-Type: application/json
 ### 5.3. Interakcje z bazą danych
 
 #### SQL Query (wykonywane przez Supabase SDK)
+
 ```sql
 -- Supabase SDK generuje zapytanie:
 UPDATE public.stories
@@ -577,6 +615,7 @@ RETURNING *;
 ```
 
 **WAŻNE:** W Supabase SDK, partial update działa tak:
+
 ```typescript
 // Only update question (answer remains unchanged)
 .update({ question: 'New question' })
@@ -589,6 +628,7 @@ RETURNING *;
 ```
 
 **Index Utilization:**
+
 ```sql
 -- PostgreSQL używa primary key index:
 -- stories_pkey ON (id)
@@ -601,6 +641,7 @@ RETURNING *;
 ```
 
 **Performance:**
+
 - Primary key lookup: O(log n) ≈ O(1)
 - RLS filter: Minimal overhead
 - Typowy czas: 10-20ms
@@ -612,10 +653,12 @@ RETURNING *;
 ### 6.1. Uwierzytelnianie (Authentication)
 
 **Mechanizm:**
+
 - JWT Bearer token verification przez Supabase Auth
 - Token wysyłany jako `Authorization: Bearer <token>`
 
 **Implementacja:**
+
 ```typescript
 // src/hooks.server.ts (wspólny dla wszystkich endpoints)
 // Już zaimplementowany - reused
@@ -626,6 +669,7 @@ RETURNING *;
 **Mechanizm: Row Level Security (RLS)**
 
 Polityka `stories_update_own`:
+
 ```sql
 CREATE POLICY stories_update_own
 ON public.stories
@@ -634,11 +678,13 @@ USING (auth.uid() = user_id);
 ```
 
 **Jak to działa:**
+
 1. PostgreSQL automatycznie dodaje warunek `WHERE auth.uid() = user_id`
 2. Użytkownik może edytować TYLKO swoje historie
 3. Jeśli próbuje edytować cudzą historię → RLS zwraca empty result → 404
 
 **Security Guarantee:**
+
 - Zero Trust: Baza danych jest ostatecznym arbitrem
 - Nawet jeśli aplikacja ma bug, RLS blokuje dostęp
 - **Nie ujawniamy** czy story doesn't exist vs belongs to different user (jak w GET /:id)
@@ -647,51 +693,55 @@ USING (auth.uid() = user_id);
 
 **Problem:**
 Użytkownik może próbować zaktualizować read-only fields:
+
 ```json
 {
-  "subject": "Hacked subject",
-  "difficulty": 1,
-  "darkness": 1,
-  "question": "Legitimate question update"
+	"subject": "Hacked subject",
+	"difficulty": 1,
+	"darkness": 1,
+	"question": "Legitimate question update"
 }
 ```
 
 **Mitigation:**
+
 ```typescript
 // Explicit check BEFORE Zod validation
 const readOnlyFields = ['subject', 'difficulty', 'darkness', 'user_id', 'created_at', 'id'];
 const bodyKeys = Object.keys(body);
 
 for (const field of bodyKeys) {
-  if (readOnlyFields.includes(field)) {
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: `Pole '${field}' jest tylko do odczytu i nie może być aktualizowane`,
-          field
-        }
-      },
-      { status: 400 }
-    );
-  }
+	if (readOnlyFields.includes(field)) {
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'VALIDATION_ERROR',
+					message: `Pole '${field}' jest tylko do odczytu i nie może być aktualizowane`,
+					field
+				}
+			},
+			{ status: 400 }
+		);
+	}
 }
 ```
 
 **Dlaczego to ważne:**
+
 - **Zapobiega manipulacji metadanych:** subject/difficulty/darkness określają charakter historii
 - **Nie można "upgradeować" difficulty:** User nie może zmienić difficulty=3 → difficulty=1
 - **Immutable metadata:** subject/difficulty/darkness są set at creation time
 - **Security by design:** Explicit rejection z jasnym error message
 
 **Logging:**
+
 ```typescript
 // Log attempts to update read-only fields (security monitoring)
 console.warn('[SECURITY] Attempt to update read-only field', {
-  field,
-  userId: locals.user.id,
-  storyId: id,
-  timestamp: new Date().toISOString()
+	field,
+	userId: locals.user.id,
+	storyId: id,
+	timestamp: new Date().toISOString()
 });
 ```
 
@@ -699,25 +749,28 @@ console.warn('[SECURITY] Attempt to update read-only field', {
 
 **Problem:**
 Client może wysłać dodatkowe pola:
+
 ```json
 {
-  "question": "Legitimate update",
-  "user_id": "different-user-uuid",  // Attempt to hijack story
-  "created_at": "2020-01-01T00:00:00Z"  // Attempt to fake timestamp
+	"question": "Legitimate update",
+	"user_id": "different-user-uuid", // Attempt to hijack story
+	"created_at": "2020-01-01T00:00:00Z" // Attempt to fake timestamp
 }
 ```
 
 **Mitigation:**
+
 1. **Read-only fields check** (krok wyżej) - rejects user_id/created_at
 2. **Explicit pick** tylko question/answer w UPDATE query:
+
 ```typescript
 // Build update object with ONLY allowed fields
 const updateData: Partial<UpdateStoryCommand> = {};
 if (validated.question !== undefined) {
-  updateData.question = validated.question;
+	updateData.question = validated.question;
 }
 if (validated.answer !== undefined) {
-  updateData.answer = validated.answer;
+	updateData.answer = validated.answer;
 }
 
 // Supabase SDK: .update(updateData)
@@ -727,6 +780,7 @@ if (validated.answer !== undefined) {
 ### 6.5. UUID Validation & Injection Prevention
 
 **Jak w GET /:id:**
+
 - UUID validation zapobiega SQL injection
 - Supabase SDK używa parameterized queries
 - Brak ryzyka injection
@@ -734,6 +788,7 @@ if (validated.answer !== undefined) {
 ### 6.6. Information Disclosure Prevention
 
 **Jednolita 404 message:**
+
 - "Nie znaleziono historii lub nie masz do niej dostępu"
 - Nie rozróżniamy: story doesn't exist vs belongs to different user
 - Zapobiega information leakage (jak w GET /:id)
@@ -745,61 +800,67 @@ if (validated.answer !== undefined) {
 ### 7.1. Tabela błędów
 
 | Error Code             | HTTP Status | Opis                         | User Message (PL)                                                | Retry Safe? | Frontend Action                  |
-|------------------------|-------------|------------------------------|------------------------------------------------------------------|-------------|----------------------------------|
-| `VALIDATION_ERROR`     | 400         | Invalid UUID format          | "Nieprawidłowy format identyfikatora historii"                   | ❌ Nie       | Show error, redirect to /history |
-| `VALIDATION_ERROR`     | 400         | Empty question/answer        | "Pytanie/Odpowiedź nie może być puste"                           | ✅ Tak       | Show error under field, focus    |
-| `VALIDATION_ERROR`     | 400         | No fields provided           | "Musisz podać przynajmniej jedno pole do aktualizacji"           | ✅ Tak       | Show error, highlight form       |
-| `VALIDATION_ERROR`     | 400         | Read-only field included     | "Pole '{field}' jest tylko do odczytu..."                        | ❌ Nie       | Show error, remove field         |
-| `AUTHENTICATION_ERROR` | 401         | No/invalid token             | "Brakujący lub nieprawidłowy token uwierzytelniający"            | ❌ Nie       | Redirect to /login               |
-| `NOT_FOUND`            | 404         | Story not found or no access | "Nie znaleziono historii lub nie masz do niej dostępu"           | ❌ Nie       | Show 404 page                    |
-| `INTERNAL_ERROR`       | 500         | Database UPDATE error        | "Nie udało się zaktualizować historii. Spróbuj ponownie później" | ✅ Tak       | Show error toast, enable retry   |
+| ---------------------- | ----------- | ---------------------------- | ---------------------------------------------------------------- | ----------- | -------------------------------- |
+| `VALIDATION_ERROR`     | 400         | Invalid UUID format          | "Nieprawidłowy format identyfikatora historii"                   | ❌ Nie      | Show error, redirect to /history |
+| `VALIDATION_ERROR`     | 400         | Empty question/answer        | "Pytanie/Odpowiedź nie może być puste"                           | ✅ Tak      | Show error under field, focus    |
+| `VALIDATION_ERROR`     | 400         | No fields provided           | "Musisz podać przynajmniej jedno pole do aktualizacji"           | ✅ Tak      | Show error, highlight form       |
+| `VALIDATION_ERROR`     | 400         | Read-only field included     | "Pole '{field}' jest tylko do odczytu..."                        | ❌ Nie      | Show error, remove field         |
+| `AUTHENTICATION_ERROR` | 401         | No/invalid token             | "Brakujący lub nieprawidłowy token uwierzytelniający"            | ❌ Nie      | Redirect to /login               |
+| `NOT_FOUND`            | 404         | Story not found or no access | "Nie znaleziono historii lub nie masz do niej dostępu"           | ❌ Nie      | Show 404 page                    |
+| `INTERNAL_ERROR`       | 500         | Database UPDATE error        | "Nie udało się zaktualizować historii. Spróbuj ponownie później" | ✅ Tak      | Show error toast, enable retry   |
 
 ### 7.2. Szczegółowa obsługa błędów
 
 #### 7.2.1. VALIDATION_ERROR (400) - Invalid UUID
 
 **Scenariusz:**
+
 ```bash
 PATCH /api/stories/not-a-uuid
 ```
 
 **Response:**
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Nieprawidłowy format identyfikatora historii",
-    "field": "id"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Nieprawidłowy format identyfikatora historii",
+		"field": "id"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Show error message
 - Redirect to `/history`
 
 #### 7.2.2. VALIDATION_ERROR (400) - Empty Fields
 
 **Scenariusz:**
+
 ```json
 {
-  "question": "   ",  // Only whitespace
-  "answer": ""        // Empty
+	"question": "   ", // Only whitespace
+	"answer": "" // Empty
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Pytanie nie może być puste",
-    "field": "question"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Pytanie nie może być puste",
+		"field": "question"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Show error under question field
 - Focus on field
 - User can fix and retry
@@ -807,21 +868,24 @@ PATCH /api/stories/not-a-uuid
 #### 7.2.3. VALIDATION_ERROR (400) - No Fields Provided
 
 **Scenariusz:**
+
 ```json
-{}  // Empty body
+{} // Empty body
 ```
 
 **Response:**
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Show error at top of form
 - Highlight both fields
 - User must fill at least one
@@ -829,42 +893,47 @@ PATCH /api/stories/not-a-uuid
 #### 7.2.4. VALIDATION_ERROR (400) - Read-only Field
 
 **Scenariusz:**
+
 ```json
 {
-  "subject": "Trying to update subject",
-  "question": "Also updating question"
+	"subject": "Trying to update subject",
+	"question": "Also updating question"
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Pole 'subject' jest tylko do odczytu i nie może być aktualizowane",
-    "field": "subject"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Pole 'subject' jest tylko do odczytu i nie może być aktualizowane",
+		"field": "subject"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Show error: "Nie możesz edytować pola 'subject'"
 - Remove read-only field from request
 - Retry with only editable fields
 
 **Logging:**
+
 ```typescript
 // IMPORTANT: Log attempts to update read-only fields
 console.warn('[SECURITY] Attempt to update read-only field', {
-  field: 'subject',
-  userId: locals.user.id,
-  storyId: id,
-  attemptedValue: body.subject,
-  timestamp: new Date().toISOString()
+	field: 'subject',
+	userId: locals.user.id,
+	storyId: id,
+	attemptedValue: body.subject,
+	timestamp: new Date().toISOString()
 });
 ```
 
 **Wszystkie read-only fields:**
+
 - subject → "Pole 'subject' jest tylko do odczytu..."
 - difficulty → "Pole 'difficulty' jest tylko do odczytu..."
 - darkness → "Pole 'darkness' jest tylko do odczytu..."
@@ -874,6 +943,7 @@ console.warn('[SECURITY] Attempt to update read-only field', {
 #### 7.2.5. AUTHENTICATION_ERROR (401)
 
 **Jak w GET /:id:**
+
 - Brak/invalid token → 401
 - Redirect to /login
 
@@ -882,19 +952,21 @@ console.warn('[SECURITY] Attempt to update read-only field', {
 **Scenariusze:**
 
 **Przypadek 1: Story nie istnieje**
+
 ```typescript
 // Valid UUID, ale story nie istnieje w bazie
 const { data, error } = await locals.supabase
-  .from('stories')
-  .update(updateData)
-  .eq('id', id)
-  .select()
-  .single();
+	.from('stories')
+	.update(updateData)
+	.eq('id', id)
+	.select()
+	.single();
 
 // data = null (empty result)
 ```
 
 **Przypadek 2: Story należy do innego użytkownika (RLS blocked)**
+
 ```typescript
 // Valid UUID, story exists, ale belongs to different user
 // RLS policy blokuje UPDATE
@@ -904,26 +976,29 @@ const { data, error } = await locals.supabase
 ```
 
 **Jednolita odpowiedź:**
+
 ```json
 {
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Nie znaleziono historii lub nie masz do niej dostępu"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Nie znaleziono historii lub nie masz do niej dostępu"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Wyświetl 404 page
 - Przycisk: "Wróć do moich historii" → `/history`
 
 **Logging:**
+
 ```typescript
 console.warn('[NOT_FOUND] Story not found or no access during UPDATE', {
-  storyId: id,
-  userId: locals.user.id,
-  updateFields: Object.keys(updateData),
-  timestamp: new Date().toISOString()
+	storyId: id,
+	userId: locals.user.id,
+	updateFields: Object.keys(updateData),
+	timestamp: new Date().toISOString()
 });
 ```
 
@@ -932,39 +1007,42 @@ console.warn('[NOT_FOUND] Story not found or no access during UPDATE', {
 **Scenariusz:**
 
 **Database UPDATE Error:**
+
 ```typescript
 const { data, error } = await locals.supabase
-  .from('stories')
-  .update(updateData)
-  .eq('id', id)
-  .select()
-  .single();
+	.from('stories')
+	.update(updateData)
+	.eq('id', id)
+	.select()
+	.single();
 
 if (error) {
-  console.error('[DB_ERROR] UPDATE failed', {
-    code: error.code,
-    message: error.message,
-    storyId: id,
-    userId: locals.user.id,
-    updateData,
-    timestamp: new Date().toISOString()
-  });
+	console.error('[DB_ERROR] UPDATE failed', {
+		code: error.code,
+		message: error.message,
+		storyId: id,
+		userId: locals.user.id,
+		updateData,
+		timestamp: new Date().toISOString()
+	});
 
-  throw new InternalError('Database UPDATE failed');
+	throw new InternalError('Database UPDATE failed');
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "error": {
-    "code": "INTERNAL_ERROR",
-    "message": "Nie udało się zaktualizować historii. Spróbuj ponownie później"
-  }
+	"error": {
+		"code": "INTERNAL_ERROR",
+		"message": "Nie udało się zaktualizować historii. Spróbuj ponownie później"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Show error toast
 - Enable "Spróbuj ponownie" button
 - Zachowaj dane w formularzu (nie czyść)
@@ -1052,16 +1130,20 @@ if (error) {
 #### 8.1.1. Database UPDATE Performance
 
 **Problem:**
+
 - UPDATE by primary key jest szybkie, ale RLS check adds overhead
 
 **Wpływ:**
+
 - ~10-30ms response time (typowo)
 
 **Mitigation:**
+
 - Primary key index `stories_pkey` zapewnia O(log n) lookup
 - RLS policy jest prosta (single equality check)
 
 **Performance:**
+
 ```sql
 EXPLAIN ANALYZE UPDATE stories
 SET question = 'New question', answer = 'New answer'
@@ -1076,6 +1158,7 @@ WHERE id = 'uuid' AND user_id = 'user-uuid';
 #### 8.1.2. Validation Overhead
 
 **Problem:**
+
 - Multiple validation steps:
   1. UUID validation
   2. Read-only fields check
@@ -1083,9 +1166,11 @@ WHERE id = 'uuid' AND user_id = 'user-uuid';
   4. At least one field check
 
 **Wpływ:**
+
 - +5-15ms latency
 
 **Mitigation:**
+
 - Każda walidacja jest szybka (< 5ms)
 - Early returns (fail fast)
 - Zod jest very performant
@@ -1095,6 +1180,7 @@ WHERE id = 'uuid' AND user_id = 'user-uuid';
 #### 8.2.1. Database Optimization
 
 **Index Strategy:**
+
 ```sql
 -- Primary key index (already exists)
 -- stories_pkey ON (id)
@@ -1103,14 +1189,15 @@ WHERE id = 'uuid' AND user_id = 'user-uuid';
 ```
 
 **Query Optimization:**
+
 ```typescript
 // Use .select() after UPDATE to return updated row
 const { data, error } = await locals.supabase
-  .from('stories')
-  .update(updateData)
-  .eq('id', id)
-  .select()
-  .single();
+	.from('stories')
+	.update(updateData)
+	.eq('id', id)
+	.select()
+	.single();
 
 // Advantage: Single roundtrip (UPDATE + SELECT in one query)
 ```
@@ -1118,6 +1205,7 @@ const { data, error } = await locals.supabase
 #### 8.2.2. Validation Optimization
 
 **Early Returns:**
+
 ```typescript
 // Fail fast - check UUID first
 if (!isValidUUID(id)) {
@@ -1134,6 +1222,7 @@ if (!locals.user) {
 ```
 
 **Reuse Existing Functions:**
+
 ```typescript
 // Use isValidUUID() from types.ts (already optimized)
 // Use isValidUpdateStoryCommand() from types.ts (already optimized)
@@ -1144,32 +1233,30 @@ if (!locals.user) {
 ```typescript
 // Frontend: Update UI immediately, then sync with server
 async function updateStory(id: string, data: UpdateStoryCommand) {
-  // 1. Optimistically update local state
-  storiesStore.update(stories =>
-    stories.map(s => s.id === id ? { ...s, ...data } : s)
-  );
+	// 1. Optimistically update local state
+	storiesStore.update((stories) => stories.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
-  try {
-    // 2. Sync with server
-    const updated = await fetch(`/api/stories/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data)
-    });
+	try {
+		// 2. Sync with server
+		const updated = await fetch(`/api/stories/${id}`, {
+			method: 'PATCH',
+			body: JSON.stringify(data)
+		});
 
-    // 3. Replace with server version
-    storiesStore.replace(id, updated);
-  } catch (error) {
-    // 4. Rollback on error
-    storiesStore.revert(id);
-    throw error;
-  }
+		// 3. Replace with server version
+		storiesStore.replace(id, updated);
+	} catch (error) {
+		// 4. Rollback on error
+		storiesStore.revert(id);
+		throw error;
+	}
 }
 ```
 
 ### 8.3. Performance Targets
 
 | Metric                    | Target (MVP) | Target (Post-MVP) |
-|---------------------------|--------------|-------------------|
+| ------------------------- | ------------ | ----------------- |
 | API Response Time (p50)   | < 100ms      | < 75ms            |
 | API Response Time (p95)   | < 200ms      | < 150ms           |
 | API Response Time (p99)   | < 300ms      | < 250ms           |
@@ -1180,59 +1267,57 @@ async function updateStory(id: string, data: UpdateStoryCommand) {
 ### 8.4. Load Testing Plan
 
 **Scenarios:**
+
 1. **Baseline:** 10 concurrent users, 2 updates per minute each
 2. **Normal Load:** 50 concurrent users, 5 updates per minute each
 3. **Peak Load:** 100 concurrent users, 10 updates per minute each
 4. **Concurrent Updates:** Multiple users editing different stories simultaneously
 
 **Sample k6 Script:**
+
 ```javascript
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export let options = {
-  stages: [
-    { duration: '2m', target: 10 },
-    { duration: '5m', target: 50 },
-    { duration: '2m', target: 100 },
-    { duration: '5m', target: 0 },
-  ],
+	stages: [
+		{ duration: '2m', target: 10 },
+		{ duration: '5m', target: 50 },
+		{ duration: '2m', target: 100 },
+		{ duration: '5m', target: 0 }
+	]
 };
 
 const storyIds = [
-  '550e8400-e29b-41d4-a716-446655440000',
-  // ... more IDs
+	'550e8400-e29b-41d4-a716-446655440000'
+	// ... more IDs
 ];
 
 export default function () {
-  const token = __ENV.AUTH_TOKEN;
-  const storyId = storyIds[Math.floor(Math.random() * storyIds.length)];
+	const token = __ENV.AUTH_TOKEN;
+	const storyId = storyIds[Math.floor(Math.random() * storyIds.length)];
 
-  const payload = JSON.stringify({
-    question: `Updated question at ${Date.now()}`,
-    answer: `Updated answer at ${Date.now()}`
-  });
+	const payload = JSON.stringify({
+		question: `Updated question at ${Date.now()}`,
+		answer: `Updated answer at ${Date.now()}`
+	});
 
-  const params = {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  };
+	const params = {
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		}
+	};
 
-  const res = http.patch(
-    `https://mrocznehistorie.pl/api/stories/${storyId}`,
-    payload,
-    params
-  );
+	const res = http.patch(`https://mrocznehistorie.pl/api/stories/${storyId}`, payload, params);
 
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 200ms': (r) => r.timings.duration < 200,
-    'has updated question': (r) => JSON.parse(r.body).question.includes('Updated'),
-  });
+	check(res, {
+		'status is 200': (r) => r.status === 200,
+		'response time < 200ms': (r) => r.timings.duration < 200,
+		'has updated question': (r) => JSON.parse(r.body).question.includes('Updated')
+	});
 
-  sleep(Math.random() * 5);
+	sleep(Math.random() * 5);
 }
 ```
 
@@ -1251,26 +1336,21 @@ export default function () {
 import { z } from 'zod';
 
 export const UpdateStorySchema = z.object({
-  question: z.string()
-    .min(1, 'Pytanie nie może być puste')
-    .trim()
-    .optional(),
+	question: z.string().min(1, 'Pytanie nie może być puste').trim().optional(),
 
-  answer: z.string()
-    .min(1, 'Odpowiedź nie może być pusta')
-    .trim()
-    .optional()
+	answer: z.string().min(1, 'Odpowiedź nie może być pusta').trim().optional()
 });
 
 export type ValidatedUpdateStoryCommand = z.infer<typeof UpdateStorySchema>;
 
 // Custom validation helper
 export function validateAtLeastOneField(data: ValidatedUpdateStoryCommand): boolean {
-  return data.question !== undefined || data.answer !== undefined;
+	return data.question !== undefined || data.answer !== undefined;
 }
 ```
 
 **Deliverable:**
+
 - ✅ UpdateStorySchema created
 - ✅ Validation for empty fields
 - ✅ Helper function for "at least one field" check
@@ -1291,217 +1371,215 @@ import type { ErrorDTO, StoryDTO, UpdateStoryCommand } from '$lib/types';
 
 // Existing GET handler
 export const GET: RequestHandler = async ({ params, locals }) => {
-  // ... existing GET implementation
+	// ... existing GET implementation
 };
 
 // New PATCH handler
 export const PATCH: RequestHandler = async ({ params, locals, request }) => {
-  // 1. Authentication check
-  if (!locals.user) {
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'AUTHENTICATION_ERROR',
-          message: 'Brakujący lub nieprawidłowy token uwierzytelniający'
-        }
-      },
-      { status: 401 }
-    );
-  }
+	// 1. Authentication check
+	if (!locals.user) {
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'AUTHENTICATION_ERROR',
+					message: 'Brakujący lub nieprawidłowy token uwierzytelniający'
+				}
+			},
+			{ status: 401 }
+		);
+	}
 
-  // 2. Validate UUID
-  const { id } = params;
+	// 2. Validate UUID
+	const { id } = params;
 
-  if (!isValidUUID(id)) {
-    console.warn('[VALIDATION_ERROR] Invalid UUID format', {
-      providedId: id,
-      userId: locals.user.id,
-      timestamp: new Date().toISOString()
-    });
+	if (!isValidUUID(id)) {
+		console.warn('[VALIDATION_ERROR] Invalid UUID format', {
+			providedId: id,
+			userId: locals.user.id,
+			timestamp: new Date().toISOString()
+		});
 
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Nieprawidłowy format identyfikatora historii',
-          field: 'id'
-        }
-      },
-      { status: 400 }
-    );
-  }
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'VALIDATION_ERROR',
+					message: 'Nieprawidłowy format identyfikatora historii',
+					field: 'id'
+				}
+			},
+			{ status: 400 }
+		);
+	}
 
-  // 3. Parse request body
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch (error) {
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Nieprawidłowy format JSON'
-        }
-      },
-      { status: 400 }
-    );
-  }
+	// 3. Parse request body
+	let body: unknown;
+	try {
+		body = await request.json();
+	} catch (error) {
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'VALIDATION_ERROR',
+					message: 'Nieprawidłowy format JSON'
+				}
+			},
+			{ status: 400 }
+		);
+	}
 
-  // 4. Check for read-only fields
-  const readOnlyFields = ['subject', 'difficulty', 'darkness', 'user_id', 'created_at', 'id'];
-  const bodyKeys = Object.keys(body as object);
+	// 4. Check for read-only fields
+	const readOnlyFields = ['subject', 'difficulty', 'darkness', 'user_id', 'created_at', 'id'];
+	const bodyKeys = Object.keys(body as object);
 
-  for (const field of bodyKeys) {
-    if (readOnlyFields.includes(field)) {
-      console.warn('[SECURITY] Attempt to update read-only field', {
-        field,
-        userId: locals.user.id,
-        storyId: id,
-        timestamp: new Date().toISOString()
-      });
+	for (const field of bodyKeys) {
+		if (readOnlyFields.includes(field)) {
+			console.warn('[SECURITY] Attempt to update read-only field', {
+				field,
+				userId: locals.user.id,
+				storyId: id,
+				timestamp: new Date().toISOString()
+			});
 
-      return json<ErrorDTO>(
-        {
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: `Pole '${field}' jest tylko do odczytu i nie może być aktualizowane`,
-            field
-          }
-        },
-        { status: 400 }
-      );
-    }
-  }
+			return json<ErrorDTO>(
+				{
+					error: {
+						code: 'VALIDATION_ERROR',
+						message: `Pole '${field}' jest tylko do odczytu i nie może być aktualizowane`,
+						field
+					}
+				},
+				{ status: 400 }
+			);
+		}
+	}
 
-  // 5. Validate with Zod
-  const validation = UpdateStorySchema.safeParse(body);
-  if (!validation.success) {
-    return json<ErrorDTO>(
-      formatValidationError(validation.error),
-      { status: 400 }
-    );
-  }
+	// 5. Validate with Zod
+	const validation = UpdateStorySchema.safeParse(body);
+	if (!validation.success) {
+		return json<ErrorDTO>(formatValidationError(validation.error), { status: 400 });
+	}
 
-  // 6. Check at least one field provided
-  if (!isValidUpdateStoryCommand(validation.data)) {
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)'
-        }
-      },
-      { status: 400 }
-    );
-  }
+	// 6. Check at least one field provided
+	if (!isValidUpdateStoryCommand(validation.data)) {
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'VALIDATION_ERROR',
+					message: 'Musisz podać przynajmniej jedno pole do aktualizacji (question lub answer)'
+				}
+			},
+			{ status: 400 }
+		);
+	}
 
-  // 7. Build update object (only provided fields)
-  const updateData: Partial<UpdateStoryCommand> = {};
-  if (validation.data.question !== undefined) {
-    updateData.question = validation.data.question;
-  }
-  if (validation.data.answer !== undefined) {
-    updateData.answer = validation.data.answer;
-  }
+	// 7. Build update object (only provided fields)
+	const updateData: Partial<UpdateStoryCommand> = {};
+	if (validation.data.question !== undefined) {
+		updateData.question = validation.data.question;
+	}
+	if (validation.data.answer !== undefined) {
+		updateData.answer = validation.data.answer;
+	}
 
-  // 8. Update story in database
-  try {
-    const { data, error } = await locals.supabase
-      .from('stories')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
+	// 8. Update story in database
+	try {
+		const { data, error } = await locals.supabase
+			.from('stories')
+			.update(updateData)
+			.eq('id', id)
+			.select()
+			.single();
 
-    if (error) {
-      // Check if "not found" (common case)
-      if (error.code === 'PGRST116') {
-        console.warn('[NOT_FOUND] Story not found or no access during UPDATE', {
-          storyId: id,
-          userId: locals.user.id,
-          updateFields: Object.keys(updateData),
-          timestamp: new Date().toISOString()
-        });
+		if (error) {
+			// Check if "not found" (common case)
+			if (error.code === 'PGRST116') {
+				console.warn('[NOT_FOUND] Story not found or no access during UPDATE', {
+					storyId: id,
+					userId: locals.user.id,
+					updateFields: Object.keys(updateData),
+					timestamp: new Date().toISOString()
+				});
 
-        return json<ErrorDTO>(
-          {
-            error: {
-              code: 'NOT_FOUND',
-              message: 'Nie znaleziono historii lub nie masz do niej dostępu'
-            }
-          },
-          { status: 404 }
-        );
-      }
+				return json<ErrorDTO>(
+					{
+						error: {
+							code: 'NOT_FOUND',
+							message: 'Nie znaleziono historii lub nie masz do niej dostępu'
+						}
+					},
+					{ status: 404 }
+				);
+			}
 
-      // Other database errors
-      console.error('[DB_ERROR] UPDATE failed', {
-        code: error.code,
-        message: error.message,
-        storyId: id,
-        userId: locals.user.id,
-        updateData,
-        timestamp: new Date().toISOString()
-      });
+			// Other database errors
+			console.error('[DB_ERROR] UPDATE failed', {
+				code: error.code,
+				message: error.message,
+				storyId: id,
+				userId: locals.user.id,
+				updateData,
+				timestamp: new Date().toISOString()
+			});
 
-      return json<ErrorDTO>(
-        {
-          error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Nie udało się zaktualizować historii. Spróbuj ponownie później'
-          }
-        },
-        { status: 500 }
-      );
-    }
+			return json<ErrorDTO>(
+				{
+					error: {
+						code: 'INTERNAL_ERROR',
+						message: 'Nie udało się zaktualizować historii. Spróbuj ponownie później'
+					}
+				},
+				{ status: 500 }
+			);
+		}
 
-    // 9. Check if data is null (RLS blocked or not found)
-    if (!data) {
-      console.warn('[NOT_FOUND] Story not found or no access (RLS) during UPDATE', {
-        storyId: id,
-        userId: locals.user.id,
-        updateFields: Object.keys(updateData),
-        timestamp: new Date().toISOString()
-      });
+		// 9. Check if data is null (RLS blocked or not found)
+		if (!data) {
+			console.warn('[NOT_FOUND] Story not found or no access (RLS) during UPDATE', {
+				storyId: id,
+				userId: locals.user.id,
+				updateFields: Object.keys(updateData),
+				timestamp: new Date().toISOString()
+			});
 
-      return json<ErrorDTO>(
-        {
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Nie znaleziono historii lub nie masz do niej dostępu'
-          }
-        },
-        { status: 404 }
-      );
-    }
+			return json<ErrorDTO>(
+				{
+					error: {
+						code: 'NOT_FOUND',
+						message: 'Nie znaleziono historii lub nie masz do niej dostępu'
+					}
+				},
+				{ status: 404 }
+			);
+		}
 
-    // 10. Return success response
-    return json<StoryDTO>(data, { status: 200 });
-  } catch (error: any) {
-    // 11. Handle unexpected errors
-    console.error('[API_ERROR] PATCH /api/stories/:id', {
-      error: error.message,
-      stack: error.stack,
-      storyId: id,
-      userId: locals.user.id,
-      updateData,
-      timestamp: new Date().toISOString()
-    });
+		// 10. Return success response
+		return json<StoryDTO>(data, { status: 200 });
+	} catch (error: any) {
+		// 11. Handle unexpected errors
+		console.error('[API_ERROR] PATCH /api/stories/:id', {
+			error: error.message,
+			stack: error.stack,
+			storyId: id,
+			userId: locals.user.id,
+			updateData,
+			timestamp: new Date().toISOString()
+		});
 
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Nie udało się zaktualizować historii. Spróbuj ponownie później'
-        }
-      },
-      { status: 500 }
-    );
-  }
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'INTERNAL_ERROR',
+					message: 'Nie udało się zaktualizować historii. Spróbuj ponownie później'
+				}
+			},
+			{ status: 500 }
+		);
+	}
 };
 ```
 
 **Deliverable:**
+
 - ✅ PATCH handler added to existing [id]/+server.ts
 - ✅ All validation steps implemented
 - ✅ Read-only fields protection
@@ -1656,6 +1734,7 @@ curl -X PATCH "https://localhost:5173/api/stories/$STORY_A_ID" \
 ```
 
 **Deliverable:**
+
 - ✅ All happy path tests passing
 - ✅ All validation tests returning 400
 - ✅ Read-only fields rejected
@@ -1677,25 +1756,25 @@ import type { UpdateStoryCommand, StoryDTO, ErrorDTO } from '$lib/types';
 // Existing: listStories(), createStory(), getStoryById()
 
 export async function updateStory(
-  id: string,
-  data: UpdateStoryCommand,
-  token: string
+	id: string,
+	data: UpdateStoryCommand,
+	token: string
 ): Promise<StoryDTO> {
-  const response = await fetch(`/api/stories/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  });
+	const response = await fetch(`/api/stories/${id}`, {
+		method: 'PATCH',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(data)
+	});
 
-  if (!response.ok) {
-    const error: ErrorDTO = await response.json();
-    throw new Error(error.error.message);
-  }
+	if (!response.ok) {
+		const error: ErrorDTO = await response.json();
+		throw new Error(error.error.message);
+	}
 
-  return response.json();
+	return response.json();
 }
 ```
 
@@ -1705,200 +1784,203 @@ Utworzyć: `src/routes/history/[id]/edit/+page.svelte`
 
 ```svelte
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
-  import { getStoryById, updateStory } from '$lib/api/stories';
-  import { getSupabase } from '$lib/supabase';
-  import type { StoryDTO } from '$lib/types';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { getStoryById, updateStory } from '$lib/api/stories';
+	import { getSupabase } from '$lib/supabase';
+	import type { StoryDTO } from '$lib/types';
 
-  let story: StoryDTO | null = null;
-  let question = '';
-  let answer = '';
-  let loading = false;
-  let loadingStory = false;
-  let error = '';
+	let story: StoryDTO | null = null;
+	let question = '';
+	let answer = '';
+	let loading = false;
+	let loadingStory = false;
+	let error = '';
 
-  const storyId = $page.params.id;
+	const storyId = $page.params.id;
 
-  async function loadStory() {
-    loadingStory = true;
-    error = '';
+	async function loadStory() {
+		loadingStory = true;
+		error = '';
 
-    try {
-      const supabase = getSupabase();
-      const { data: { session } } = await supabase.auth.getSession();
+		try {
+			const supabase = getSupabase();
+			const {
+				data: { session }
+			} = await supabase.auth.getSession();
 
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
+			if (!session) {
+				throw new Error('Not authenticated');
+			}
 
-      story = await getStoryById(storyId, session.access_token);
-      question = story.question;
-      answer = story.answer;
-    } catch (err: any) {
-      error = err.message;
-    } finally {
-      loadingStory = false;
-    }
-  }
+			story = await getStoryById(storyId, session.access_token);
+			question = story.question;
+			answer = story.answer;
+		} catch (err: any) {
+			error = err.message;
+		} finally {
+			loadingStory = false;
+		}
+	}
 
-  async function handleSubmit(event: Event) {
-    event.preventDefault();
-    loading = true;
-    error = '';
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
+		loading = true;
+		error = '';
 
-    try {
-      const supabase = getSupabase();
-      const { data: { session } } = await supabase.auth.getSession();
+		try {
+			const supabase = getSupabase();
+			const {
+				data: { session }
+			} = await supabase.auth.getSession();
 
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
+			if (!session) {
+				throw new Error('Not authenticated');
+			}
 
-      await updateStory(
-        storyId,
-        { question, answer },
-        session.access_token
-      );
+			await updateStory(storyId, { question, answer }, session.access_token);
 
-      // Redirect to story details
-      goto(`/history/${storyId}`);
-    } catch (err: any) {
-      error = err.message;
-    } finally {
-      loading = false;
-    }
-  }
+			// Redirect to story details
+			goto(`/history/${storyId}`);
+		} catch (err: any) {
+			error = err.message;
+		} finally {
+			loading = false;
+		}
+	}
 
-  onMount(loadStory);
+	onMount(loadStory);
 </script>
 
 <div class="container">
-  {#if loadingStory}
-    <p>Ładowanie historii...</p>
-  {:else if story}
-    <h1>Edytuj historię</h1>
+	{#if loadingStory}
+		<p>Ładowanie historii...</p>
+	{:else if story}
+		<h1>Edytuj historię</h1>
 
-    <div class="metadata">
-      <p><strong>Temat:</strong> {story.subject}</p>
-      <p><strong>Trudność:</strong> {story.difficulty}/3</p>
-      <p><strong>Mroczność:</strong> {story.darkness}/3</p>
-      <p class="note">Możesz edytować tylko pytanie i odpowiedź. Temat, trudność i mroczność są tylko do odczytu.</p>
-    </div>
+		<div class="metadata">
+			<p><strong>Temat:</strong> {story.subject}</p>
+			<p><strong>Trudność:</strong> {story.difficulty}/3</p>
+			<p><strong>Mroczność:</strong> {story.darkness}/3</p>
+			<p class="note">
+				Możesz edytować tylko pytanie i odpowiedź. Temat, trudność i mroczność są tylko do odczytu.
+			</p>
+		</div>
 
-    <form on:submit={handleSubmit}>
-      <div class="field">
-        <label for="question">Pytanie (Zagadka)</label>
-        <textarea
-          id="question"
-          bind:value={question}
-          required
-          rows="5"
-          placeholder="Wpisz treść pytania..."
-        />
-      </div>
+		<form on:submit={handleSubmit}>
+			<div class="field">
+				<label for="question">Pytanie (Zagadka)</label>
+				<textarea
+					id="question"
+					bind:value={question}
+					required
+					rows="5"
+					placeholder="Wpisz treść pytania..."
+				/>
+			</div>
 
-      <div class="field">
-        <label for="answer">Odpowiedź (Rozwiązanie)</label>
-        <textarea
-          id="answer"
-          bind:value={answer}
-          required
-          rows="5"
-          placeholder="Wpisz treść odpowiedzi..."
-        />
-      </div>
+			<div class="field">
+				<label for="answer">Odpowiedź (Rozwiązanie)</label>
+				<textarea
+					id="answer"
+					bind:value={answer}
+					required
+					rows="5"
+					placeholder="Wpisz treść odpowiedzi..."
+				/>
+			</div>
 
-      {#if error}
-        <p class="error">{error}</p>
-      {/if}
+			{#if error}
+				<p class="error">{error}</p>
+			{/if}
 
-      <div class="actions">
-        <a href="/history/{storyId}" class="btn-secondary">Anuluj</a>
-        <button type="submit" class="btn" disabled={loading}>
-          {loading ? 'Zapisywanie...' : 'Zapisz zmiany'}
-        </button>
-      </div>
-    </form>
-  {:else}
-    <div class="error-state">
-      <h2>Wystąpił błąd</h2>
-      <p>{error}</p>
-      <a href="/history" class="btn">Wróć do listy historii</a>
-    </div>
-  {/if}
+			<div class="actions">
+				<a href="/history/{storyId}" class="btn-secondary">Anuluj</a>
+				<button type="submit" class="btn" disabled={loading}>
+					{loading ? 'Zapisywanie...' : 'Zapisz zmiany'}
+				</button>
+			</div>
+		</form>
+	{:else}
+		<div class="error-state">
+			<h2>Wystąpił błąd</h2>
+			<p>{error}</p>
+			<a href="/history" class="btn">Wróć do listy historii</a>
+		</div>
+	{/if}
 </div>
 
 <style>
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
+	.container {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 2rem;
+	}
 
-  .metadata {
-    background: #f9fafb;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-  }
+	.metadata {
+		background: #f9fafb;
+		padding: 1rem;
+		border-radius: 8px;
+		margin-bottom: 2rem;
+	}
 
-  .metadata p {
-    margin: 0.5rem 0;
-  }
+	.metadata p {
+		margin: 0.5rem 0;
+	}
 
-  .note {
-    font-size: 0.875rem;
-    color: #6b7280;
-    font-style: italic;
-  }
+	.note {
+		font-size: 0.875rem;
+		color: #6b7280;
+		font-style: italic;
+	}
 
-  .field {
-    margin-bottom: 1.5rem;
-  }
+	.field {
+		margin-bottom: 1.5rem;
+	}
 
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-  }
+	label {
+		display: block;
+		margin-bottom: 0.5rem;
+		font-weight: 600;
+	}
 
-  textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 1rem;
-  }
+	textarea {
+		width: 100%;
+		padding: 0.75rem;
+		border: 1px solid #d1d5db;
+		border-radius: 8px;
+		font-family: inherit;
+		font-size: 1rem;
+	}
 
-  textarea:focus {
-    outline: none;
-    border-color: #6366f1;
-    ring: 2px;
-    ring-color: #6366f1;
-  }
+	textarea:focus {
+		outline: none;
+		border-color: #6366f1;
+		ring: 2px;
+		ring-color: #6366f1;
+	}
 
-  .actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
+	.actions {
+		display: flex;
+		gap: 1rem;
+		margin-top: 2rem;
+	}
 
-  .error {
-    color: #ef4444;
-    margin-top: 1rem;
-  }
+	.error {
+		color: #ef4444;
+		margin-top: 1rem;
+	}
 
-  .error-state {
-    text-align: center;
-    padding: 3rem;
-  }
+	.error-state {
+		text-align: center;
+		padding: 3rem;
+	}
 </style>
 ```
 
 **Deliverable:**
+
 - ✅ API client function created
 - ✅ Edit page implemented
 - ✅ Read-only fields clearly indicated
@@ -1915,227 +1997,229 @@ Utworzyć: `src/routes/history/[id]/edit/+page.svelte`
 import { test, expect } from '@playwright/test';
 
 test.describe('PATCH /api/stories/:id', () => {
-  let authToken: string;
-  let storyId: string;
+	let authToken: string;
+	let storyId: string;
 
-  test.beforeAll(async ({ request }) => {
-    // Login
-    const loginResponse = await request.post('/auth/v1/token?grant_type=password', {
-      data: {
-        email: 'test@example.com',
-        password: 'test123456'
-      }
-    });
+	test.beforeAll(async ({ request }) => {
+		// Login
+		const loginResponse = await request.post('/auth/v1/token?grant_type=password', {
+			data: {
+				email: 'test@example.com',
+				password: 'test123456'
+			}
+		});
 
-    const loginData = await loginResponse.json();
-    authToken = loginData.access_token;
+		const loginData = await loginResponse.json();
+		authToken = loginData.access_token;
 
-    // Create test story
-    const createResponse = await request.post('/api/stories', {
-      headers: { 'Authorization': `Bearer ${authToken}` },
-      data: {
-        subject: 'E2E Test Story for UPDATE',
-        difficulty: 2,
-        darkness: 2,
-        question: 'Original question',
-        answer: 'Original answer'
-      }
-    });
+		// Create test story
+		const createResponse = await request.post('/api/stories', {
+			headers: { Authorization: `Bearer ${authToken}` },
+			data: {
+				subject: 'E2E Test Story for UPDATE',
+				difficulty: 2,
+				darkness: 2,
+				question: 'Original question',
+				answer: 'Original answer'
+			}
+		});
 
-    const createData = await createResponse.json();
-    storyId = createData.id;
-  });
+		const createData = await createResponse.json();
+		storyId = createData.id;
+	});
 
-  test('should update both question and answer', async ({ request }) => {
-    const response = await request.patch(`/api/stories/${storyId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        question: 'Updated question',
-        answer: 'Updated answer'
-      }
-    });
+	test('should update both question and answer', async ({ request }) => {
+		const response = await request.patch(`/api/stories/${storyId}`, {
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				question: 'Updated question',
+				answer: 'Updated answer'
+			}
+		});
 
-    expect(response.status()).toBe(200);
+		expect(response.status()).toBe(200);
 
-    const data = await response.json();
-    expect(data.id).toBe(storyId);
-    expect(data.question).toBe('Updated question');
-    expect(data.answer).toBe('Updated answer');
-    expect(data.subject).toBe('E2E Test Story for UPDATE');  // unchanged
-    expect(data.difficulty).toBe(2);  // unchanged
-  });
+		const data = await response.json();
+		expect(data.id).toBe(storyId);
+		expect(data.question).toBe('Updated question');
+		expect(data.answer).toBe('Updated answer');
+		expect(data.subject).toBe('E2E Test Story for UPDATE'); // unchanged
+		expect(data.difficulty).toBe(2); // unchanged
+	});
 
-  test('should update only question', async ({ request }) => {
-    const response = await request.patch(`/api/stories/${storyId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        question: 'Only question updated'
-      }
-    });
+	test('should update only question', async ({ request }) => {
+		const response = await request.patch(`/api/stories/${storyId}`, {
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				question: 'Only question updated'
+			}
+		});
 
-    expect(response.status()).toBe(200);
+		expect(response.status()).toBe(200);
 
-    const data = await response.json();
-    expect(data.question).toBe('Only question updated');
-    expect(data.answer).toBe('Updated answer');  // from previous test
-  });
+		const data = await response.json();
+		expect(data.question).toBe('Only question updated');
+		expect(data.answer).toBe('Updated answer'); // from previous test
+	});
 
-  test('should return 400 for invalid UUID', async ({ request }) => {
-    const response = await request.patch('/api/stories/not-a-uuid', {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        question: 'Test'
-      }
-    });
+	test('should return 400 for invalid UUID', async ({ request }) => {
+		const response = await request.patch('/api/stories/not-a-uuid', {
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				question: 'Test'
+			}
+		});
 
-    expect(response.status()).toBe(400);
+		expect(response.status()).toBe(400);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('VALIDATION_ERROR');
-    expect(data.error.field).toBe('id');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('VALIDATION_ERROR');
+		expect(data.error.field).toBe('id');
+	});
 
-  test('should return 400 for empty question', async ({ request }) => {
-    const response = await request.patch(`/api/stories/${storyId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        question: '   '  // only whitespace
-      }
-    });
+	test('should return 400 for empty question', async ({ request }) => {
+		const response = await request.patch(`/api/stories/${storyId}`, {
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				question: '   ' // only whitespace
+			}
+		});
 
-    expect(response.status()).toBe(400);
+		expect(response.status()).toBe(400);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('VALIDATION_ERROR');
-    expect(data.error.message).toContain('puste');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('VALIDATION_ERROR');
+		expect(data.error.message).toContain('puste');
+	});
 
-  test('should return 400 for no fields provided', async ({ request }) => {
-    const response = await request.patch(`/api/stories/${storyId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      data: {}
-    });
+	test('should return 400 for no fields provided', async ({ request }) => {
+		const response = await request.patch(`/api/stories/${storyId}`, {
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {}
+		});
 
-    expect(response.status()).toBe(400);
+		expect(response.status()).toBe(400);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('VALIDATION_ERROR');
-    expect(data.error.message).toContain('przynajmniej jedno pole');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('VALIDATION_ERROR');
+		expect(data.error.message).toContain('przynajmniej jedno pole');
+	});
 
-  test('should return 400 for read-only field (subject)', async ({ request }) => {
-    const response = await request.patch(`/api/stories/${storyId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        subject: 'Trying to update subject',
-        question: 'Also updating question'
-      }
-    });
+	test('should return 400 for read-only field (subject)', async ({ request }) => {
+		const response = await request.patch(`/api/stories/${storyId}`, {
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				subject: 'Trying to update subject',
+				question: 'Also updating question'
+			}
+		});
 
-    expect(response.status()).toBe(400);
+		expect(response.status()).toBe(400);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('VALIDATION_ERROR');
-    expect(data.error.message).toContain('tylko do odczytu');
-    expect(data.error.field).toBe('subject');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('VALIDATION_ERROR');
+		expect(data.error.message).toContain('tylko do odczytu');
+		expect(data.error.field).toBe('subject');
+	});
 
-  test('should return 401 without auth token', async ({ request }) => {
-    const response = await request.patch(`/api/stories/${storyId}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: {
-        question: 'Test'
-      }
-    });
+	test('should return 401 without auth token', async ({ request }) => {
+		const response = await request.patch(`/api/stories/${storyId}`, {
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			data: {
+				question: 'Test'
+			}
+		});
 
-    expect(response.status()).toBe(401);
+		expect(response.status()).toBe(401);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('AUTHENTICATION_ERROR');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('AUTHENTICATION_ERROR');
+	});
 
-  test('should return 404 for non-existent story', async ({ request }) => {
-    const nonExistentId = '00000000-0000-4000-8000-000000000001';
+	test('should return 404 for non-existent story', async ({ request }) => {
+		const nonExistentId = '00000000-0000-4000-8000-000000000001';
 
-    const response = await request.patch(`/api/stories/${nonExistentId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        question: 'Test'
-      }
-    });
+		const response = await request.patch(`/api/stories/${nonExistentId}`, {
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				question: 'Test'
+			}
+		});
 
-    expect(response.status()).toBe(404);
+		expect(response.status()).toBe(404);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('NOT_FOUND');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('NOT_FOUND');
+	});
 
-  test('should enforce RLS (different user)', async ({ request }) => {
-    // Create second user
-    await request.post('/auth/v1/signup', {
-      data: {
-        email: 'test2@example.com',
-        password: 'test123456'
-      }
-    });
+	test('should enforce RLS (different user)', async ({ request }) => {
+		// Create second user
+		await request.post('/auth/v1/signup', {
+			data: {
+				email: 'test2@example.com',
+				password: 'test123456'
+			}
+		});
 
-    const user2LoginResponse = await request.post('/auth/v1/token?grant_type=password', {
-      data: {
-        email: 'test2@example.com',
-        password: 'test123456'
-      }
-    });
+		const user2LoginResponse = await request.post('/auth/v1/token?grant_type=password', {
+			data: {
+				email: 'test2@example.com',
+				password: 'test123456'
+			}
+		});
 
-    const user2Token = (await user2LoginResponse.json()).access_token;
+		const user2Token = (await user2LoginResponse.json()).access_token;
 
-    // User 2 tries to update User 1's story
-    const response = await request.patch(`/api/stories/${storyId}`, {
-      headers: {
-        'Authorization': `Bearer ${user2Token}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        question: 'Hacked by User 2'
-      }
-    });
+		// User 2 tries to update User 1's story
+		const response = await request.patch(`/api/stories/${storyId}`, {
+			headers: {
+				Authorization: `Bearer ${user2Token}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				question: 'Hacked by User 2'
+			}
+		});
 
-    expect(response.status()).toBe(404);
+		expect(response.status()).toBe(404);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('NOT_FOUND');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('NOT_FOUND');
+	});
 });
 ```
 
 **Run tests:**
+
 ```bash
 npx playwright test tests/api/stories/update.spec.ts
 ```
 
 **Deliverable:**
+
 - ✅ E2E tests written
 - ✅ All tests passing
 - ✅ Happy path covered
@@ -2151,7 +2235,7 @@ npx playwright test tests/api/stories/update.spec.ts
 
 Edytować: `docs/api/stories.md`
 
-```markdown
+````markdown
 # Stories API
 
 ## PATCH /api/stories/:id
@@ -2159,43 +2243,50 @@ Edytować: `docs/api/stories.md`
 Update story question and/or answer. Subject, difficulty, and darkness are read-only.
 
 ### Authentication
+
 Required: Bearer token
 
 ### URL Parameters
+
 - `id`: UUID v4 format (required)
 
 ### Request Body
+
 ```json
 {
-  "question": "Updated question text (optional)",
-  "answer": "Updated answer text (optional)"
+	"question": "Updated question text (optional)",
+	"answer": "Updated answer text (optional)"
 }
 ```
+````
 
 **At least one field required.** Read-only fields: `subject`, `difficulty`, `darkness`, `user_id`, `created_at`.
 
 ### Response (200 OK)
+
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "user_id": "660e8400-e29b-41d4-a716-446655440001",
-  "subject": "Tajemnicza latarnia morska",
-  "difficulty": 2,
-  "darkness": 3,
-  "question": "Updated question...",
-  "answer": "Updated answer...",
-  "created_at": "2025-01-26T10:30:00.000Z"
+	"id": "550e8400-e29b-41d4-a716-446655440000",
+	"user_id": "660e8400-e29b-41d4-a716-446655440001",
+	"subject": "Tajemnicza latarnia morska",
+	"difficulty": 2,
+	"darkness": 3,
+	"question": "Updated question...",
+	"answer": "Updated answer...",
+	"created_at": "2025-01-26T10:30:00.000Z"
 }
 ```
 
 ### Errors
+
 - 400: Invalid UUID, empty fields, no fields provided, or read-only field included
 - 401: Authentication error
 - 404: Story not found or no access (RLS)
 - 500: Database error
 
 See full documentation in `.ai/view-implementation-plans/update-story-endpoint.md`
-```
+
+````
 
 **Deliverable:**
 - ✅ API documentation updated
@@ -2244,9 +2335,10 @@ curl -X PATCH "https://mrocznehistorie.pl/api/stories/$PROD_STORY_ID" \
 # 3. Verify RLS
 # Try to update story created by different user
 # Expected: 404 Not Found
-```
+````
 
 **Deliverable:**
+
 - ✅ Deployed to production
 - ✅ Smoke tests passed
 
@@ -2257,7 +2349,7 @@ curl -X PATCH "https://mrocznehistorie.pl/api/stories/$PROD_STORY_ID" \
 ### 10.1. Główne komponenty
 
 | Komponent         | Lokalizacja                                 | Odpowiedzialność                                |
-|-------------------|---------------------------------------------|-------------------------------------------------|
+| ----------------- | ------------------------------------------- | ----------------------------------------------- |
 | API Route (PATCH) | `src/routes/api/stories/[id]/+server.ts`    | PATCH handler, validation, DB update            |
 | Validation Schema | `src/lib/validation/story.validation.ts`    | UpdateStorySchema (Zod)                         |
 | Types             | `src/types.ts`                              | UpdateStoryCommand, isValidUpdateStoryCommand() |
@@ -2295,6 +2387,7 @@ curl -X PATCH "https://mrocznehistorie.pl/api/stories/$PROD_STORY_ID" \
 ## Appendix: Przykładowe requesty
 
 ### Sukces - Update both (200 OK)
+
 ```bash
 curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJ..." \
@@ -2306,6 +2399,7 @@ curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446
 ```
 
 ### Sukces - Update only question (200 OK)
+
 ```bash
 curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJ..." \
@@ -2316,6 +2410,7 @@ curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446
 ```
 
 ### Błąd - Read-only field (400)
+
 ```bash
 curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJ..." \
@@ -2327,6 +2422,7 @@ curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446
 ```
 
 ### Błąd - No fields provided (400)
+
 ```bash
 curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJ..." \
@@ -2335,6 +2431,7 @@ curl -X PATCH https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446
 ```
 
 ### Błąd - Not Found (404)
+
 ```bash
 curl -X PATCH https://mrocznehistorie.pl/api/stories/00000000-0000-4000-8000-000000000001 \
   -H "Authorization: Bearer eyJ..." \

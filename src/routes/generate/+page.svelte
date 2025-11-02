@@ -83,7 +83,7 @@
 	}
 
 	// Reactive derived values using $derived
-	let story = $derived((form?.generatedStory) as GeneratedStoryDTO | undefined);
+	let story = $derived(form?.generatedStory as GeneratedStoryDTO | undefined);
 	let derivedFormData = $derived(
 		form?.formData
 			? {

@@ -33,13 +33,11 @@ export class BasePage {
 	 * @param message - Expected message (optional, for verification)
 	 * @returns Toast locator
 	 */
-	async waitForToast(
-		type: 'success' | 'error',
-		message?: string
-	): Promise<Locator> {
-		const toastSelector = type === 'success'
-			? '.alert-success, [role="alert"].success'
-			: '.alert-error, [role="alert"].error';
+	async waitForToast(type: 'success' | 'error', message?: string): Promise<Locator> {
+		const toastSelector =
+			type === 'success'
+				? '.alert-success, [role="alert"].success'
+				: '.alert-error, [role="alert"].error';
 
 		const toast = this.page.locator(toastSelector).first();
 		await toast.waitFor({ state: 'visible', timeout: TIMEOUTS.toast });
@@ -50,7 +48,9 @@ export class BasePage {
 			const toastText = await toast.textContent();
 			// If message not found in toast, throw error with actual toast content
 			if (!toastText?.includes(message)) {
-				throw new Error(`Toast does not contain expected message. Expected: "${message}", Got: "${toastText}"`);
+				throw new Error(
+					`Toast does not contain expected message. Expected: "${message}", Got: "${toastText}"`
+				);
 			}
 		}
 
@@ -116,10 +116,7 @@ export class BasePage {
 	 * Wait for navigation after an action (e.g., form submit)
 	 */
 	async waitForNavigation(action: () => Promise<void>): Promise<void> {
-		await Promise.all([
-			this.page.waitForNavigation({ timeout: TIMEOUTS.navigation }),
-			action()
-		]);
+		await Promise.all([this.page.waitForNavigation({ timeout: TIMEOUTS.navigation }), action()]);
 	}
 
 	// Navbar methods

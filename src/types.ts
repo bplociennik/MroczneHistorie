@@ -24,8 +24,8 @@ export type StoryDTO = Tables<'stories'>;
  * - darkness: Required, integer 1-3
  */
 export type GenerateStoryCommand = Pick<
-  TablesInsert<'stories'>,
-  'subject' | 'difficulty' | 'darkness'
+	TablesInsert<'stories'>,
+	'subject' | 'difficulty' | 'darkness'
 >;
 
 /**
@@ -43,8 +43,8 @@ export type GenerateStoryCommand = Pick<
  * - answer: Required, min 1 character
  */
 export type CreateStoryCommand = Pick<
-  TablesInsert<'stories'>,
-  'subject' | 'difficulty' | 'darkness' | 'question' | 'answer'
+	TablesInsert<'stories'>,
+	'subject' | 'difficulty' | 'darkness' | 'question' | 'answer'
 >;
 
 /**
@@ -59,10 +59,7 @@ export type CreateStoryCommand = Pick<
  * - answer (optional): Min 1 character if provided
  * - At least one field must be present
  */
-export type UpdateStoryCommand = Pick<
-  TablesUpdate<'stories'>,
-  'question' | 'answer'
->;
+export type UpdateStoryCommand = Pick<TablesUpdate<'stories'>, 'question' | 'answer'>;
 
 // ============================================================================
 // Response DTOs
@@ -81,16 +78,16 @@ export type GeneratedStoryDTO = Pick<Tables<'stories'>, 'question' | 'answer'>;
  * Response from GET /api/stories
  */
 export interface ListStoriesDTO {
-  /**
-   * Array of user's stories, sorted by created_at DESC
-   */
-  stories: StoryDTO[];
+	/**
+	 * Array of user's stories, sorted by created_at DESC
+	 */
+	stories: StoryDTO[];
 
-  /**
-   * Total number of stories returned
-   * (In MVP, this equals stories.length since there's no pagination limit)
-   */
-  total: number;
+	/**
+	 * Total number of stories returned
+	 * (In MVP, this equals stories.length since there's no pagination limit)
+	 */
+	total: number;
 }
 
 // ============================================================================
@@ -101,36 +98,36 @@ export interface ListStoriesDTO {
  * Standardized error codes used across the API
  */
 export type ErrorCode =
-  | 'VALIDATION_ERROR'      // Input validation failure
-  | 'AUTHENTICATION_ERROR'  // Missing or invalid token
-  | 'AUTHORIZATION_ERROR'   // User lacks permission for resource
-  | 'NOT_FOUND'            // Resource does not exist
-  | 'TIMEOUT_ERROR'        // Request exceeded time limit (e.g., OpenAI timeout)
-  | 'EXTERNAL_API_ERROR'   // OpenAI API failure
-  | 'INTERNAL_ERROR';      // Unexpected server error
+	| 'VALIDATION_ERROR' // Input validation failure
+	| 'AUTHENTICATION_ERROR' // Missing or invalid token
+	| 'AUTHORIZATION_ERROR' // User lacks permission for resource
+	| 'NOT_FOUND' // Resource does not exist
+	| 'TIMEOUT_ERROR' // Request exceeded time limit (e.g., OpenAI timeout)
+	| 'EXTERNAL_API_ERROR' // OpenAI API failure
+	| 'INTERNAL_ERROR'; // Unexpected server error
 
 /**
  * Error response structure
  * Used for all API error responses (4xx, 5xx)
  */
 export interface ErrorDTO {
-  error: {
-    /**
-     * Machine-readable error code
-     */
-    code: ErrorCode;
+	error: {
+		/**
+		 * Machine-readable error code
+		 */
+		code: ErrorCode;
 
-    /**
-     * Human-readable error message (localized in Polish for MVP)
-     */
-    message: string;
+		/**
+		 * Human-readable error message (localized in Polish for MVP)
+		 */
+		message: string;
 
-    /**
-     * Optional field name for validation errors
-     * e.g., "subject", "difficulty", "question"
-     */
-    field?: string;
-  };
+		/**
+		 * Optional field name for validation errors
+		 * e.g., "subject", "difficulty", "question"
+		 */
+		field?: string;
+	};
 }
 
 // ============================================================================
@@ -142,17 +139,17 @@ export interface ErrorDTO {
  * GET /api/stories?limit=25&offset=0
  */
 export interface ListStoriesQueryParams {
-  /**
-   * Maximum number of stories to return
-   * @default 25
-   */
-  limit?: number;
+	/**
+	 * Maximum number of stories to return
+	 * @default 25
+	 */
+	limit?: number;
 
-  /**
-   * Number of stories to skip (for pagination)
-   * @default 0
-   */
-  offset?: number;
+	/**
+	 * Number of stories to skip (for pagination)
+	 * @default 0
+	 */
+	offset?: number;
 }
 
 // ============================================================================
@@ -164,9 +161,12 @@ export interface ListStoriesQueryParams {
  * Required by PATCH /api/stories/:id validation rules
  */
 export function isValidUpdateStoryCommand(
-  cmd: UpdateStoryCommand
-): cmd is Required<Pick<UpdateStoryCommand, 'question'>> | Required<Pick<UpdateStoryCommand, 'answer'>> | Required<UpdateStoryCommand> {
-  return cmd.question !== undefined || cmd.answer !== undefined;
+	cmd: UpdateStoryCommand
+): cmd is
+	| Required<Pick<UpdateStoryCommand, 'question'>>
+	| Required<Pick<UpdateStoryCommand, 'answer'>>
+	| Required<UpdateStoryCommand> {
+	return cmd.question !== undefined || cmd.answer !== undefined;
 }
 
 /**
@@ -174,8 +174,8 @@ export function isValidUpdateStoryCommand(
  * Used for story ID validation in API routes
  */
 export function isValidUUID(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
+	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+	return uuidRegex.test(id);
 }
 
 // ============================================================================
@@ -202,6 +202,6 @@ export type StoryDarkness = 1 | 2 | 3;
  * Helper type to ensure difficulty and darkness are within valid ranges
  */
 export interface StoryParameters {
-  difficulty: StoryDifficulty;
-  darkness: StoryDarkness;
+	difficulty: StoryDifficulty;
+	darkness: StoryDarkness;
 }

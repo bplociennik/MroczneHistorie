@@ -38,6 +38,7 @@ Architektura jest celowo płaska i minimalistyczna - nie ma potrzeby tworzenia o
 Komponent strony renderujący ultra-minimalistyczny interfejs gry. Wyświetla pytanie zagadki w dużej, czytelnej czcionce oraz przycisk umożliwiający przełączanie widoczności odpowiedzi. Odpowiedź pojawia się z animacją `fade` po kliknięciu przycisku.
 
 **Główne elementy HTML:**
+
 - `<main>` - główny kontener strony
 - `<section>` - kontener dla pytania (z dużą czcionką, centrowany)
 - `<button>` - przycisk toggle do odkrywania/ukrywania odpowiedzi
@@ -45,20 +46,25 @@ Komponent strony renderujący ultra-minimalistyczny interfejs gry. Wyświetla py
 - Użycie dyrektywy `transition:fade` dla animacji odpowiedzi
 
 **Obsługiwane zdarzenia:**
+
 - `onclick` na przycisku toggle - przełącza stan zmiennej `showAnswer`
 
 **Warunki walidacji:**
+
 - Brak walidacji na poziomie komponentu (wszystkie warunki sprawdzane w `+page.server.ts`)
 - Komponent zakłada, że otrzymuje poprawne dane typu `StoryDTO`
 
 **Typy:**
+
 - `StoryDTO` - props otrzymywane z funkcji `load`
 - Typ danych zwracanych przez load: `{ story: StoryDTO }`
 
 **Propsy:**
+
 - `data` - obiekt zawierający pole `story` typu `StoryDTO` (automatycznie przekazywane przez SvelteKit z funkcji `load`)
 
 **Stan lokalny:**
+
 - `showAnswer: boolean` - stan kontrolujący widoczność odpowiedzi (zarządzany przez `$state` rune)
 
 ### +page.server.ts (Server Load Function)
@@ -67,12 +73,14 @@ Komponent strony renderujący ultra-minimalistyczny interfejs gry. Wyświetla py
 Funkcja serwerowa odpowiedzialna za pobieranie danych historii z bazy danych przed renderowaniem strony. Waliduje UUID, sprawdza dostęp użytkownika (poprzez RLS) i zwraca dane historii lub rzuca odpowiedni błąd.
 
 **Główne elementy:**
+
 - Eksport funkcji `load` typu `PageServerLoad`
 - Walidacja formatu UUID
 - Zapytanie do Supabase: `locals.supabase.from('stories').select('*').eq('id', id).single()`
 - Obsługa błędów z użyciem `error()` helper z SvelteKit
 
 **Obsługiwane scenariusze:**
+
 - Pomyślne pobranie danych → zwrócenie `{ story: StoryDTO }`
 - Nieprawidłowy UUID → `error(400, 'Nieprawidłowy format identyfikatora historii')`
 - Brak uwierzytelnienia → przekierowanie do logowania (obsłużone przez hooks)
@@ -80,6 +88,7 @@ Funkcja serwerowa odpowiedzialna za pobieranie danych historii z bazy danych prz
 - Błąd bazy danych → `error(500, 'Nie udało się pobrać historii')`
 
 **Typy:**
+
 - `PageServerLoad` z `@sveltejs/kit`
 - `StoryDTO` z `$lib/types` lub `../../../types`
 - Zwracany typ: `{ story: StoryDTO }`
@@ -113,7 +122,7 @@ export type StoryDTO = Tables<'stories'>;
  * Typ danych zwracanych przez funkcję load
  */
 interface PageData {
-  story: StoryDTO;
+	story: StoryDTO;
 }
 ```
 
@@ -135,6 +144,7 @@ let showAnswer = $state(false);
 ### Brak globalnego stanu
 
 Widok nie wymaga:
+
 - Stores (Svelte stores)
 - Context API
 - Customowych hooków
@@ -149,6 +159,7 @@ Cały stan jest lokalny i prosty (pojedyncza zmienna boolean).
 Dane są pobierane **bezpośrednio z Supabase w funkcji `load`** w pliku `+page.server.ts`, a nie przez dedykowany endpoint API `/api/stories/:id`.
 
 **Uzasadnienie**:
+
 - Dane są potrzebne do renderowania strony SSR
 - SvelteKit load functions są optymalne do pobierania danych przed renderowaniem
 - Eliminujemy zbędny dodatkowy request HTTP
@@ -163,45 +174,45 @@ import { isValidUUID } from '../../../types';
 import type { StoryDTO } from '../../../types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-  // 1. Walidacja UUID
-  if (!isValidUUID(params.id)) {
-    throw error(400, 'Nieprawidłowy format identyfikatora historii');
-  }
+	// 1. Walidacja UUID
+	if (!isValidUUID(params.id)) {
+		throw error(400, 'Nieprawidłowy format identyfikatora historii');
+	}
 
-  // 2. Pobranie historii z Supabase
-  const { data: story, error: dbError } = await locals.supabase
-    .from('stories')
-    .select('*')
-    .eq('id', params.id)
-    .single();
+	// 2. Pobranie historii z Supabase
+	const { data: story, error: dbError } = await locals.supabase
+		.from('stories')
+		.select('*')
+		.eq('id', params.id)
+		.single();
 
-  // 3. Obsługa błędów
-  if (dbError) {
-    console.error('[DB_ERROR] GET story failed', {
-      code: dbError.code,
-      message: dbError.message,
-      storyId: params.id,
-      userId: locals.user?.id,
-      timestamp: new Date().toISOString()
-    });
+	// 3. Obsługa błędów
+	if (dbError) {
+		console.error('[DB_ERROR] GET story failed', {
+			code: dbError.code,
+			message: dbError.message,
+			storyId: params.id,
+			userId: locals.user?.id,
+			timestamp: new Date().toISOString()
+		});
 
-    // PGRST116 = PostgREST "not found"
-    if (dbError.code === 'PGRST116') {
-      throw error(404, 'Nie znaleziono historii lub nie masz do niej dostępu');
-    }
+		// PGRST116 = PostgREST "not found"
+		if (dbError.code === 'PGRST116') {
+			throw error(404, 'Nie znaleziono historii lub nie masz do niej dostępu');
+		}
 
-    throw error(500, 'Nie udało się pobrać historii');
-  }
+		throw error(500, 'Nie udało się pobrać historii');
+	}
 
-  // 4. Dodatkowa walidacja (na wypadek null przez RLS)
-  if (!story) {
-    throw error(404, 'Nie znaleziono historii lub nie masz do niej dostępu');
-  }
+	// 4. Dodatkowa walidacja (na wypadek null przez RLS)
+	if (!story) {
+		throw error(404, 'Nie znaleziono historii lub nie masz do niej dostępu');
+	}
 
-  // 5. Zwrócenie danych
-  return {
-    story: story as StoryDTO
-  };
+	// 5. Zwrócenie danych
+	return {
+		story: story as StoryDTO
+	};
 };
 ```
 
@@ -215,6 +226,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 **Trigger**: Kliknięcie przycisku "Odkryj odpowiedź"
 
 **Przebieg**:
+
 1. Użytkownik klika przycisk z tekstem "Odkryj odpowiedź"
 2. Zmienna `showAnswer` zmienia wartość z `false` na `true`
 3. Tekst przycisku zmienia się na "Ukryj odpowiedź"
@@ -222,15 +234,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 5. Odpowiedź wyświetlana jest w czytelnej czcionce
 
 **Implementacja**:
+
 ```svelte
-<button onclick={() => showAnswer = !showAnswer}>
-  {showAnswer ? 'Ukryj odpowiedź' : 'Odkryj odpowiedź'}
+<button onclick={() => (showAnswer = !showAnswer)}>
+	{showAnswer ? 'Ukryj odpowiedź' : 'Odkryj odpowiedź'}
 </button>
 
 {#if showAnswer}
-  <section transition:fade={{ duration: 300 }}>
-    <p>{data.story.answer}</p>
-  </section>
+	<section transition:fade={{ duration: 300 }}>
+		<p>{data.story.answer}</p>
+	</section>
 {/if}
 ```
 
@@ -239,6 +252,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 **Trigger**: Kliknięcie przycisku "Ukryj odpowiedź" (gdy odpowiedź jest widoczna)
 
 **Przebieg**:
+
 1. Użytkownik klika przycisk z tekstem "Ukryj odpowiedź"
 2. Zmienna `showAnswer` zmienia wartość z `true` na `false`
 3. Tekst przycisku zmienia się na "Odkryj odpowiedź"
@@ -249,6 +263,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 **Trigger**: Kliknięcie linków w Navbar
 
 **Dostępne akcje**:
+
 - Powrót do listy historii (`/`)
 - Generowanie nowej historii (`/generate`)
 - Wylogowanie
@@ -258,24 +273,28 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 ### Walidacja po stronie serwera (`+page.server.ts`)
 
 **Warunek 1: Format UUID**
+
 - **Lokalizacja**: Funkcja `load` w `+page.server.ts`
 - **Sprawdzenie**: `isValidUUID(params.id)`
 - **Wpływ na UI**: Błąd 400 → Wyświetlenie strony błędu SvelteKit
 - **Komunikat**: "Nieprawidłowy format identyfikatora historii"
 
 **Warunek 2: Uwierzytelnienie użytkownika**
+
 - **Lokalizacja**: `hooks.server.ts` (globalna middleware)
 - **Sprawdzenie**: Obecność `locals.user`
 - **Wpływ na UI**: Przekierowanie do `/login` dla niezalogowanych użytkowników
 - **Implementacja**: Obsłużone automatycznie przez istniejące hooki
 
 **Warunek 3: Istnienie historii**
+
 - **Lokalizacja**: Zapytanie Supabase w funkcji `load`
 - **Sprawdzenie**: `data !== null` po zapytaniu `.single()`
 - **Wpływ na UI**: Błąd 404 → Wyświetlenie strony błędu
 - **Komunikat**: "Nie znaleziono historii lub nie masz do niej dostępu"
 
 **Warunek 4: Własność historii (RLS)**
+
 - **Lokalizacja**: Polityka RLS w Supabase (`stories_select_own`)
 - **Sprawdzenie**: Automatyczne filtrowanie przez `WHERE user_id = auth.uid()`
 - **Wpływ na UI**: Błąd 404 dla historii należących do innych użytkowników
@@ -292,9 +311,10 @@ Komponent `+page.svelte` nie wykonuje żadnej walidacji - zakłada, że otrzymuj
 **Przyczyna**: Użytkownik wpisał lub kliknął link z nieprawidłowym UUID
 
 **Obsługa**:
+
 ```typescript
 if (!isValidUUID(params.id)) {
-  throw error(400, 'Nieprawidłowy format identyfikatora historii');
+	throw error(400, 'Nieprawidłowy format identyfikatora historii');
 }
 ```
 
@@ -305,9 +325,10 @@ if (!isValidUUID(params.id)) {
 **Przyczyna**: Historia została usunięta lub nigdy nie istniała
 
 **Obsługa**:
+
 ```typescript
 if (dbError?.code === 'PGRST116' || !story) {
-  throw error(404, 'Nie znaleziono historii lub nie masz do niej dostępu');
+	throw error(404, 'Nie znaleziono historii lub nie masz do niej dostępu');
 }
 ```
 
@@ -326,10 +347,13 @@ if (dbError?.code === 'PGRST116' || !story) {
 **Przyczyna**: Problem z połączeniem, timeout, błąd SQL
 
 **Obsługa**:
+
 ```typescript
 if (dbError) {
-  console.error('[DB_ERROR] GET story failed', { /* ... */ });
-  throw error(500, 'Nie udało się pobrać historii');
+	console.error('[DB_ERROR] GET story failed', {
+		/* ... */
+	});
+	throw error(500, 'Nie udało się pobrać historii');
 }
 ```
 
@@ -349,13 +373,13 @@ Można stworzyć `src/routes/stories/[id]/+error.svelte` dla lepszego UX:
 
 ```svelte
 <script lang="ts">
-  import { page } from '$app/stores';
+	import { page } from '$app/stores';
 </script>
 
 <div class="error-container">
-  <h1>{$page.status}</h1>
-  <p>{$page.error?.message}</p>
-  <a href="/">Wróć do listy historii</a>
+	<h1>{$page.status}</h1>
+	<p>{$page.error?.message}</p>
+	<a href="/">Wróć do listy historii</a>
 </div>
 ```
 
@@ -377,9 +401,10 @@ touch src/routes/stories/[id]/+page.svelte
    - `isValidUUID` i `StoryDTO` z `../../../types`
 
 2. Zdefiniować i wyeksportować funkcję `load`:
+
    ```typescript
    export const load: PageServerLoad = async ({ params, locals }) => {
-     // Implementacja zgodnie z sekcją 7
+   	// Implementacja zgodnie z sekcją 7
    };
    ```
 
@@ -394,13 +419,14 @@ touch src/routes/stories/[id]/+page.svelte
 ### Krok 3: Implementacja komponentu `+page.svelte`
 
 1. Zdefiniować blok `<script>`:
+
    ```svelte
    <script lang="ts">
-     import { fade } from 'svelte/transition';
-     import type { PageData } from './$types';
+   	import { fade } from 'svelte/transition';
+   	import type { PageData } from './$types';
 
-     let { data }: { data: PageData } = $props();
-     let showAnswer = $state(false);
+   	let { data }: { data: PageData } = $props();
+   	let showAnswer = $state(false);
    </script>
    ```
 
@@ -419,34 +445,39 @@ touch src/routes/stories/[id]/+page.svelte
 2. Mobile-first: Zacząć od podstawowych klas bez prefiksów responsywnych
 
 3. Duża, czytelna czcionka dla pytania:
+
    ```html
-   <p class="text-3xl md:text-4xl lg:text-5xl font-bold leading-relaxed">
+   <p class="text-3xl md:text-4xl lg:text-5xl font-bold leading-relaxed"></p>
    ```
 
 4. Stylizacja przycisku:
+
    ```html
-   <button class="btn btn-primary btn-lg w-full max-w-md">
+   <button class="btn btn-primary btn-lg w-full max-w-md"></button>
    ```
 
 5. Centrowanie i padding:
+
    ```html
-   <main class="min-h-screen flex flex-col items-center justify-center p-6 gap-8">
+   <main class="min-h-screen flex flex-col items-center justify-center p-6 gap-8"></main>
    ```
 
 6. Stylizacja odpowiedzi (podobnie jak pytania, możliwe mniejsza czcionka):
    ```html
-   <p class="text-xl md:text-2xl lg:text-3xl leading-relaxed">
+   <p class="text-xl md:text-2xl lg:text-3xl leading-relaxed"></p>
    ```
 
 ### Krok 5: Testowanie funkcjonalności
 
 **Test 1: Poprawne ładowanie historii**
+
 - Zaloguj się jako użytkownik
 - Przejdź do `/stories/{valid-uuid-of-own-story}`
 - Sprawdź, czy pytanie się wyświetla
 - Sprawdź, czy odpowiedź jest ukryta
 
 **Test 2: Toggle odpowiedzi**
+
 - Kliknij "Odkryj odpowiedź"
 - Sprawdź animację fade-in
 - Sprawdź, czy odpowiedź się wyświetla
@@ -455,20 +486,24 @@ touch src/routes/stories/[id]/+page.svelte
 - Sprawdź animację fade-out
 
 **Test 3: Nieprawidłowy UUID**
+
 - Przejdź do `/stories/invalid-uuid`
 - Sprawdź, czy wyświetla się strona błędu 400
 
 **Test 4: Nieistniejąca historia**
+
 - Przejdź do `/stories/{valid-uuid-but-nonexistent}`
 - Sprawdź, czy wyświetla się strona błędu 404
 
 **Test 5: Cudza historia**
+
 - Zaloguj się jako User A
 - Pobierz UUID historii User B
 - Jako User A przejdź do `/stories/{user-b-story-uuid}`
 - Sprawdź, czy wyświetla się 404 (RLS blokuje)
 
 **Test 6: Brak uwierzytelnienia**
+
 - Wyloguj się
 - Przejdź do `/stories/{any-uuid}`
 - Sprawdź, czy następuje przekierowanie do `/login`
@@ -506,11 +541,9 @@ touch src/routes/stories/[id]/+page.svelte
 
 4. Opcjonalnie dodać atrybuty ARIA:
    ```html
-   <button
-     onclick={() => showAnswer = !showAnswer}
-     aria-expanded={showAnswer}
-   >
-     {showAnswer ? 'Ukryj odpowiedź' : 'Odkryj odpowiedź'}
+   <button onclick="{()" ="">
+   	showAnswer = !showAnswer} aria-expanded={showAnswer} > {showAnswer ? 'Ukryj odpowiedź' :
+   	'Odkryj odpowiedź'}
    </button>
    ```
 
@@ -543,6 +576,7 @@ touch src/routes/stories/[id]/+page.svelte
 ### Krok 10: Dokumentacja
 
 1. Dodać komentarze JSDoc do funkcji `load`:
+
    ```typescript
    /**
     * Story Details Page - Game Mode

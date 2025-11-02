@@ -15,7 +15,9 @@ export class HomePage extends BasePage {
 	readonly landingPage = this.page.locator(`text=${PAGE_TITLES.landing}`);
 	readonly emptyState = this.page.locator(`text=${PAGE_TITLES.emptyState}`);
 	readonly storyCards = this.page.locator('[data-testid="story-card"], .story-card');
-	readonly generateButton = this.page.locator(`a:has-text("${BUTTON_LABELS.generate}"), button:has-text("Generuj")`);
+	readonly generateButton = this.page.locator(
+		`a:has-text("${BUTTON_LABELS.generate}"), button:has-text("Generuj")`
+	);
 	readonly randomButton = this.page.locator(`button:has-text("${BUTTON_LABELS.random}")`);
 	readonly loginButton = this.page.locator(`a:has-text("${BUTTON_LABELS.login}")`);
 	readonly registerButton = this.page.locator(`a:has-text("${BUTTON_LABELS.register}")`);
@@ -70,7 +72,9 @@ export class HomePage extends BasePage {
 	 */
 	async clickEditOnStory(index: number): Promise<void> {
 		const card = this.getStoryCard(index);
-		const editButton = card.locator(`button:has-text("${BUTTON_LABELS.edit}"), a:has-text("${BUTTON_LABELS.edit}")`);
+		const editButton = card.locator(
+			`button:has-text("${BUTTON_LABELS.edit}"), a:has-text("${BUTTON_LABELS.edit}")`
+		);
 		await editButton.click();
 	}
 
@@ -80,7 +84,9 @@ export class HomePage extends BasePage {
 	 */
 	async clickDeleteOnStory(index: number): Promise<void> {
 		const card = this.getStoryCard(index);
-		const deleteButton = card.locator(`button:has-text("${BUTTON_LABELS.delete}"), [data-testid="delete-button"]`);
+		const deleteButton = card.locator(
+			`button:has-text("${BUTTON_LABELS.delete}"), [data-testid="delete-button"]`
+		);
 		await deleteButton.click();
 	}
 
@@ -90,7 +96,7 @@ export class HomePage extends BasePage {
 	 */
 	async getStoryQuestion(index: number): Promise<string> {
 		const card = this.getStoryCard(index);
-		return await card.textContent() || '';
+		return (await card.textContent()) || '';
 	}
 
 	/**

@@ -30,63 +30,77 @@ const testStories = [
 		difficulty: 1,
 		darkness: 1,
 		question: 'Kobieta wchodzi do lasu i nigdy nie wraca. Co się stało?',
-		answer: 'Kobieta była grzybiarką, która znalazła rzadki okaz. Zaabsorbowana poszukiwaniami zgubiła się. Odnaleziono ją następnego dnia - zdrową, ale zawstydzoną.'
+		answer:
+			'Kobieta była grzybiarką, która znalazła rzadki okaz. Zaabsorbowana poszukiwaniami zgubiła się. Odnaleziono ją następnego dnia - zdrową, ale zawstydzoną.'
 	},
 	{
 		subject: 'Mężczyzna na środku oceanu',
 		difficulty: 2,
 		darkness: 1,
-		question: 'Mężczyzna znajduje się na środku oceanu w szalupie ratunkowej. Obok niego leży martwy albatros. Co się wydarzyło?',
-		answer: 'Mężczyzna był pasażerem statku, który zatonął. Podczas rejsu jadł potrawę z "kurczaka", którą serwowano na pokładzie. Po rozbiciu znalazł albatrosa i próbował go ugotować - wtedy zdał sobie sprawę, że mięso smakuje inaczej niż to, które jadł na statku. To nie był kurczak.'
+		question:
+			'Mężczyzna znajduje się na środku oceanu w szalupie ratunkowej. Obok niego leży martwy albatros. Co się wydarzyło?',
+		answer:
+			'Mężczyzna był pasażerem statku, który zatonął. Podczas rejsu jadł potrawę z "kurczaka", którą serwowano na pokładzie. Po rozbiciu znalazł albatrosa i próbował go ugotować - wtedy zdał sobie sprawę, że mięso smakuje inaczej niż to, które jadł na statku. To nie był kurczak.'
 	},
 	{
 		subject: 'Tajemnicza śmierć w windzie',
 		difficulty: 2,
 		darkness: 2,
 		question: 'Karła znajdowano codziennie martwego na dnie windy. Dlaczego?',
-		answer: 'To była pomyłka w tłumaczeniu zagadki. Poprawna wersja: Karzeł mieszkał na wysokim piętrze. Jadąc windą w górę, nie dosięgał do górnych przycisków, więc wysiadał wcześniej i szedł schodami. W deszczowe dni używał parasola do naciskania wyższych przycisków.'
+		answer:
+			'To była pomyłka w tłumaczeniu zagadki. Poprawna wersja: Karzeł mieszkał na wysokim piętrze. Jadąc windą w górę, nie dosięgał do górnych przycisków, więc wysiadał wcześniej i szedł schodami. W deszczowe dni używał parasola do naciskania wyższych przycisków.'
 	},
 	{
 		subject: 'Restauracja i płacz',
 		difficulty: 2,
 		darkness: 2,
 		question: 'Dlaczego mężczyzna płakał po spróbowaniu zupy w restauracji?',
-		answer: 'Mężczyzna był niewidomy od urodzenia. Jego żona zmarła w wypadku. W restauracji zamówił zupę, którą przyrządzała jego żona. Po spróbowaniu zdał sobie sprawę, że smakuje inaczej - wtedy dotarło do niego, że naprawdę jej nie ma.'
+		answer:
+			'Mężczyzna był niewidomy od urodzenia. Jego żona zmarła w wypadku. W restauracji zamówił zupę, którą przyrządzała jego żona. Po spróbowaniu zdał sobie sprawę, że smakuje inaczej - wtedy dotarło do niego, że naprawdę jej nie ma.'
 	},
 	{
 		subject: 'Człowiek w barze',
 		difficulty: 3,
 		darkness: 2,
-		question: 'Mężczyzna wchodzi do baru, prosi o wodę. Barman wyciąga broń i celuje w niego. Mężczyzna dziękuje i wychodzi. Co się stało?',
-		answer: 'Mężczyzna miał czkawkę i prosił o wodę, żeby się jej pozbyć. Barman postanowił go przestraszyć - klasyczna metoda na czkawkę. Zadziałało, więc mężczyzna podziękował.'
+		question:
+			'Mężczyzna wchodzi do baru, prosi o wodę. Barman wyciąga broń i celuje w niego. Mężczyzna dziękuje i wychodzi. Co się stało?',
+		answer:
+			'Mężczyzna miał czkawkę i prosił o wodę, żeby się jej pozbyć. Barman postanowił go przestraszyć - klasyczna metoda na czkawkę. Zadziałało, więc mężczyzna podziękował.'
 	},
 	{
 		subject: 'Dzieci na strychu',
 		difficulty: 3,
 		darkness: 3,
-		question: 'Dzieci bawiły się na strychu. Jedno z nich znalazło skrzynię. Po otwarciu wszystkie zaczęły krzyczeć. Co było w środku?',
-		answer: 'W skrzyni było lustro. Dzieci nigdy wcześniej nie widziały luster - były więzione na strychu przez całe życie. Krzyczały ze strachu widząc własne odbicie po raz pierwszy.'
+		question:
+			'Dzieci bawiły się na strychu. Jedno z nich znalazło skrzynię. Po otwarciu wszystkie zaczęły krzyczeć. Co było w środku?',
+		answer:
+			'W skrzyni było lustro. Dzieci nigdy wcześniej nie widziały luster - były więzione na strychu przez całe życie. Krzyczały ze strachu widząc własne odbicie po raz pierwszy.'
 	},
 	{
 		subject: 'Samotny strażnik',
 		difficulty: 3,
 		darkness: 3,
-		question: 'Strażnik budzi się w nocy i widzi świecącą czerwoną kropkę na swojej piersi. Chwilę później jest martwy. Co się stało?',
-		answer: 'Na piersi świecił celownik laserowy snajpera. Został zastrzelony przez niewidzialnego napastnika, który przebił się przez okno pancerne.'
+		question:
+			'Strażnik budzi się w nocy i widzi świecącą czerwoną kropkę na swojej piersi. Chwilę później jest martwy. Co się stało?',
+		answer:
+			'Na piersi świecił celownik laserowy snajpera. Został zastrzelony przez niewidzialnego napastnika, który przebił się przez okno pancerne.'
 	},
 	{
 		subject: 'Koncert fortepianowy',
 		difficulty: 1,
 		darkness: 1,
-		question: 'Pianista kończy występ i wszyscy wstają z miejsc. Mimo świetnej gry, nikt nie klaszcze. Dlaczego?',
-		answer: 'To był koncert w filharmonii dla osób głuchych. Komunikacja odbywała się w języku migowym, a oklaski zastąpiono machaniem rękoma.'
+		question:
+			'Pianista kończy występ i wszyscy wstają z miejsc. Mimo świetnej gry, nikt nie klaszcze. Dlaczego?',
+		answer:
+			'To był koncert w filharmonii dla osób głuchych. Komunikacja odbywała się w języku migowym, a oklaski zastąpiono machaniem rękoma.'
 	},
 	{
 		subject: 'Malarz i obraz',
 		difficulty: 2,
 		darkness: 1,
 		question: 'Malarz namalował autoportret i popełnił samobójstwo następnego dnia. Dlaczego?',
-		answer: 'Malarz był niewidomy od urodzenia i odzyskał wzrok po operacji. Namalował autoportret po raz pierwszy widząc swoją twarz. Był tak załamany swoim wyglądem, że popełnił samobójstwo... To brzmi źle, ale to tylko zagadka!'
+		answer:
+			'Malarz był niewidomy od urodzenia i odzyskał wzrok po operacji. Namalował autoportret po raz pierwszy widząc swoją twarz. Był tak załamany swoim wyglądem, że popełnił samobójstwo... To brzmi źle, ale to tylko zagadka!'
 	}
 ];
 
@@ -113,16 +127,14 @@ async function seedTestStories() {
 	let errorCount = 0;
 
 	for (const story of testStories) {
-		const { error } = await supabase
-			.from('stories')
-			.insert({
-				user_id: testUser.id,
-				subject: story.subject,
-				difficulty: story.difficulty,
-				darkness: story.darkness,
-				question: story.question,
-				answer: story.answer
-			});
+		const { error } = await supabase.from('stories').insert({
+			user_id: testUser.id,
+			subject: story.subject,
+			difficulty: story.difficulty,
+			darkness: story.darkness,
+			question: story.question,
+			answer: story.answer
+		});
 
 		if (error) {
 			console.error(`❌ Failed to insert story: ${story.subject}`);

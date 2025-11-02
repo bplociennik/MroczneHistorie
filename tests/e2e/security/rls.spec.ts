@@ -49,7 +49,10 @@ test.describe('RLS Security', () => {
 		});
 	});
 
-	test('TC-AUTH-007: Cannot access another user story by ID (404)', async ({ page, seededStories }) => {
+	test('TC-AUTH-007: Cannot access another user story by ID (404)', async ({
+		page,
+		seededStories
+	}) => {
 		// Create a fake UUID that doesn't belong to E2E user
 		const otherUserStoryId = '00000000-0000-0000-0000-000000000001';
 

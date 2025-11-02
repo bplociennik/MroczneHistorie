@@ -31,10 +31,7 @@ export default defineConfig({
 	retries: process.env.CI ? 1 : 0,
 
 	// Reporter to use
-	reporter: [
-		['html', { outputFolder: 'playwright-report' }],
-		['list']
-	],
+	reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
 
 	// Shared settings for all projects
 	use: {
@@ -66,7 +63,11 @@ export default defineConfig({
 		{
 			name: 'chromium',
 			testMatch: '**/e2e/**/*.spec.ts',
-			testIgnore: ['**/e2e/auth/login.spec.ts', '**/e2e/auth/register.spec.ts', '**/e2e/auth/route-protection.spec.ts'],
+			testIgnore: [
+				'**/e2e/auth/login.spec.ts',
+				'**/e2e/auth/register.spec.ts',
+				'**/e2e/auth/route-protection.spec.ts'
+			],
 			use: {
 				...devices['Desktop Chrome'],
 				// Use saved authentication state
@@ -78,7 +79,11 @@ export default defineConfig({
 		// Tests that require unauthenticated state (landing page, login, register)
 		{
 			name: 'chromium-guest',
-			testMatch: ['**/e2e/auth/login.spec.ts', '**/e2e/auth/register.spec.ts', '**/e2e/auth/route-protection.spec.ts'],
+			testMatch: [
+				'**/e2e/auth/login.spec.ts',
+				'**/e2e/auth/register.spec.ts',
+				'**/e2e/auth/route-protection.spec.ts'
+			],
 			use: {
 				...devices['Desktop Chrome'],
 				// No authentication state

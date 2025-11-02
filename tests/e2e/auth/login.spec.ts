@@ -9,7 +9,10 @@ import { E2E_USER, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/test-dat
 test.describe('Login', () => {
 	test.use({ storageState: { cookies: [], origins: [] } }); // Use guest (unauthenticated) state
 
-	test('TC-AUTH-003: Login with valid credentials (Happy Path)', async ({ loginPage, homePage }) => {
+	test('TC-AUTH-003: Login with valid credentials (Happy Path)', async ({
+		loginPage,
+		homePage
+	}) => {
 		// Navigate to login page
 		await loginPage.navigate();
 
@@ -22,7 +25,10 @@ test.describe('Login', () => {
 		// Note: Login doesn't show a toast in the app, so we skip toast verification
 
 		// Wait for authentication state to update in UI (navbar changes from "Zaloguj się" to "Wyloguj")
-		await loginPage.page.locator('text=Wyloguj').first().waitFor({ state: 'visible', timeout: 5000 });
+		await loginPage.page
+			.locator('text=Wyloguj')
+			.first()
+			.waitFor({ state: 'visible', timeout: 5000 });
 
 		// Verify user is logged in (navbar shows logout)
 		const isLoggedIn = await homePage.isLoggedIn();

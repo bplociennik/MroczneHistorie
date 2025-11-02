@@ -5,17 +5,20 @@
 Endpoint `GET /api/stories/:id` odpowiada za pobranie pojedynczej historii po jej UUID. Jest to najprostszy i najszybszy endpoint w aplikacji, wykonujący primary key lookup w bazie danych.
 
 **Kluczowe cechy:**
+
 - Pobiera pojedynczą historię z tabeli `public.stories` po ID
 - RLS automatycznie filtruje po user_id (user widzi tylko swoje historie)
 - Bardzo szybki (target <100ms) - primary key index lookup
 - Zwraca 404 jeśli historia nie istnieje LUB należy do innego użytkownika
 
 **Powiązane User Stories:**
+
 - Epic 3, ID 3.2: "Jako użytkownik chcę kliknąć na historię z listy, aby zobaczyć jej szczegóły"
 - Epic 3, ID 3.3: "Jako użytkownik chcę zobaczyć pełną treść pytania (zagadki)"
 - Epic 3, ID 3.4: "Jako użytkownik chcę kliknąć przycisk, aby ujawnić odpowiedź (rozwiązanie)"
 
 **Relacja z innymi endpoints:**
+
 - **Poprzedza:** `GET /api/stories` (lista historii)
 - **Następuje:** `PATCH /api/stories/:id` (edycja), `DELETE /api/stories/:id` (usuwanie)
 
@@ -24,14 +27,17 @@ Endpoint `GET /api/stories/:id` odpowiada za pobranie pojedynczej historii po je
 ## 2. Szczegóły żądania
 
 ### 2.1. Metoda HTTP
+
 `GET`
 
 ### 2.2. Struktura URL
+
 ```
 GET /api/stories/:id
 ```
 
 **Przykłady:**
+
 ```
 GET /api/stories/550e8400-e29b-41d4-a716-446655440000
 GET /api/stories/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
@@ -40,11 +46,13 @@ GET /api/stories/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
 ### 2.3. Nagłówki (Headers)
 
 **Wymagane:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
 
 **Opcjonalne:**
+
 ```
 Accept: application/json
 ```
@@ -54,49 +62,53 @@ Accept: application/json
 **URL Parameters:**
 
 | Parametr | Typ      | Wymagany | Format  | Opis                            |
-|----------|----------|----------|---------|---------------------------------|
-| `id`     | `string` | ✅ Tak    | UUID v4 | Unikalny identyfikator historii |
+| -------- | -------- | -------- | ------- | ------------------------------- |
+| `id`     | `string` | ✅ Tak   | UUID v4 | Unikalny identyfikator historii |
 
 **Query Parameters:**
+
 - Brak
 
 **Request Body:**
+
 - Brak (GET request)
 
 ### 2.5. Walidacja URL parametru
 
 #### UUID Format Validation:
+
 ```typescript
 // Użyj isValidUUID() z types.ts (już istnieje!)
 export function isValidUUID(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
+	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+	return uuidRegex.test(id);
 }
 
 // Test cases:
-isValidUUID('550e8400-e29b-41d4-a716-446655440000') // ✅ true
-isValidUUID('not-a-uuid') // ❌ false
-isValidUUID('123') // ❌ false
-isValidUUID('550e8400-e29b-41d4-a716') // ❌ false (too short)
-isValidUUID('550e8400-e29b-41d4-a716-446655440000-extra') // ❌ false (too long)
-isValidUUID('550e8400-e29b-51d4-a716-446655440000') // ❌ false (version not 4)
+isValidUUID('550e8400-e29b-41d4-a716-446655440000'); // ✅ true
+isValidUUID('not-a-uuid'); // ❌ false
+isValidUUID('123'); // ❌ false
+isValidUUID('550e8400-e29b-41d4-a716'); // ❌ false (too short)
+isValidUUID('550e8400-e29b-41d4-a716-446655440000-extra'); // ❌ false (too long)
+isValidUUID('550e8400-e29b-51d4-a716-446655440000'); // ❌ false (version not 4)
 ```
 
 **Validation Flow:**
+
 ```typescript
 const { id } = params;
 
 if (!isValidUUID(id)) {
-  return json<ErrorDTO>(
-    {
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Nieprawidłowy format identyfikatora historii',
-        field: 'id'
-      }
-    },
-    { status: 400 }
-  );
+	return json<ErrorDTO>(
+		{
+			error: {
+				code: 'VALIDATION_ERROR',
+				message: 'Nieprawidłowy format identyfikatora historii',
+				field: 'id'
+			}
+		},
+		{ status: 400 }
+	);
 }
 ```
 
@@ -105,41 +117,44 @@ if (!isValidUUID(id)) {
 ## 3. Wykorzystywane typy
 
 ### 3.1. Response DTO
+
 ```typescript
 // src/types.ts (istniejący typ)
 export type StoryDTO = Tables<'stories'>;
 
 // Rozwinięcie:
 interface StoryDTO {
-  id: string;           // uuid (URL param)
-  user_id: string;      // uuid (auto-filtered by RLS)
-  subject: string;      // varchar(150)
-  difficulty: number;   // smallint (1-3)
-  darkness: number;     // smallint (1-3)
-  question: string;     // text
-  answer: string;       // text
-  created_at: string;   // timestamptz ISO 8601
+	id: string; // uuid (URL param)
+	user_id: string; // uuid (auto-filtered by RLS)
+	subject: string; // varchar(150)
+	difficulty: number; // smallint (1-3)
+	darkness: number; // smallint (1-3)
+	question: string; // text
+	answer: string; // text
+	created_at: string; // timestamptz ISO 8601
 }
 ```
 
 ### 3.2. Error DTO
+
 ```typescript
 // src/types.ts (istniejący typ)
 export interface ErrorDTO {
-  error: {
-    code: ErrorCode;
-    message: string;
-    field?: string;
-  };
+	error: {
+		code: ErrorCode;
+		message: string;
+		field?: string;
+	};
 }
 ```
 
 ### 3.3. Utility Functions
+
 ```typescript
 // src/types.ts (już istnieje!)
 export function isValidUUID(id: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
+	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+	return uuidRegex.test(id);
 }
 ```
 
@@ -152,25 +167,28 @@ export function isValidUUID(id: string): boolean {
 **Content-Type:** `application/json`
 
 **Struktura:**
+
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "user_id": "660e8400-e29b-41d4-a716-446655440001",
-  "subject": "Tajemnicza latarnia morska",
-  "difficulty": 2,
-  "darkness": 3,
-  "question": "Na szczycie latarni morskiej znaleziono martwego latarnika. Wszystkie drzwi i okna były zamknięte od wewnątrz. W pobliżu ciała znajdowała się kałuża wody. Co się stało?",
-  "answer": "Latarnik zginął od uderzenia dużym soplem, który stopniał po upadku z sufitu. Morderca umieścił go tam zimą, wiedząc, że w końcu się stopi, a jako dowód zostanie jedynie woda.",
-  "created_at": "2025-01-26T10:30:00.000Z"
+	"id": "550e8400-e29b-41d4-a716-446655440000",
+	"user_id": "660e8400-e29b-41d4-a716-446655440001",
+	"subject": "Tajemnicza latarnia morska",
+	"difficulty": 2,
+	"darkness": 3,
+	"question": "Na szczycie latarni morskiej znaleziono martwego latarnika. Wszystkie drzwi i okna były zamknięte od wewnątrz. W pobliżu ciała znajdowała się kałuża wody. Co się stało?",
+	"answer": "Latarnik zginął od uderzenia dużym soplem, który stopniał po upadku z sufitu. Morderca umieścił go tam zimą, wiedząc, że w końcu się stopi, a jako dowód zostanie jedynie woda.",
+	"created_at": "2025-01-26T10:30:00.000Z"
 }
 ```
 
 **Charakterystyka odpowiedzi:**
+
 - Pojedynczy obiekt StoryDTO (nie array!)
 - Wszystkie pola włącznie z question i answer
 - created_at w formacie ISO 8601
 
 **HTTP Headers:**
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -179,68 +197,77 @@ Content-Type: application/json
 ### 4.2. Błędy (4xx, 5xx)
 
 #### 400 Bad Request - Invalid UUID format
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Nieprawidłowy format identyfikatora historii",
-    "field": "id"
-  }
+	"error": {
+		"code": "VALIDATION_ERROR",
+		"message": "Nieprawidłowy format identyfikatora historii",
+		"field": "id"
+	}
 }
 ```
 
 **Przykłady invalid UUID:**
+
 - `not-a-uuid`
 - `123`
 - `550e8400-e29b-41d4-a716` (za krótkie)
 - `550e8400-e29b-51d4-a716-446655440000` (version nie 4)
 
 #### 401 Unauthorized - Brak autoryzacji
+
 ```json
 {
-  "error": {
-    "code": "AUTHENTICATION_ERROR",
-    "message": "Brakujący lub nieprawidłowy token uwierzytelniający"
-  }
+	"error": {
+		"code": "AUTHENTICATION_ERROR",
+		"message": "Brakujący lub nieprawidłowy token uwierzytelniający"
+	}
 }
 ```
 
 **Przyczyny:**
+
 - Brak nagłówka `Authorization`
 - Nieprawidłowy format tokenu JWT
 - Token wygasł
 - Token został unieważniony (logout)
 
 #### 404 Not Found - Historia nie znaleziona
+
 ```json
 {
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Nie znaleziono historii lub nie masz do niej dostępu"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Nie znaleziono historii lub nie masz do niej dostępu"
+	}
 }
 ```
 
 **Przyczyny:**
+
 - Historia o podanym ID nie istnieje w bazie
 - Historia należy do innego użytkownika (RLS blocked)
 
 **WAŻNE:** Nie rozróżniamy tych dwóch przypadków (security by obscurity):
+
 - "Story doesn't exist" vs "Story belongs to different user"
 - Zapobiega information disclosure
 - Attacker nie może enumeration attack
 
 #### 500 Internal Server Error - Błąd bazy danych
+
 ```json
 {
-  "error": {
-    "code": "INTERNAL_ERROR",
-    "message": "Nie udało się pobrać historii. Spróbuj ponownie później"
-  }
+	"error": {
+		"code": "INTERNAL_ERROR",
+		"message": "Nie udało się pobrać historii. Spróbuj ponownie później"
+	}
 }
 ```
 
 **Przyczyny:**
+
 - SELECT query failed (database error)
 - Database connection timeout
 - Connection pool exhausted
@@ -318,22 +345,26 @@ Content-Type: application/json
 ### 5.2. Szczegółowy opis kroków
 
 #### Krok 1: Client Request
+
 - Frontend wysyła GET request z story ID w URL
 - Typowo po kliknięciu w historię z listy
 - Dołącza JWT token w nagłówku `Authorization`
 
 #### Krok 2: Extract & Validate ID
+
 - Extract `id` z URL params (SvelteKit params object)
 - Wywołaj `isValidUUID(id)` z types.ts
 - Jeśli invalid UUID format → 400 Bad Request
 - Jeśli valid → proceed to auth
 
 #### Krok 3: Authentication
+
 - SvelteKit middleware (`src/hooks.server.ts`) weryfikuje JWT
 - Supabase Auth waliduje token i zwraca user
 - Jeśli token nieprawidłowy → 401 Unauthorized
 
 #### Krok 4: Row Level Security Check
+
 - PostgreSQL wykonuje RLS policy `stories_select_own`
 - Sprawdza czy `auth.uid() = user_id`
 - **Jeśli historia należy do innego użytkownika:**
@@ -342,6 +373,7 @@ Content-Type: application/json
   - API endpoint zwraca 404 Not Found
 
 #### Krok 5: Database Lookup
+
 - PostgreSQL wykonuje:
   ```sql
   SELECT * FROM public.stories
@@ -353,10 +385,12 @@ Content-Type: application/json
 - Typowy czas: <10ms
 
 **Rezultaty:**
+
 - **Found:** Zwraca single row
 - **Not Found:** Empty result (RLS blocked LUB ID doesn't exist)
 
 #### Krok 6: Client Response
+
 - API route formatuje odpowiedź jako `StoryDTO`
 - Zwraca 200 OK z pojedynczym obiektem
 - Frontend renderuje szczegóły historii
@@ -364,6 +398,7 @@ Content-Type: application/json
 ### 5.3. Interakcje z bazą danych
 
 #### SQL Query (wykonywane przez Supabase SDK)
+
 ```sql
 -- Supabase SDK generuje zapytanie:
 SELECT *
@@ -375,6 +410,7 @@ WHERE id = $1  -- UUID parameter
 ```
 
 **Index Utilization:**
+
 ```sql
 -- PostgreSQL używa primary key index:
 -- stories_pkey ON (id)
@@ -387,6 +423,7 @@ WHERE id = $1  -- UUID parameter
 ```
 
 **Performance:**
+
 - Primary key lookup: O(log n) ≈ O(1)
 - RLS filter: Minimal overhead (single equality check)
 - Typowy czas: 5-15ms dla 10,000 stories
@@ -398,30 +435,30 @@ WHERE id = $1  -- UUID parameter
 ### 6.1. Uwierzytelnianie (Authentication)
 
 **Mechanizm:**
+
 - JWT Bearer token verification przez Supabase Auth
 - Token przechowywany w localStorage lub HTTPOnly cookies
 - Token wysyłany w każdym request jako `Authorization: Bearer <token>`
 
 **Implementacja:**
+
 ```typescript
 // src/hooks.server.ts (wspólny dla wszystkich endpoints)
 export const handle: Handle = async ({ event, resolve }) => {
-  event.locals.supabase = createServerClient(
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        get: (key) => event.cookies.get(key),
-        set: (key, value, options) => event.cookies.set(key, value, options),
-        remove: (key, options) => event.cookies.delete(key, options)
-      }
-    }
-  );
+	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		cookies: {
+			get: (key) => event.cookies.get(key),
+			set: (key, value, options) => event.cookies.set(key, value, options),
+			remove: (key, options) => event.cookies.delete(key, options)
+		}
+	});
 
-  const { data: { session } } = await event.locals.supabase.auth.getSession();
-  event.locals.user = session?.user ?? null;
+	const {
+		data: { session }
+	} = await event.locals.supabase.auth.getSession();
+	event.locals.user = session?.user ?? null;
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
@@ -430,6 +467,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 **Mechanizm: Row Level Security (RLS)**
 
 Polityka `stories_select_own`:
+
 ```sql
 CREATE POLICY stories_select_own
 ON public.stories
@@ -438,16 +476,19 @@ USING (auth.uid() = user_id);
 ```
 
 **Jak to działa:**
+
 1. PostgreSQL automatycznie dodaje warunek `WHERE auth.uid() = user_id`
 2. Użytkownik może zobaczyć TYLKO swoje historie
 3. Jeśli próbuje dostępu do cudzej historii → RLS zwraca empty result
 
 **Security Guarantee:**
+
 - Zero Trust: Baza danych jest ostatecznym arbitrem
 - Nawet jeśli aplikacja ma bug, RLS blokuje dostęp
 - **Nie ujawniamy** czy story doesn't exist vs belongs to different user
 
 **Test Case:**
+
 ```typescript
 // User A (id: user-a-uuid) próbuje zobaczyć historię User B
 
@@ -466,24 +507,30 @@ WHERE id = 'user-b-story-uuid'
 ### 6.3. UUID Validation & Injection Prevention
 
 #### SQL Injection Prevention
+
 **Zagrożenie:**
+
 ```
 GET /api/stories/550e8400-e29b-41d4-a716-446655440000'; DROP TABLE stories; --
 ```
 
 **Mitigation:**
+
 1. **UUID validation:** isValidUUID() odrzuca wszystko co nie jest UUID v4
 2. **Parameterized queries:** Supabase SDK nie konkatenuje stringów
 3. **Type safety:** PostgreSQL uuid type validation
 
 **Nie ma ryzyka SQL injection** bo:
+
 - UUID validation przed użyciem w query
 - Supabase SDK używa prepared statements
 - PostgreSQL type checking
 
 #### UUID Enumeration Attack
+
 **Zagrożenie:**
 Attacker może próbować odgadnąć UUIDs i dostać się do cudzych historii:
+
 ```
 GET /api/stories/00000000-0000-4000-8000-000000000001
 GET /api/stories/00000000-0000-4000-8000-000000000002
@@ -491,12 +538,14 @@ GET /api/stories/00000000-0000-4000-8000-000000000002
 ```
 
 **Mitigation:**
+
 - **UUID v4 przestrzeń:** 2^122 możliwości (340,282,366,920,938,463,463,374,607,431,768,211,456)
 - **Astronomically impossible** to guess w reasonable time
 - **RLS blokuje** nawet jeśli odgadnie (belongs to different user)
 - **Rate limiting (future):** Max 100 requests/minute per user
 
 **Praktycznie niemożliwe:**
+
 - Przy 1 billion requests/second: 10^25 years to try 1% UUIDs
 - RLS dodatkowo blokuje wszystkie cudze historie
 
@@ -506,11 +555,13 @@ GET /api/stories/00000000-0000-4000-8000-000000000002
 Czy ujawnić różnicę między "story doesn't exist" vs "story belongs to different user"?
 
 **Decyzja:**
+
 - **Jednolita odpowiedź 404:** "Nie znaleziono historii lub nie masz do niej dostępu"
 - Nie rozróżniamy przypadków
 - Zapobiega information leakage
 
 **Dlaczego to ważne:**
+
 ```
 // Attacker scenario:
 GET /api/stories/valid-uuid-that-exists
@@ -527,17 +578,19 @@ GET /api/stories/valid-uuid-that-exists
 ### 6.5. CORS Configuration
 
 **Dozwolone Origins:**
+
 ```typescript
 // svelte.config.js lub Cloudflare Pages config
 const allowedOrigins = [
-  'https://mrocznehistorie.pl',
-  'https://www.mrocznehistorie.pl',
-  // Development
-  process.env.NODE_ENV === 'development' ? 'http://localhost:5173' : null
+	'https://mrocznehistorie.pl',
+	'https://www.mrocznehistorie.pl',
+	// Development
+	process.env.NODE_ENV === 'development' ? 'http://localhost:5173' : null
 ].filter(Boolean);
 ```
 
 **Headers:**
+
 ```
 Access-Control-Allow-Origin: <allowed_origin>
 Access-Control-Allow-Methods: GET, OPTIONS
@@ -551,12 +604,12 @@ Access-Control-Allow-Credentials: true
 
 ### 7.1. Tabela błędów
 
-| Error Code | HTTP Status | Opis | User Message (PL) | Retry Safe? | Frontend Action |
-|-----------|-------------|------|-------------------|-------------|-----------------|
-| `VALIDATION_ERROR` | 400 | Invalid UUID format | "Nieprawidłowy format identyfikatora historii" | ❌ Nie | Show error, redirect to /history |
-| `AUTHENTICATION_ERROR` | 401 | No/invalid token | "Brakujący lub nieprawidłowy token uwierzytelniający" | ❌ Nie | Redirect to /login |
-| `NOT_FOUND` | 404 | Story doesn't exist OR no access | "Nie znaleziono historii lub nie masz do niej dostępu" | ❌ Nie | Show 404 page, link to /history |
-| `INTERNAL_ERROR` | 500 | Database error | "Nie udało się pobrać historii. Spróbuj ponownie później" | ✅ Tak | Show error toast, enable retry |
+| Error Code             | HTTP Status | Opis                             | User Message (PL)                                         | Retry Safe? | Frontend Action                  |
+| ---------------------- | ----------- | -------------------------------- | --------------------------------------------------------- | ----------- | -------------------------------- |
+| `VALIDATION_ERROR`     | 400         | Invalid UUID format              | "Nieprawidłowy format identyfikatora historii"            | ❌ Nie      | Show error, redirect to /history |
+| `AUTHENTICATION_ERROR` | 401         | No/invalid token                 | "Brakujący lub nieprawidłowy token uwierzytelniający"     | ❌ Nie      | Redirect to /login               |
+| `NOT_FOUND`            | 404         | Story doesn't exist OR no access | "Nie znaleziono historii lub nie masz do niej dostępu"    | ❌ Nie      | Show 404 page, link to /history  |
+| `INTERNAL_ERROR`       | 500         | Database error                   | "Nie udało się pobrać historii. Spróbuj ponownie później" | ✅ Tak      | Show error toast, enable retry   |
 
 ### 7.2. Szczegółowa obsługa błędów
 
@@ -565,23 +618,25 @@ Access-Control-Allow-Credentials: true
 **Scenariusze:**
 
 **Invalid UUID format:**
+
 ```typescript
 // URL: /api/stories/not-a-uuid
 if (!isValidUUID(id)) {
-  return json<ErrorDTO>(
-    {
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Nieprawidłowy format identyfikatora historii',
-        field: 'id'
-      }
-    },
-    { status: 400 }
-  );
+	return json<ErrorDTO>(
+		{
+			error: {
+				code: 'VALIDATION_ERROR',
+				message: 'Nieprawidłowy format identyfikatora historii',
+				field: 'id'
+			}
+		},
+		{ status: 400 }
+	);
 }
 ```
 
 **Test cases:**
+
 ```typescript
 // Invalid UUIDs:
 isValidUUID('not-a-uuid') → false
@@ -593,22 +648,25 @@ isValidUUID(null) → false (null)
 ```
 
 **Frontend Action:**
+
 - Pokaż error message: "Nieprawidłowy link do historii"
 - Przycisk: "Wróć do listy historii" → redirect to `/history`
 - **Nie retry** - invalid UUID nie stanie się valid
 
 **Logging:**
+
 ```typescript
 console.warn('[VALIDATION_ERROR] Invalid UUID format', {
-  providedId: id,
-  userId: locals.user?.id,
-  timestamp: new Date().toISOString()
+	providedId: id,
+	userId: locals.user?.id,
+	timestamp: new Date().toISOString()
 });
 ```
 
 #### 7.2.2. AUTHENTICATION_ERROR (401)
 
 **Scenariusze:**
+
 - Brak nagłówka `Authorization`
 - Token w złym formacie
 - Token wygasł
@@ -616,16 +674,18 @@ console.warn('[VALIDATION_ERROR] Invalid UUID format', {
 - Użytkownik został wylogowany
 
 **Response:**
+
 ```json
 {
-  "error": {
-    "code": "AUTHENTICATION_ERROR",
-    "message": "Brakujący lub nieprawidłowy token uwierzytelniający"
-  }
+	"error": {
+		"code": "AUTHENTICATION_ERROR",
+		"message": "Brakujący lub nieprawidłowy token uwierzytelniający"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Przekieruj na stronę logowania (`/login`)
 - Wyczyść localStorage (usuń token)
 - Pokaż toast: "Sesja wygasła. Zaloguj się ponownie"
@@ -636,18 +696,16 @@ console.warn('[VALIDATION_ERROR] Invalid UUID format', {
 **Scenariusze:**
 
 **Przypadek 1: Story nie istnieje**
+
 ```typescript
 // UUID valid, ale story nie istnieje w bazie
-const { data, error } = await locals.supabase
-  .from('stories')
-  .select('*')
-  .eq('id', id)
-  .single();
+const { data, error } = await locals.supabase.from('stories').select('*').eq('id', id).single();
 
 // data = null (empty result)
 ```
 
 **Przypadek 2: Story należy do innego użytkownika (RLS blocked)**
+
 ```typescript
 // UUID valid, story exists, ale belongs to different user
 // RLS policy blokuje dostęp
@@ -657,16 +715,18 @@ const { data, error } = await locals.supabase
 ```
 
 **Jednolita odpowiedź dla obu przypadków:**
+
 ```json
 {
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Nie znaleziono historii lub nie masz do niej dostępu"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Nie znaleziono historii lub nie masz do niej dostępu"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Wyświetl 404 page z komunikatem
 - Sugestie:
   - "Historia mogła zostać usunięta"
@@ -675,12 +735,13 @@ const { data, error } = await locals.supabase
 - **Nie retry** - 404 jest permanent (story doesn't exist or no access)
 
 **Logging:**
+
 ```typescript
 // Log 404s - może być attempt to access innego usera
 console.warn('[NOT_FOUND] Story not found or no access', {
-  storyId: id,
-  userId: locals.user.id,
-  timestamp: new Date().toISOString()
+	storyId: id,
+	userId: locals.user.id,
+	timestamp: new Date().toISOString()
 });
 
 // Future: Track 404 rate (może być enumeration attack)
@@ -691,64 +752,66 @@ console.warn('[NOT_FOUND] Story not found or no access', {
 **Scenariusze:**
 
 **Database SELECT Error:**
+
 ```typescript
-const { data, error } = await locals.supabase
-  .from('stories')
-  .select('*')
-  .eq('id', id)
-  .single();
+const { data, error } = await locals.supabase.from('stories').select('*').eq('id', id).single();
 
 if (error) {
-  console.error('[DB_ERROR] SELECT failed', {
-    code: error.code,
-    message: error.message,
-    storyId: id,
-    userId: locals.user.id,
-    timestamp: new Date().toISOString()
-  });
+	console.error('[DB_ERROR] SELECT failed', {
+		code: error.code,
+		message: error.message,
+		storyId: id,
+		userId: locals.user.id,
+		timestamp: new Date().toISOString()
+	});
 
-  throw new InternalError('Database SELECT failed');
+	throw new InternalError('Database SELECT failed');
 }
 ```
 
 **Connection Timeout:**
+
 ```typescript
 // Database query takes too long (>5s)
-if (error.code === '57014') {  // query_canceled
-  console.error('[TIMEOUT] Database query timeout', {
-    storyId: id,
-    userId: locals.user.id,
-    error: error
-  });
+if (error.code === '57014') {
+	// query_canceled
+	console.error('[TIMEOUT] Database query timeout', {
+		storyId: id,
+		userId: locals.user.id,
+		error: error
+	});
 
-  throw new InternalError('Database timeout');
+	throw new InternalError('Database timeout');
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "error": {
-    "code": "INTERNAL_ERROR",
-    "message": "Nie udało się pobrać historii. Spróbuj ponownie później"
-  }
+	"error": {
+		"code": "INTERNAL_ERROR",
+		"message": "Nie udało się pobrać historii. Spróbuj ponownie później"
+	}
 }
 ```
 
 **Frontend Action:**
+
 - Pokaż error toast z generic message
 - Włącz przycisk "Spróbuj ponownie"
 - Zachowaj URL (nie redirect)
 - Auto-retry raz po 2s
 
 **Logging:**
+
 ```typescript
 console.error('[API_ERROR] GET /api/stories/:id', {
-  error: error.message,
-  stack: error.stack,
-  storyId: id,
-  userId: locals.user.id,
-  timestamp: new Date().toISOString()
+	error: error.message,
+	stack: error.stack,
+	storyId: id,
+	userId: locals.user.id,
+	timestamp: new Date().toISOString()
 });
 ```
 
@@ -803,18 +866,23 @@ console.error('[API_ERROR] GET /api/stories/:id', {
 ### 8.1. Potencjalne wąskie gardła (Bottlenecks)
 
 #### 8.1.1. Database Query Performance
+
 **Problem:**
+
 - Primary key lookup jest bardzo szybki, ale może być bottleneck przy bardzo wysokim traffic
 
 **Wpływ:**
+
 - ~5-15ms response time (typowo)
 - Bottleneck przy >1000 concurrent requests
 
 **Mitigation (MVP):**
+
 - Primary key index `stories_pkey` zapewnia O(log n) ≈ O(1) lookup
 - Connection pooling (Supabase PgBouncer)
 
 **Current Performance:**
+
 ```sql
 EXPLAIN ANALYZE SELECT * FROM stories WHERE id = 'uuid';
 
@@ -825,33 +893,43 @@ EXPLAIN ANALYZE SELECT * FROM stories WHERE id = 'uuid';
 ```
 
 **Future optimization:**
+
 - Caching (Redis) dla hot stories
 - CDN caching (Cloudflare) dla read-heavy stories
 
 #### 8.1.2. RLS Policy Evaluation
+
 **Problem:**
+
 - PostgreSQL musi sprawdzić `auth.uid() = user_id` przy każdym query
 - JWT parsing przy każdym request
 
 **Wpływ:**
+
 - +5-10ms latency per request
 
 **Mitigation:**
+
 - RLS policy jest bardzo prosta (single equality check)
 - PostgreSQL cache'uje execution plan
 - Minimal overhead
 
 **Future optimization:**
+
 - Server-side session caching (Redis) - IF auth becomes bottleneck
 
 #### 8.1.3. Network Latency
+
 **Problem:**
+
 - Roundtrip time: Client → Cloudflare → SvelteKit → Supabase → SvelteKit → Client
 
 **Wpływ:**
+
 - +50-200ms depending on geography
 
 **Mitigation:**
+
 - Cloudflare global CDN (edge caching)
 - Supabase multi-region (future)
 - Client-side caching (future)
@@ -861,6 +939,7 @@ EXPLAIN ANALYZE SELECT * FROM stories WHERE id = 'uuid';
 #### 8.2.1. Database Optimization
 
 **Index Strategy:**
+
 ```sql
 -- Primary key index (already exists, automatic)
 CREATE UNIQUE INDEX stories_pkey ON public.stories USING btree (id);
@@ -870,18 +949,16 @@ CREATE UNIQUE INDEX stories_pkey ON public.stories USING btree (id);
 ```
 
 **Query Optimization:**
+
 ```typescript
 // Use .single() for single row
-const { data, error } = await locals.supabase
-  .from('stories')
-  .select('*')
-  .eq('id', id)
-  .single();  // Returns single object, not array
+const { data, error } = await locals.supabase.from('stories').select('*').eq('id', id).single(); // Returns single object, not array
 
 // Advantage: Cleaner code, no need to access data[0]
 ```
 
 **Connection Pooling:**
+
 - Supabase PgBouncer (transaction mode)
 - Pool size: 15 connections (default)
 - Optimal dla krótkich queries
@@ -889,14 +966,20 @@ const { data, error } = await locals.supabase
 #### 8.2.2. Caching Strategy (Future)
 
 **Client-Side Caching:**
+
 ```typescript
 // SvelteKit stores
 import { writable } from 'svelte/store';
 
-export const storyCache = writable<Map<string, {
-  story: StoryDTO;
-  fetchedAt: number;
-}>>(new Map());
+export const storyCache = writable<
+	Map<
+		string,
+		{
+			story: StoryDTO;
+			fetchedAt: number;
+		}
+	>
+>(new Map());
 
 // On fetch:
 const cached = storyCache.get(id);
@@ -904,19 +987,20 @@ const now = Date.now();
 
 // Use cache if fresh (<5 minutes)
 if (cached && now - cached.fetchedAt < 5 * 60 * 1000) {
-  return cached.story;
+	return cached.story;
 }
 
 // Otherwise fetch fresh data
 const story = await fetch(`/api/stories/${id}`);
 
 storyCache.set(id, {
-  story,
-  fetchedAt: now
+	story,
+	fetchedAt: now
 });
 ```
 
 **Server-Side Caching (Future - NOT in MVP):**
+
 ```typescript
 // Redis cache
 import { redis } from '$lib/redis';
@@ -925,7 +1009,7 @@ const cacheKey = `story:${id}`;
 const cached = await redis.get(cacheKey);
 
 if (cached) {
-  return JSON.parse(cached);
+	return JSON.parse(cached);
 }
 
 const story = await fetchFromDB(id);
@@ -937,39 +1021,43 @@ return story;
 ```
 
 **Cache Invalidation:**
+
 ```typescript
 // After PATCH /api/stories/:id (update)
 await redis.del(`story:${id}`);
 
 // Or: Update cache optimistically
-storyCache.update(cache => {
-  cache.set(id, { story: updatedStory, fetchedAt: Date.now() });
-  return cache;
+storyCache.update((cache) => {
+	cache.set(id, { story: updatedStory, fetchedAt: Date.now() });
+	return cache;
 });
 ```
 
 **CDN Caching (Cloudflare Pages):**
+
 ```typescript
 // Future: Add Cache-Control headers for public stories (jeśli będą)
 export const GET: RequestHandler = async ({ params, locals }) => {
-  // ... fetch story
+	// ... fetch story
 
-  return json(story, {
-    status: 200,
-    headers: {
-      'Cache-Control': 'private, max-age=300'  // 5 minutes client cache
-    }
-  });
+	return json(story, {
+		status: 200,
+		headers: {
+			'Cache-Control': 'private, max-age=300' // 5 minutes client cache
+		}
+	});
 };
 ```
 
 #### 8.2.3. Response Optimization
 
 **Compression:**
+
 - Cloudflare Pages automatic gzip/brotli
 - Reduces payload size by ~70%
 
 **Lazy Loading (Future):**
+
 ```typescript
 // Currently: Return full story (question + answer)
 // Future option: Return only question, load answer on demand
@@ -984,7 +1072,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 ### 8.3. Performance Targets
 
 | Metric                    | Target (MVP) | Target (Post-MVP) |
-|---------------------------|--------------|-------------------|
+| ------------------------- | ------------ | ----------------- |
 | API Response Time (p50)   | < 50ms       | < 30ms            |
 | API Response Time (p95)   | < 100ms      | < 75ms            |
 | API Response Time (p99)   | < 150ms      | < 100ms           |
@@ -996,17 +1084,20 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 ### 8.4. Load Testing Plan
 
 **Scenarios:**
+
 1. **Baseline:** 10 concurrent users, 5 story views per minute each
 2. **Normal Load:** 100 concurrent users, 20 views per minute each
 3. **Peak Load:** 500 concurrent users, 50 views per minute each
 4. **Cache Test:** Repeated access to same story IDs (test cache efficiency)
 
 **Tools:**
+
 - k6 for load testing
 - Grafana for monitoring
 - Supabase Dashboard for database metrics
 
 **Metrics to Monitor:**
+
 - Response time distribution (p50, p95, p99)
 - Error rate (404 vs 500)
 - Database query duration
@@ -1014,50 +1105,48 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 - Connection pool utilization
 
 **Sample k6 Script:**
+
 ```javascript
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export let options = {
-  stages: [
-    { duration: '2m', target: 10 },   // Ramp-up
-    { duration: '5m', target: 100 },  // Normal load
-    { duration: '2m', target: 500 },  // Peak load
-    { duration: '5m', target: 0 },    // Ramp-down
-  ],
+	stages: [
+		{ duration: '2m', target: 10 }, // Ramp-up
+		{ duration: '5m', target: 100 }, // Normal load
+		{ duration: '2m', target: 500 }, // Peak load
+		{ duration: '5m', target: 0 } // Ramp-down
+	]
 };
 
 const storyIds = [
-  '550e8400-e29b-41d4-a716-446655440000',
-  '660e8400-e29b-41d4-a716-446655440001',
-  '770e8400-e29b-41d4-a716-446655440002',
-  // ... more IDs
+	'550e8400-e29b-41d4-a716-446655440000',
+	'660e8400-e29b-41d4-a716-446655440001',
+	'770e8400-e29b-41d4-a716-446655440002'
+	// ... more IDs
 ];
 
 export default function () {
-  const token = __ENV.AUTH_TOKEN;
-  const storyId = storyIds[Math.floor(Math.random() * storyIds.length)];
+	const token = __ENV.AUTH_TOKEN;
+	const storyId = storyIds[Math.floor(Math.random() * storyIds.length)];
 
-  const params = {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  };
+	const params = {
+		headers: {
+			Authorization: `Bearer ${token}`
+		}
+	};
 
-  const res = http.get(
-    `https://mrocznehistorie.pl/api/stories/${storyId}`,
-    params
-  );
+	const res = http.get(`https://mrocznehistorie.pl/api/stories/${storyId}`, params);
 
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 100ms': (r) => r.timings.duration < 100,
-    'has story id': (r) => JSON.parse(r.body).id !== undefined,
-    'has question': (r) => JSON.parse(r.body).question !== undefined,
-    'has answer': (r) => JSON.parse(r.body).answer !== undefined,
-  });
+	check(res, {
+		'status is 200': (r) => r.status === 200,
+		'response time < 100ms': (r) => r.timings.duration < 100,
+		'has story id': (r) => JSON.parse(r.body).id !== undefined,
+		'has question': (r) => JSON.parse(r.body).question !== undefined,
+		'has answer': (r) => JSON.parse(r.body).answer !== undefined
+	});
 
-  sleep(Math.random() * 3);  // Random 0-3s between requests
+	sleep(Math.random() * 3); // Random 0-3s between requests
 }
 ```
 
@@ -1070,6 +1159,7 @@ export default function () {
 **Utworzyć folder i plik:** `src/routes/api/stories/[id]/+server.ts`
 
 **Struktura folderów:**
+
 ```
 src/routes/api/stories/
   ├── +server.ts              (GET list, POST create - już istniejące)
@@ -1088,134 +1178,131 @@ import { isValidUUID } from '$lib/types';
 import type { ErrorDTO, StoryDTO } from '$lib/types';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
-  // 1. Authentication check (handled by hooks.server.ts)
-  if (!locals.user) {
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'AUTHENTICATION_ERROR',
-          message: 'Brakujący lub nieprawidłowy token uwierzytelniający'
-        }
-      },
-      { status: 401 }
-    );
-  }
+	// 1. Authentication check (handled by hooks.server.ts)
+	if (!locals.user) {
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'AUTHENTICATION_ERROR',
+					message: 'Brakujący lub nieprawidłowy token uwierzytelniający'
+				}
+			},
+			{ status: 401 }
+		);
+	}
 
-  // 2. Extract and validate ID
-  const { id } = params;
+	// 2. Extract and validate ID
+	const { id } = params;
 
-  if (!isValidUUID(id)) {
-    console.warn('[VALIDATION_ERROR] Invalid UUID format', {
-      providedId: id,
-      userId: locals.user.id,
-      timestamp: new Date().toISOString()
-    });
+	if (!isValidUUID(id)) {
+		console.warn('[VALIDATION_ERROR] Invalid UUID format', {
+			providedId: id,
+			userId: locals.user.id,
+			timestamp: new Date().toISOString()
+		});
 
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Nieprawidłowy format identyfikatora historii',
-          field: 'id'
-        }
-      },
-      { status: 400 }
-    );
-  }
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'VALIDATION_ERROR',
+					message: 'Nieprawidłowy format identyfikatora historii',
+					field: 'id'
+				}
+			},
+			{ status: 400 }
+		);
+	}
 
-  // 3. Fetch story from database
-  try {
-    const { data, error } = await locals.supabase
-      .from('stories')
-      .select('*')
-      .eq('id', id)
-      .single();
+	// 3. Fetch story from database
+	try {
+		const { data, error } = await locals.supabase.from('stories').select('*').eq('id', id).single();
 
-    if (error) {
-      // Check if "not found" (common case)
-      if (error.code === 'PGRST116') {
-        console.warn('[NOT_FOUND] Story not found or no access', {
-          storyId: id,
-          userId: locals.user.id,
-          timestamp: new Date().toISOString()
-        });
+		if (error) {
+			// Check if "not found" (common case)
+			if (error.code === 'PGRST116') {
+				console.warn('[NOT_FOUND] Story not found or no access', {
+					storyId: id,
+					userId: locals.user.id,
+					timestamp: new Date().toISOString()
+				});
 
-        return json<ErrorDTO>(
-          {
-            error: {
-              code: 'NOT_FOUND',
-              message: 'Nie znaleziono historii lub nie masz do niej dostępu'
-            }
-          },
-          { status: 404 }
-        );
-      }
+				return json<ErrorDTO>(
+					{
+						error: {
+							code: 'NOT_FOUND',
+							message: 'Nie znaleziono historii lub nie masz do niej dostępu'
+						}
+					},
+					{ status: 404 }
+				);
+			}
 
-      // Other database errors
-      console.error('[DB_ERROR] SELECT failed', {
-        code: error.code,
-        message: error.message,
-        storyId: id,
-        userId: locals.user.id,
-        timestamp: new Date().toISOString()
-      });
+			// Other database errors
+			console.error('[DB_ERROR] SELECT failed', {
+				code: error.code,
+				message: error.message,
+				storyId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
 
-      return json<ErrorDTO>(
-        {
-          error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Nie udało się pobrać historii. Spróbuj ponownie później'
-          }
-        },
-        { status: 500 }
-      );
-    }
+			return json<ErrorDTO>(
+				{
+					error: {
+						code: 'INTERNAL_ERROR',
+						message: 'Nie udało się pobrać historii. Spróbuj ponownie później'
+					}
+				},
+				{ status: 500 }
+			);
+		}
 
-    // 4. Check if data is null (RLS blocked or not found)
-    if (!data) {
-      console.warn('[NOT_FOUND] Story not found or no access (RLS)', {
-        storyId: id,
-        userId: locals.user.id,
-        timestamp: new Date().toISOString()
-      });
+		// 4. Check if data is null (RLS blocked or not found)
+		if (!data) {
+			console.warn('[NOT_FOUND] Story not found or no access (RLS)', {
+				storyId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
 
-      return json<ErrorDTO>(
-        {
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Nie znaleziono historii lub nie masz do niej dostępu'
-          }
-        },
-        { status: 404 }
-      );
-    }
+			return json<ErrorDTO>(
+				{
+					error: {
+						code: 'NOT_FOUND',
+						message: 'Nie znaleziono historii lub nie masz do niej dostępu'
+					}
+				},
+				{ status: 404 }
+			);
+		}
 
-    // 5. Return success response
-    return json<StoryDTO>(data, { status: 200 });
-  } catch (error: any) {
-    // 6. Handle unexpected errors
-    console.error('[API_ERROR] GET /api/stories/:id', {
-      error: error.message,
-      stack: error.stack,
-      storyId: id,
-      userId: locals.user.id,
-      timestamp: new Date().toISOString()
-    });
+		// 5. Return success response
+		return json<StoryDTO>(data, { status: 200 });
+	} catch (error: any) {
+		// 6. Handle unexpected errors
+		console.error('[API_ERROR] GET /api/stories/:id', {
+			error: error.message,
+			stack: error.stack,
+			storyId: id,
+			userId: locals.user.id,
+			timestamp: new Date().toISOString()
+		});
 
-    return json<ErrorDTO>(
-      {
-        error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Nie udało się pobrać historii. Spróbuj ponownie później'
-        }
-      },
-      { status: 500 }
-    );
-  }
+		return json<ErrorDTO>(
+			{
+				error: {
+					code: 'INTERNAL_ERROR',
+					message: 'Nie udało się pobrać historii. Spróbuj ponownie później'
+				}
+			},
+			{ status: 500 }
+		);
+	}
 };
 ```
 
 **Deliverable:**
+
 - ✅ Dynamic route [id] created
 - ✅ GET handler fully implemented
 - ✅ UUID validation using isValidUUID()
@@ -1317,6 +1404,7 @@ curl -X GET "https://localhost:5173/api/stories/$STORY_B_ID" \
 ```
 
 **Deliverable:**
+
 - ✅ All happy path tests passing
 - ✅ All validation tests returning 400
 - ✅ All auth tests returning 401
@@ -1364,6 +1452,7 @@ SELECT * FROM public.stories WHERE id = '<user-a-story-uuid>';
 ```
 
 **Deliverable:**
+
 - ✅ RLS policy `stories_select_own` active
 - ✅ User A can see their stories
 - ✅ User B cannot see User A's stories
@@ -1390,6 +1479,7 @@ WHERE id = '550e8400-e29b-41d4-a716-446655440000'
 ```
 
 **Deliverable:**
+
 - ✅ PostgreSQL uses Index Scan (stories_pkey)
 - ✅ Query execution time < 10ms
 - ✅ No sequential scans
@@ -1407,23 +1497,20 @@ import type { StoryDTO, ErrorDTO } from '$lib/types';
 
 // Existing functions: listStories(), createStory()
 
-export async function getStoryById(
-  id: string,
-  token: string
-): Promise<StoryDTO> {
-  const response = await fetch(`/api/stories/${id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
+export async function getStoryById(id: string, token: string): Promise<StoryDTO> {
+	const response = await fetch(`/api/stories/${id}`, {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${token}`
+		}
+	});
 
-  if (!response.ok) {
-    const error: ErrorDTO = await response.json();
-    throw new Error(error.error.message);
-  }
+	if (!response.ok) {
+		const error: ErrorDTO = await response.json();
+		throw new Error(error.error.message);
+	}
 
-  return response.json();
+	return response.json();
 }
 ```
 
@@ -1433,161 +1520,164 @@ Utworzyć: `src/routes/history/[id]/+page.svelte`
 
 ```svelte
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import { getStoryById } from '$lib/api/stories';
-  import { getSupabase } from '$lib/supabase';
-  import type { StoryDTO } from '$lib/types';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { getStoryById } from '$lib/api/stories';
+	import { getSupabase } from '$lib/supabase';
+	import type { StoryDTO } from '$lib/types';
 
-  let story: StoryDTO | null = null;
-  let loading = false;
-  let error = '';
-  let answerRevealed = false;
+	let story: StoryDTO | null = null;
+	let loading = false;
+	let error = '';
+	let answerRevealed = false;
 
-  const storyId = $page.params.id;
+	const storyId = $page.params.id;
 
-  async function loadStory() {
-    loading = true;
-    error = '';
+	async function loadStory() {
+		loading = true;
+		error = '';
 
-    try {
-      const supabase = getSupabase();
-      const { data: { session } } = await supabase.auth.getSession();
+		try {
+			const supabase = getSupabase();
+			const {
+				data: { session }
+			} = await supabase.auth.getSession();
 
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
+			if (!session) {
+				throw new Error('Not authenticated');
+			}
 
-      story = await getStoryById(storyId, session.access_token);
-    } catch (err: any) {
-      error = err.message;
-    } finally {
-      loading = false;
-    }
-  }
+			story = await getStoryById(storyId, session.access_token);
+		} catch (err: any) {
+			error = err.message;
+		} finally {
+			loading = false;
+		}
+	}
 
-  function toggleAnswer() {
-    answerRevealed = !answerRevealed;
-  }
+	function toggleAnswer() {
+		answerRevealed = !answerRevealed;
+	}
 
-  onMount(loadStory);
+	onMount(loadStory);
 </script>
 
 <div class="container">
-  {#if loading}
-    <p>Ładowanie historii...</p>
-  {:else if error}
-    <div class="error-state">
-      <h2>Wystąpił błąd</h2>
-      <p>{error}</p>
-      <a href="/history" class="btn">Wróć do listy historii</a>
-    </div>
-  {:else if story}
-    <div class="story-detail">
-      <h1>{story.subject}</h1>
+	{#if loading}
+		<p>Ładowanie historii...</p>
+	{:else if error}
+		<div class="error-state">
+			<h2>Wystąpił błąd</h2>
+			<p>{error}</p>
+			<a href="/history" class="btn">Wróć do listy historii</a>
+		</div>
+	{:else if story}
+		<div class="story-detail">
+			<h1>{story.subject}</h1>
 
-      <div class="metadata">
-        <span>Trudność: {story.difficulty}/3</span>
-        <span>Mroczność: {story.darkness}/3</span>
-        <span class="date">{new Date(story.created_at).toLocaleDateString('pl-PL')}</span>
-      </div>
+			<div class="metadata">
+				<span>Trudność: {story.difficulty}/3</span>
+				<span>Mroczność: {story.darkness}/3</span>
+				<span class="date">{new Date(story.created_at).toLocaleDateString('pl-PL')}</span>
+			</div>
 
-      <div class="question-section">
-        <h2>Zagadka</h2>
-        <p>{story.question}</p>
-      </div>
+			<div class="question-section">
+				<h2>Zagadka</h2>
+				<p>{story.question}</p>
+			</div>
 
-      <div class="answer-section">
-        <button on:click={toggleAnswer} class="btn-reveal">
-          {answerRevealed ? 'Ukryj rozwiązanie' : 'Pokaż rozwiązanie'}
-        </button>
+			<div class="answer-section">
+				<button on:click={toggleAnswer} class="btn-reveal">
+					{answerRevealed ? 'Ukryj rozwiązanie' : 'Pokaż rozwiązanie'}
+				</button>
 
-        {#if answerRevealed}
-          <div class="answer">
-            <h3>Rozwiązanie</h3>
-            <p>{story.answer}</p>
-          </div>
-        {/if}
-      </div>
+				{#if answerRevealed}
+					<div class="answer">
+						<h3>Rozwiązanie</h3>
+						<p>{story.answer}</p>
+					</div>
+				{/if}
+			</div>
 
-      <div class="actions">
-        <a href="/history" class="btn-secondary">Wróć do listy</a>
-        <a href="/history/{story.id}/edit" class="btn">Edytuj</a>
-      </div>
-    </div>
-  {/if}
+			<div class="actions">
+				<a href="/history" class="btn-secondary">Wróć do listy</a>
+				<a href="/history/{story.id}/edit" class="btn">Edytuj</a>
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
+	.container {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 2rem;
+	}
 
-  .story-detail {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
+	.story-detail {
+		background: white;
+		border-radius: 12px;
+		padding: 2rem;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
 
-  .metadata {
-    display: flex;
-    gap: 1rem;
-    margin: 1rem 0;
-    color: #666;
-    font-size: 0.9rem;
-  }
+	.metadata {
+		display: flex;
+		gap: 1rem;
+		margin: 1rem 0;
+		color: #666;
+		font-size: 0.9rem;
+	}
 
-  .question-section {
-    margin: 2rem 0;
-  }
+	.question-section {
+		margin: 2rem 0;
+	}
 
-  .answer-section {
-    margin: 2rem 0;
-  }
+	.answer-section {
+		margin: 2rem 0;
+	}
 
-  .btn-reveal {
-    padding: 0.75rem 1.5rem;
-    background: #6366f1;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
+	.btn-reveal {
+		padding: 0.75rem 1.5rem;
+		background: #6366f1;
+		color: white;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+	}
 
-  .btn-reveal:hover {
-    background: #4f46e5;
-  }
+	.btn-reveal:hover {
+		background: #4f46e5;
+	}
 
-  .answer {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #f9fafb;
-    border-left: 4px solid #6366f1;
-    border-radius: 4px;
-  }
+	.answer {
+		margin-top: 1rem;
+		padding: 1rem;
+		background: #f9fafb;
+		border-left: 4px solid #6366f1;
+		border-radius: 4px;
+	}
 
-  .actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
+	.actions {
+		display: flex;
+		gap: 1rem;
+		margin-top: 2rem;
+	}
 
-  .error-state {
-    text-align: center;
-    padding: 3rem;
-  }
+	.error-state {
+		text-align: center;
+		padding: 3rem;
+	}
 
-  .error-state h2 {
-    color: #ef4444;
-    margin-bottom: 1rem;
-  }
+	.error-state h2 {
+		color: #ef4444;
+		margin-bottom: 1rem;
+	}
 </style>
 ```
 
 **Deliverable:**
+
 - ✅ API client function created
 - ✅ Story detail page implemented
 - ✅ Answer reveal functionality
@@ -1604,126 +1694,128 @@ Utworzyć: `src/routes/history/[id]/+page.svelte`
 import { test, expect } from '@playwright/test';
 
 test.describe('GET /api/stories/:id', () => {
-  let authToken: string;
-  let storyId: string;
+	let authToken: string;
+	let storyId: string;
 
-  test.beforeAll(async ({ request }) => {
-    // Login to get auth token
-    const loginResponse = await request.post('/auth/v1/token?grant_type=password', {
-      data: {
-        email: 'test@example.com',
-        password: 'test123456'
-      }
-    });
+	test.beforeAll(async ({ request }) => {
+		// Login to get auth token
+		const loginResponse = await request.post('/auth/v1/token?grant_type=password', {
+			data: {
+				email: 'test@example.com',
+				password: 'test123456'
+			}
+		});
 
-    const loginData = await loginResponse.json();
-    authToken = loginData.access_token;
+		const loginData = await loginResponse.json();
+		authToken = loginData.access_token;
 
-    // Create a test story
-    const createResponse = await request.post('/api/stories', {
-      headers: { 'Authorization': `Bearer ${authToken}` },
-      data: {
-        subject: 'E2E Test Story for GET',
-        difficulty: 2,
-        darkness: 2,
-        question: 'E2E test question',
-        answer: 'E2E test answer'
-      }
-    });
+		// Create a test story
+		const createResponse = await request.post('/api/stories', {
+			headers: { Authorization: `Bearer ${authToken}` },
+			data: {
+				subject: 'E2E Test Story for GET',
+				difficulty: 2,
+				darkness: 2,
+				question: 'E2E test question',
+				answer: 'E2E test answer'
+			}
+		});
 
-    const createData = await createResponse.json();
-    storyId = createData.id;
-  });
+		const createData = await createResponse.json();
+		storyId = createData.id;
+	});
 
-  test('should get story by valid ID', async ({ request }) => {
-    const response = await request.get(`/api/stories/${storyId}`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
+	test('should get story by valid ID', async ({ request }) => {
+		const response = await request.get(`/api/stories/${storyId}`, {
+			headers: { Authorization: `Bearer ${authToken}` }
+		});
 
-    expect(response.status()).toBe(200);
+		expect(response.status()).toBe(200);
 
-    const data = await response.json();
-    expect(data.id).toBe(storyId);
-    expect(data).toHaveProperty('subject');
-    expect(data).toHaveProperty('question');
-    expect(data).toHaveProperty('answer');
-    expect(data).toHaveProperty('created_at');
-    expect(data.subject).toBe('E2E Test Story for GET');
-  });
+		const data = await response.json();
+		expect(data.id).toBe(storyId);
+		expect(data).toHaveProperty('subject');
+		expect(data).toHaveProperty('question');
+		expect(data).toHaveProperty('answer');
+		expect(data).toHaveProperty('created_at');
+		expect(data.subject).toBe('E2E Test Story for GET');
+	});
 
-  test('should return 400 for invalid UUID format', async ({ request }) => {
-    const response = await request.get('/api/stories/not-a-uuid', {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
+	test('should return 400 for invalid UUID format', async ({ request }) => {
+		const response = await request.get('/api/stories/not-a-uuid', {
+			headers: { Authorization: `Bearer ${authToken}` }
+		});
 
-    expect(response.status()).toBe(400);
+		expect(response.status()).toBe(400);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('VALIDATION_ERROR');
-    expect(data.error.field).toBe('id');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('VALIDATION_ERROR');
+		expect(data.error.field).toBe('id');
+	});
 
-  test('should return 401 without auth token', async ({ request }) => {
-    const response = await request.get(`/api/stories/${storyId}`);
+	test('should return 401 without auth token', async ({ request }) => {
+		const response = await request.get(`/api/stories/${storyId}`);
 
-    expect(response.status()).toBe(401);
+		expect(response.status()).toBe(401);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('AUTHENTICATION_ERROR');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('AUTHENTICATION_ERROR');
+	});
 
-  test('should return 404 for non-existent story', async ({ request }) => {
-    const nonExistentId = '00000000-0000-4000-8000-000000000001';
+	test('should return 404 for non-existent story', async ({ request }) => {
+		const nonExistentId = '00000000-0000-4000-8000-000000000001';
 
-    const response = await request.get(`/api/stories/${nonExistentId}`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
+		const response = await request.get(`/api/stories/${nonExistentId}`, {
+			headers: { Authorization: `Bearer ${authToken}` }
+		});
 
-    expect(response.status()).toBe(404);
+		expect(response.status()).toBe(404);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('NOT_FOUND');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('NOT_FOUND');
+	});
 
-  test('should enforce RLS (different user)', async ({ request }) => {
-    // Create second user
-    await request.post('/auth/v1/signup', {
-      data: {
-        email: 'test2@example.com',
-        password: 'test123456'
-      }
-    });
+	test('should enforce RLS (different user)', async ({ request }) => {
+		// Create second user
+		await request.post('/auth/v1/signup', {
+			data: {
+				email: 'test2@example.com',
+				password: 'test123456'
+			}
+		});
 
-    const user2LoginResponse = await request.post('/auth/v1/token?grant_type=password', {
-      data: {
-        email: 'test2@example.com',
-        password: 'test123456'
-      }
-    });
+		const user2LoginResponse = await request.post('/auth/v1/token?grant_type=password', {
+			data: {
+				email: 'test2@example.com',
+				password: 'test123456'
+			}
+		});
 
-    const user2Token = (await user2LoginResponse.json()).access_token;
+		const user2Token = (await user2LoginResponse.json()).access_token;
 
-    // User 2 tries to access User 1's story
-    const response = await request.get(`/api/stories/${storyId}`, {
-      headers: { 'Authorization': `Bearer ${user2Token}` }
-    });
+		// User 2 tries to access User 1's story
+		const response = await request.get(`/api/stories/${storyId}`, {
+			headers: { Authorization: `Bearer ${user2Token}` }
+		});
 
-    expect(response.status()).toBe(404);
+		expect(response.status()).toBe(404);
 
-    const data = await response.json();
-    expect(data.error.code).toBe('NOT_FOUND');
-    // Same message for "doesn't exist" and "no access" (security)
-    expect(data.error.message).toContain('nie masz do niej dostępu');
-  });
+		const data = await response.json();
+		expect(data.error.code).toBe('NOT_FOUND');
+		// Same message for "doesn't exist" and "no access" (security)
+		expect(data.error.message).toContain('nie masz do niej dostępu');
+	});
 });
 ```
 
 **Run tests:**
+
 ```bash
 npx playwright test tests/api/stories/get-by-id.spec.ts
 ```
 
 **Deliverable:**
+
 - ✅ E2E tests written
 - ✅ All tests passing
 - ✅ Happy path covered
@@ -1739,7 +1831,7 @@ npx playwright test tests/api/stories/get-by-id.spec.ts
 
 Edytować: `docs/api/stories.md`
 
-```markdown
+````markdown
 # Stories API
 
 ## GET /api/stories/:id
@@ -1747,43 +1839,51 @@ Edytować: `docs/api/stories.md`
 Get a specific story by its UUID.
 
 ### Authentication
+
 Required: Bearer token
 
 ### URL Parameters
+
 - `id`: UUID v4 format (required)
 
 ### Request
+
 ```bash
 GET /api/stories/550e8400-e29b-41d4-a716-446655440000
 ```
+````
 
 ### Response (200 OK)
+
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "user_id": "660e8400-e29b-41d4-a716-446655440001",
-  "subject": "Tajemnicza latarnia morska",
-  "difficulty": 2,
-  "darkness": 3,
-  "question": "Na szczycie latarni morskiej...",
-  "answer": "Latarnik zginął od uderzenia...",
-  "created_at": "2025-01-26T10:30:00.000Z"
+	"id": "550e8400-e29b-41d4-a716-446655440000",
+	"user_id": "660e8400-e29b-41d4-a716-446655440001",
+	"subject": "Tajemnicza latarnia morska",
+	"difficulty": 2,
+	"darkness": 3,
+	"question": "Na szczycie latarni morskiej...",
+	"answer": "Latarnik zginął od uderzenia...",
+	"created_at": "2025-01-26T10:30:00.000Z"
 }
 ```
 
 ### Errors
+
 - 400: Invalid UUID format
 - 401: Authentication error (no/invalid token)
 - 404: Story not found or no access (RLS)
 - 500: Internal error (database failure)
 
 ### Security
+
 - RLS automatically filters by user_id
 - User can only access their own stories
 - 404 returned for both "doesn't exist" and "belongs to different user"
 
 See full documentation in `.ai/view-implementation-plans/get-story-by-id-endpoint.md`
-```
+
+````
 
 **7.2. Code Comments**
 
@@ -1805,9 +1905,10 @@ See full documentation in `.ai/view-implementation-plans/get-story-by-id-endpoin
 export const GET: RequestHandler = async ({ params, locals }) => {
   // ...
 };
-```
+````
 
 **Deliverable:**
+
 - ✅ API documentation updated
 - ✅ Code comments added
 - ✅ Implementation plan saved
@@ -1855,6 +1956,7 @@ curl -X GET "https://mrocznehistorie.pl/api/stories/00000000-0000-4000-8000-0000
 ```
 
 **Deliverable:**
+
 - ✅ Deployed to production
 - ✅ Smoke tests passed
 - ✅ Performance verified (<100ms p95)
@@ -1866,7 +1968,7 @@ curl -X GET "https://mrocznehistorie.pl/api/stories/00000000-0000-4000-8000-0000
 ### 10.1. Główne komponenty
 
 | Komponent       | Lokalizacja                              | Odpowiedzialność                        |
-|-----------------|------------------------------------------|-----------------------------------------|
+| --------------- | ---------------------------------------- | --------------------------------------- |
 | API Route (GET) | `src/routes/api/stories/[id]/+server.ts` | GET handler, UUID validation, DB lookup |
 | UUID Validation | `src/types.ts`                           | isValidUUID() function                  |
 | Types           | `src/types.ts`                           | StoryDTO, ErrorDTO                      |
@@ -1906,29 +2008,34 @@ curl -X GET "https://mrocznehistorie.pl/api/stories/00000000-0000-4000-8000-0000
 ## Appendix: Przykładowe requesty
 
 ### Sukces (200 OK)
+
 ```bash
 curl -X GET https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJ..."
 ```
 
 ### Błąd walidacji - Invalid UUID (400)
+
 ```bash
 curl -X GET https://mrocznehistorie.pl/api/stories/not-a-uuid \
   -H "Authorization: Bearer eyJ..."
 ```
 
 ### Brak autoryzacji (401)
+
 ```bash
 curl -X GET https://mrocznehistorie.pl/api/stories/550e8400-e29b-41d4-a716-446655440000
 ```
 
 ### Not Found - Story doesn't exist (404)
+
 ```bash
 curl -X GET https://mrocznehistorie.pl/api/stories/00000000-0000-4000-8000-000000000001 \
   -H "Authorization: Bearer eyJ..."
 ```
 
 ### Not Found - Different user's story (404)
+
 ```bash
 # User A token trying to access User B's story
 curl -X GET https://mrocznehistorie.pl/api/stories/<user-b-story-uuid> \

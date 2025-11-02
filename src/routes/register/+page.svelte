@@ -13,9 +13,7 @@
 	let isSubmitting = $state(false);
 
 	// Derived state: inline validation for password match (US 1.3)
-	let passwordsMatch = $derived(
-		confirmPassword.length === 0 || password === confirmPassword
-	);
+	let passwordsMatch = $derived(confirmPassword.length === 0 || password === confirmPassword);
 
 	let passwordMismatchError = $derived(
 		confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
@@ -64,12 +62,7 @@
 				<!-- General Error Alert -->
 				{#if form?.error}
 					<div class="alert alert-error">
-						<svg
-							class="w-6 h-6 shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
+						<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"

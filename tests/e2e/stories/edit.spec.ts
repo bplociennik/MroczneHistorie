@@ -7,7 +7,11 @@ import { SUCCESS_MESSAGES } from '../../utils/test-data';
  */
 
 test.describe('Story Edit', () => {
-	test('TC-CRUD-008: Edit story (Happy Path)', async ({ storyEditPage, storyDetailPage, seededStories }) => {
+	test('TC-CRUD-008: Edit story (Happy Path)', async ({
+		storyEditPage,
+		storyDetailPage,
+		seededStories
+	}) => {
 		const story = seededStories[0];
 
 		// Navigate to edit page
@@ -45,7 +49,10 @@ test.describe('Story Edit', () => {
 		expect(displayedAnswer).toContain(newAnswer);
 	});
 
-	test('TC-CRUD-008: Read-only fields cannot be modified', async ({ storyEditPage, seededStories }) => {
+	test('TC-CRUD-008: Read-only fields cannot be modified', async ({
+		storyEditPage,
+		seededStories
+	}) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -59,7 +66,11 @@ test.describe('Story Edit', () => {
 		expect(readOnlyValues.darkness).toBeTruthy();
 	});
 
-	test('TC-CRUD-009: Edit only question field', async ({ storyEditPage, storyDetailPage, seededStories }) => {
+	test('TC-CRUD-009: Edit only question field', async ({
+		storyEditPage,
+		storyDetailPage,
+		seededStories
+	}) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -82,7 +93,11 @@ test.describe('Story Edit', () => {
 		expect(displayedAnswer).toContain(story.answer);
 	});
 
-	test('TC-CRUD-009: Edit only answer field', async ({ storyEditPage, storyDetailPage, seededStories }) => {
+	test('TC-CRUD-009: Edit only answer field', async ({
+		storyEditPage,
+		storyDetailPage,
+		seededStories
+	}) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -133,7 +148,10 @@ test.describe('Story Edit', () => {
 		expect(toastText.toLowerCase()).toContain('odpowiedź' || 'answer');
 	});
 
-	test('TC-CRUD-008: Cancel edit returns to detail page', async ({ storyEditPage, seededStories }) => {
+	test('TC-CRUD-008: Cancel edit returns to detail page', async ({
+		storyEditPage,
+		seededStories
+	}) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -147,7 +165,9 @@ test.describe('Story Edit', () => {
 		await expect(storyEditPage.page).toHaveURL(new RegExp(`/stories/${story.id}$`));
 
 		// Verify no changes were saved (question is still original)
-		const displayedQuestion = await storyEditPage.page.textContent('[data-testid="story-question"], .story-question');
+		const displayedQuestion = await storyEditPage.page.textContent(
+			'[data-testid="story-question"], .story-question'
+		);
 		expect(displayedQuestion).toContain(story.question);
 	});
 });

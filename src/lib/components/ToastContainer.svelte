@@ -32,11 +32,7 @@
 
 <div class="toast toast-top toast-end z-50">
 	{#each $toastStore as toast (toast.id)}
-		<div
-			class={getAlertClass(toast.type)}
-			transition:fly={{ y: -20, duration: 300 }}
-			role="alert"
-		>
+		<div class={getAlertClass(toast.type)} transition:fly={{ y: -20, duration: 300 }} role="alert">
 			<div class="flex items-center gap-3 w-full">
 				<!-- Icon -->
 				<span class="text-2xl font-bold shrink-0">

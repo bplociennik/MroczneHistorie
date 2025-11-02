@@ -15,12 +15,16 @@ export class GeneratePage extends BasePage {
 	readonly randomSubjectButton = this.page.locator(`button:has-text("${BUTTON_LABELS.random}")`);
 	readonly difficultySlider = this.page.locator('input[name="difficulty"]');
 	readonly darknessSlider = this.page.locator('input[name="darkness"]');
-	readonly generateButton = this.page.locator(`button[type="submit"]:has-text("${BUTTON_LABELS.generate}")`);
+	readonly generateButton = this.page.locator(
+		`button[type="submit"]:has-text("${BUTTON_LABELS.generate}")`
+	);
 	readonly regenerateButton = this.page.locator(`button:has-text("${BUTTON_LABELS.regenerate}")`);
 	readonly saveButton = this.page.locator(`button:has-text("${BUTTON_LABELS.save}")`);
 
 	// Preview fields (shown after generation)
-	readonly previewQuestion = this.page.locator('[data-testid="preview-question"], .preview-question');
+	readonly previewQuestion = this.page.locator(
+		'[data-testid="preview-question"], .preview-question'
+	);
 	readonly previewAnswer = this.page.locator('[data-testid="preview-answer"], .preview-answer');
 
 	/**
@@ -96,7 +100,7 @@ export class GeneratePage extends BasePage {
 	 */
 	async getGeneratedQuestion(): Promise<string> {
 		await this.previewQuestion.waitFor({ state: 'visible' });
-		return await this.previewQuestion.textContent() || '';
+		return (await this.previewQuestion.textContent()) || '';
 	}
 
 	/**
@@ -104,7 +108,7 @@ export class GeneratePage extends BasePage {
 	 */
 	async getGeneratedAnswer(): Promise<string> {
 		await this.previewAnswer.waitFor({ state: 'visible' });
-		return await this.previewAnswer.textContent() || '';
+		return (await this.previewAnswer.textContent()) || '';
 	}
 
 	/**
@@ -142,6 +146,6 @@ export class GeneratePage extends BasePage {
 	 */
 	async getValidationError(): Promise<string> {
 		const errorLocator = this.page.locator('.error, [role="alert"]').first();
-		return await errorLocator.textContent() || '';
+		return (await errorLocator.textContent()) || '';
 	}
 }

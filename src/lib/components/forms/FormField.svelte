@@ -45,8 +45,8 @@
 		class="textarea textarea-bordered w-full bg-base-200 focus:textarea-primary transition-colors"
 		class:textarea-error={error}
 		aria-invalid={error ? 'true' : 'false'}
-		aria-describedby={error ? `${name}-error` : undefined}
-	>{value}</textarea>
+		aria-describedby={error ? `${name}-error` : undefined}>{value}</textarea
+	>
 
 	{#if error}
 		<label for={name} class="label">

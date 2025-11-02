@@ -25,10 +25,7 @@
 
 	<!-- Answer section (conditional) -->
 	{#if showAnswer}
-		<section
-			class="w-full max-w-4xl text-center"
-			transition:fade={{ duration: 300 }}
-		>
+		<section class="w-full max-w-4xl text-center" transition:fade={{ duration: 300 }}>
 			<p class="text-lg md:text-xl lg:text-2xl leading-relaxed text-base-content/80">
 				{data.story.answer}
 			</p>

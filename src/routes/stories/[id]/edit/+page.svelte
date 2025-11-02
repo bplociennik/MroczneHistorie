@@ -48,9 +48,7 @@
 	<!-- Page Header -->
 	<div class="text-center mb-8">
 		<h1 class="text-4xl font-bold mb-4">Edytuj Historię</h1>
-		<p class="text-lg opacity-80">
-			Możesz poprawić pytanie i odpowiedź swojej zagadki
-		</p>
+		<p class="text-lg opacity-80">Możesz poprawić pytanie i odpowiedź swojej zagadki</p>
 	</div>
 
 	<!-- Info Alert -->
@@ -76,12 +74,7 @@
 			<!-- Global Error Alert -->
 			{#if getGlobalError()}
 				<div class="alert alert-error">
-					<svg
-						class="w-6 h-6 shrink-0"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -103,8 +96,8 @@
 					class:textarea-error={getFieldError('question')}
 					placeholder="Wpisz pytanie historii..."
 					rows="6"
-					disabled={isSubmitting}
-				>{data.story.question}</textarea>
+					disabled={isSubmitting}>{data.story.question}</textarea
+				>
 				{#if getFieldError('question')}
 					<div class="label">
 						<span class="label-text-alt text-error">{getFieldError('question')}</span>
@@ -122,8 +115,8 @@
 					class:textarea-error={getFieldError('answer')}
 					placeholder="Wpisz odpowiedź historii..."
 					rows="8"
-					disabled={isSubmitting}
-				>{data.story.answer}</textarea>
+					disabled={isSubmitting}>{data.story.answer}</textarea
+				>
 				{#if getFieldError('answer')}
 					<div class="label">
 						<span class="label-text-alt text-error">{getFieldError('answer')}</span>

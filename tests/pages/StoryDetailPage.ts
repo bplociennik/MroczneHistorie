@@ -16,9 +16,13 @@ export class StoryDetailPage extends BasePage {
 	readonly answerText = this.page.locator('[data-testid="story-answer"], .story-answer');
 	readonly revealButton = this.page.locator(`button:has-text("${BUTTON_LABELS.revealAnswer}")`);
 	readonly hideButton = this.page.locator(`button:has-text("${BUTTON_LABELS.hideAnswer}")`);
-	readonly editButton = this.page.locator(`a:has-text("${BUTTON_LABELS.edit}"), button:has-text("${BUTTON_LABELS.edit}")`);
+	readonly editButton = this.page.locator(
+		`a:has-text("${BUTTON_LABELS.edit}"), button:has-text("${BUTTON_LABELS.edit}")`
+	);
 	readonly deleteButton = this.page.locator(`button:has-text("${BUTTON_LABELS.delete}")`);
-	readonly backButton = this.page.locator(`a:has-text("${BUTTON_LABELS.back}"), button:has-text("${BUTTON_LABELS.back}")`);
+	readonly backButton = this.page.locator(
+		`a:has-text("${BUTTON_LABELS.back}"), button:has-text("${BUTTON_LABELS.back}")`
+	);
 
 	/**
 	 * Navigate to story detail page
@@ -32,7 +36,7 @@ export class StoryDetailPage extends BasePage {
 	 */
 	async getQuestion(): Promise<string> {
 		await this.questionText.waitFor({ state: 'visible' });
-		return await this.questionText.textContent() || '';
+		return (await this.questionText.textContent()) || '';
 	}
 
 	/**
@@ -40,7 +44,7 @@ export class StoryDetailPage extends BasePage {
 	 */
 	async getAnswer(): Promise<string> {
 		await this.answerText.waitFor({ state: 'visible' });
-		return await this.answerText.textContent() || '';
+		return (await this.answerText.textContent()) || '';
 	}
 
 	/**

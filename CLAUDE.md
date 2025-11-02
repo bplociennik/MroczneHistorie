@@ -35,7 +35,6 @@ Celem tego MVP (Minimum Viable Product) jest szybka walidacja głównej hipotezy
 - Use lifecycle functions (onMount, onDestroy) for setup and cleanup
 - Leverage special elements like <svelte:window> and <svelte:component> for dynamic behavior
 
-
 ### Guidelines for STYLING
 
 #### TAILWIND

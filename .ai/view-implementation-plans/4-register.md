@@ -5,6 +5,7 @@
 Widok Rejestracja (`/register`) umożliwia nowym użytkownikom założenie konta w aplikacji MroczneHistorie poprzez podanie adresu email i hasła. Jest to prosty widok rejestracyjny z trzema polami, wykorzystującym Supabase Auth jako backend uwierzytelniania.
 
 Kluczowe cechy:
+
 - **Formularz rejestracji** - email + password + confirm password
 - **Inline walidacja** - sprawdzanie zgodności haseł w czasie rzeczywistym (US 1.3)
 - **Supabase Auth** - automatyczne logowanie po rejestracji
@@ -22,30 +23,35 @@ Widok jest częścią Epic 1 (Uwierzytelnianie i Architektura Strony) i realizuj
 **Ścieżka główna:** `/register`
 
 **Pliki implementacji:**
+
 - `src/routes/register/+page.svelte` - główny komponent widoku
 - `src/routes/register/+page.server.ts` - server-side logic, action, redirect guard
 
 **Ochrona dostępu:**
+
 ```typescript
 // +page.server.ts - load function
 export const load: PageServerLoad = async ({ locals }) => {
-  // Guard: redirect zalogowanych na /
-  if (locals.user) {
-    throw redirect(303, '/');
-  }
+	// Guard: redirect zalogowanych na /
+	if (locals.user) {
+		throw redirect(303, '/');
+	}
 
-  return {};
+	return {};
 };
 ```
 
 **Form Action:**
+
 - `?/register` (lub default) - rejestruje użytkownika przez Supabase Auth
 
 **Nawigacja z tego widoku:**
+
 - `/` - po udanej rejestracji (automatyczny redirect, US 1.5)
 - `/login` - link dla użytkowników posiadających konto
 
 **Nawigacja na ten widok:**
+
 - Z landing page (`/`) - przycisk "Zarejestruj się"
 - Z nawigacji (dla niezalogowanych)
 - Z `/login` - link "Nie masz konta? Zarejestruj się"
@@ -124,212 +130,210 @@ export const load: PageServerLoad = async ({ locals }) => {
 Główny widok rejestracji zawierający formularz z trzema polami: email, password i confirm password. Wykorzystuje SvelteKit Form Actions dla progressive enhancement. Kluczową cechą jest **inline walidacja** dla pola "Powtórz hasło" - użytkownik widzi komunikat "Hasła nie pasują" w czasie rzeczywistym, gdy tylko zacznie wpisywać różne hasło (US 1.3). Obsługuje wyświetlanie błędów walidacji oraz błędów rejestracji z Supabase Auth.
 
 **Główne elementy HTML i komponenty:**
+
 ```svelte
 <script lang="ts">
-  import type { PageData, ActionData } from './$types';
-  import { enhance } from '$app/forms';
-  import { goto } from '$app/navigation';
+	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 
-  interface Props {
-    data: PageData;
-    form?: ActionData;
-  }
+	interface Props {
+		data: PageData;
+		form?: ActionData;
+	}
 
-  let { data, form }: Props = $props();
+	let { data, form }: Props = $props();
 
-  // Local state for inline validation
-  let email = $state('');
-  let password = $state('');
-  let confirmPassword = $state('');
-  let isSubmitting = $state(false);
+	// Local state for inline validation
+	let email = $state('');
+	let password = $state('');
+	let confirmPassword = $state('');
+	let isSubmitting = $state(false);
 
-  // Derived state: inline validation for password match
-  let passwordsMatch = $derived(
-    confirmPassword.length === 0 || password === confirmPassword
-  );
+	// Derived state: inline validation for password match
+	let passwordsMatch = $derived(confirmPassword.length === 0 || password === confirmPassword);
 
-  let passwordMismatchError = $derived(
-    confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
-  );
+	let passwordMismatchError = $derived(
+		confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
+	);
 
-  // Client-side validation before submit
-  let canSubmit = $derived(
-    email.length > 0 &&
-    password.length > 0 &&
-    confirmPassword.length > 0 &&
-    passwordsMatch &&
-    !isSubmitting
-  );
+	// Client-side validation before submit
+	let canSubmit = $derived(
+		email.length > 0 &&
+			password.length > 0 &&
+			confirmPassword.length > 0 &&
+			passwordsMatch &&
+			!isSubmitting
+	);
 </script>
 
 <svelte:head>
-  <title>Rejestracja - MroczneHistorie</title>
-  <meta name="description" content="Załóż konto w MroczneHistorie" />
+	<title>Rejestracja - MroczneHistorie</title>
+	<meta name="description" content="Załóż konto w MroczneHistorie" />
 </svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-base-300 px-4 py-8">
-  <div class="w-full max-w-md">
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold mb-2">Zarejestruj się</h1>
-      <p class="text-lg opacity-80">Dołącz do MroczneHistorie!</p>
-    </div>
+	<div class="w-full max-w-md">
+		<!-- Header -->
+		<div class="text-center mb-8">
+			<h1 class="text-4xl font-bold mb-2">Zarejestruj się</h1>
+			<p class="text-lg opacity-80">Dołącz do MroczneHistorie!</p>
+		</div>
 
-    <!-- Auth Card -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <form
-          method="POST"
-          use:enhance={() => {
-            isSubmitting = true;
+		<!-- Auth Card -->
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<form
+					method="POST"
+					use:enhance={() => {
+						isSubmitting = true;
 
-            return async ({ result, update }) => {
-              isSubmitting = false;
+						return async ({ result, update }) => {
+							isSubmitting = false;
 
-              if (result.type === 'redirect') {
-                await goto(result.location);
-              }
+							if (result.type === 'redirect') {
+								await goto(result.location);
+							}
 
-              await update();
-            };
-          }}
-        >
-          <!-- Email Field -->
-          <div class="form-control">
-            <label for="email" class="label">
-              <span class="label-text font-semibold">Adres email</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              class="input input-bordered"
-              class:input-error={form?.errors?.email}
-              placeholder="twoj@email.pl"
-              required
-              autocomplete="email"
-              bind:value={email}
-              disabled={isSubmitting}
-            />
-            {#if form?.errors?.email}
-              <label class="label">
-                <span class="label-text-alt text-error">{form.errors.email}</span>
-              </label>
-            {/if}
-          </div>
+							await update();
+						};
+					}}
+				>
+					<!-- Email Field -->
+					<div class="form-control">
+						<label for="email" class="label">
+							<span class="label-text font-semibold">Adres email</span>
+						</label>
+						<input
+							type="email"
+							name="email"
+							id="email"
+							class="input input-bordered"
+							class:input-error={form?.errors?.email}
+							placeholder="twoj@email.pl"
+							required
+							autocomplete="email"
+							bind:value={email}
+							disabled={isSubmitting}
+						/>
+						{#if form?.errors?.email}
+							<label class="label">
+								<span class="label-text-alt text-error">{form.errors.email}</span>
+							</label>
+						{/if}
+					</div>
 
-          <!-- Password Field -->
-          <div class="form-control mt-4">
-            <label for="password" class="label">
-              <span class="label-text font-semibold">Hasło</span>
-            </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              class="input input-bordered"
-              class:input-error={form?.errors?.password}
-              placeholder="••••••••"
-              required
-              minlength="8"
-              autocomplete="new-password"
-              bind:value={password}
-              disabled={isSubmitting}
-            />
-            <label class="label">
-              <span class="label-text-alt text-base-content/60">Minimum 8 znaków</span>
-            </label>
-            {#if form?.errors?.password}
-              <label class="label">
-                <span class="label-text-alt text-error">{form.errors.password}</span>
-              </label>
-            {/if}
-          </div>
+					<!-- Password Field -->
+					<div class="form-control mt-4">
+						<label for="password" class="label">
+							<span class="label-text font-semibold">Hasło</span>
+						</label>
+						<input
+							type="password"
+							name="password"
+							id="password"
+							class="input input-bordered"
+							class:input-error={form?.errors?.password}
+							placeholder="••••••••"
+							required
+							minlength="8"
+							autocomplete="new-password"
+							bind:value={password}
+							disabled={isSubmitting}
+						/>
+						<label class="label">
+							<span class="label-text-alt text-base-content/60">Minimum 8 znaków</span>
+						</label>
+						{#if form?.errors?.password}
+							<label class="label">
+								<span class="label-text-alt text-error">{form.errors.password}</span>
+							</label>
+						{/if}
+					</div>
 
-          <!-- Confirm Password Field with inline validation -->
-          <div class="form-control mt-4">
-            <label for="confirmPassword" class="label">
-              <span class="label-text font-semibold">Powtórz hasło</span>
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              id="confirmPassword"
-              class="input input-bordered"
-              class:input-error={passwordMismatchError}
-              placeholder="••••••••"
-              required
-              minlength="8"
-              autocomplete="new-password"
-              bind:value={confirmPassword}
-              disabled={isSubmitting}
-            />
+					<!-- Confirm Password Field with inline validation -->
+					<div class="form-control mt-4">
+						<label for="confirmPassword" class="label">
+							<span class="label-text font-semibold">Powtórz hasło</span>
+						</label>
+						<input
+							type="password"
+							name="confirmPassword"
+							id="confirmPassword"
+							class="input input-bordered"
+							class:input-error={passwordMismatchError}
+							placeholder="••••••••"
+							required
+							minlength="8"
+							autocomplete="new-password"
+							bind:value={confirmPassword}
+							disabled={isSubmitting}
+						/>
 
-            <!-- Inline validation error (US 1.3) -->
-            {#if passwordMismatchError}
-              <label class="label">
-                <span class="label-text-alt text-error">{passwordMismatchError}</span>
-              </label>
-            {/if}
-          </div>
+						<!-- Inline validation error (US 1.3) -->
+						{#if passwordMismatchError}
+							<label class="label">
+								<span class="label-text-alt text-error">{passwordMismatchError}</span>
+							</label>
+						{/if}
+					</div>
 
-          <!-- General Error -->
-          {#if form?.error}
-            <div class="alert alert-error mt-4">
-              <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{form.error}</span>
-            </div>
-          {/if}
+					<!-- General Error -->
+					{#if form?.error}
+						<div class="alert alert-error mt-4">
+							<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+							<span>{form.error}</span>
+						</div>
+					{/if}
 
-          <!-- Submit Button -->
-          <div class="form-control mt-6">
-            <button
-              type="submit"
-              class="btn btn-primary btn-lg"
-              disabled={!canSubmit}
-            >
-              {#if isSubmitting}
-                <span class="loading loading-spinner loading-sm"></span>
-                Rejestracja...
-              {:else}
-                Zarejestruj się
-              {/if}
-            </button>
-          </div>
-        </form>
+					<!-- Submit Button -->
+					<div class="form-control mt-6">
+						<button type="submit" class="btn btn-primary btn-lg" disabled={!canSubmit}>
+							{#if isSubmitting}
+								<span class="loading loading-spinner loading-sm"></span>
+								Rejestracja...
+							{:else}
+								Zarejestruj się
+							{/if}
+						</button>
+					</div>
+				</form>
 
-        <!-- Link to Login -->
-        <div class="divider">LUB</div>
+				<!-- Link to Login -->
+				<div class="divider">LUB</div>
 
-        <div class="text-center">
-          <p class="text-sm">
-            Masz już konto?
-            <a href="/login" class="link link-primary font-semibold">
-              Zaloguj się
-            </a>
-          </p>
-        </div>
-      </div>
-    </div>
+				<div class="text-center">
+					<p class="text-sm">
+						Masz już konto?
+						<a href="/login" class="link link-primary font-semibold"> Zaloguj się </a>
+					</p>
+				</div>
+			</div>
+		</div>
 
-    <!-- Back to Home -->
-    <div class="text-center mt-4">
-      <a href="/" class="link link-hover text-sm opacity-70">
-        ← Powrót do strony głównej
-      </a>
-    </div>
-  </div>
+		<!-- Back to Home -->
+		<div class="text-center mt-4">
+			<a href="/" class="link link-hover text-sm opacity-70"> ← Powrót do strony głównej </a>
+		</div>
+	</div>
 </div>
 ```
 
 **Obsługiwane zdarzenia:**
+
 1. `submit` (formularz) - wywołuje default action lub `?/register`
 2. `enhance` callback - loading state, redirect handling
 3. `input` (confirm password) - inline validation
 
 **Warunki walidacji:**
+
 1. **Email:**
    - Required: pole musi być wypełnione
    - Type: email (HTML5 validation)
@@ -345,28 +349,30 @@ Główny widok rejestracji zawierający formularz z trzema polami: email, passwo
    - **Match: musi być identyczne z password (inline validation)**
 
 **Typy wymagane przez komponent:**
+
 ```typescript
 import type { PageData, ActionData } from './$types';
 
 interface PageData {
-  // Puste (tylko redirect guard w load)
+	// Puste (tylko redirect guard w load)
 }
 
 interface ActionData {
-  email?: string;           // Zachowany email przy błędzie
-  error?: string;           // Ogólny błąd rejestracji
-  errors?: {
-    email?: string;         // Błąd walidacji email
-    password?: string;      // Błąd walidacji password
-  };
+	email?: string; // Zachowany email przy błędzie
+	error?: string; // Ogólny błąd rejestracji
+	errors?: {
+		email?: string; // Błąd walidacji email
+		password?: string; // Błąd walidacji password
+	};
 }
 ```
 
 **Propsy:**
+
 ```typescript
 interface Props {
-  data: PageData;
-  form?: ActionData;
+	data: PageData;
+	form?: ActionData;
 }
 
 let { data, form }: Props = $props();
@@ -380,141 +386,145 @@ let { data, form }: Props = $props();
 Server-side logic zawierający load function (redirect guard dla zalogowanych) oraz Form Action która rejestruje użytkownika przez Supabase Auth. Po udanej rejestracji, Supabase automatycznie loguje użytkownika i następuje redirect na `/` (US 1.5). Obsługuje błędy rejestracji i walidację danych.
 
 **Load function:**
+
 ```typescript
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ locals }) => {
-  // Guard: zalogowani użytkownicy → redirect na /
-  if (locals.user) {
-    throw redirect(303, '/');
-  }
+	// Guard: zalogowani użytkownicy → redirect na /
+	if (locals.user) {
+		throw redirect(303, '/');
+	}
 
-  return {};
+	return {};
 };
 ```
 
 **Form Action:**
+
 ```typescript
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
-    try {
-      // 1. Parse form data
-      const formData = await request.formData();
-      const email = formData.get('email')?.toString();
-      const password = formData.get('password')?.toString();
-      const confirmPassword = formData.get('confirmPassword')?.toString();
+	default: async ({ request, locals }) => {
+		try {
+			// 1. Parse form data
+			const formData = await request.formData();
+			const email = formData.get('email')?.toString();
+			const password = formData.get('password')?.toString();
+			const confirmPassword = formData.get('confirmPassword')?.toString();
 
-      // 2. Server-side validation
-      if (!email || !password || !confirmPassword) {
-        return fail(400, {
-          email,
-          error: 'Wszystkie pola są wymagane'
-        });
-      }
+			// 2. Server-side validation
+			if (!email || !password || !confirmPassword) {
+				return fail(400, {
+					email,
+					error: 'Wszystkie pola są wymagane'
+				});
+			}
 
-      // Email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return fail(400, {
-          email,
-          errors: {
-            email: 'Podaj prawidłowy adres email'
-          }
-        });
-      }
+			// Email format validation
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) {
+				return fail(400, {
+					email,
+					errors: {
+						email: 'Podaj prawidłowy adres email'
+					}
+				});
+			}
 
-      // Password length validation
-      if (password.length < 8) {
-        return fail(400, {
-          email,
-          errors: {
-            password: 'Hasło musi mieć minimum 8 znaków'
-          }
-        });
-      }
+			// Password length validation
+			if (password.length < 8) {
+				return fail(400, {
+					email,
+					errors: {
+						password: 'Hasło musi mieć minimum 8 znaków'
+					}
+				});
+			}
 
-      // Password match validation
-      if (password !== confirmPassword) {
-        return fail(400, {
-          email,
-          error: 'Hasła nie pasują'
-        });
-      }
+			// Password match validation
+			if (password !== confirmPassword) {
+				return fail(400, {
+					email,
+					error: 'Hasła nie pasują'
+				});
+			}
 
-      // 3. Attempt registration with Supabase Auth
-      const { data, error } = await locals.supabase.auth.signUp({
-        email,
-        password
-      });
+			// 3. Attempt registration with Supabase Auth
+			const { data, error } = await locals.supabase.auth.signUp({
+				email,
+				password
+			});
 
-      // 4. Handle Supabase errors
-      if (error) {
-        console.error('[AUTH_ERROR] Registration failed', {
-          code: error.status,
-          message: error.message,
-          email,
-          timestamp: new Date().toISOString()
-        });
+			// 4. Handle Supabase errors
+			if (error) {
+				console.error('[AUTH_ERROR] Registration failed', {
+					code: error.status,
+					message: error.message,
+					email,
+					timestamp: new Date().toISOString()
+				});
 
-        // Map Supabase errors to Polish messages
-        let errorMessage = 'Nie udało się zarejestrować. Spróbuj ponownie później';
+				// Map Supabase errors to Polish messages
+				let errorMessage = 'Nie udało się zarejestrować. Spróbuj ponownie później';
 
-        if (error.message.includes('already registered') || error.message.includes('already exists')) {
-          errorMessage = 'Ten adres email jest już zarejestrowany';
-        } else if (error.message.includes('Password should be')) {
-          errorMessage = 'Hasło jest zbyt słabe. Użyj silniejszego hasła';
-        } else if (error.status === 429) {
-          errorMessage = 'Zbyt wiele prób rejestracji. Spróbuj ponownie za chwilę';
-        }
+				if (
+					error.message.includes('already registered') ||
+					error.message.includes('already exists')
+				) {
+					errorMessage = 'Ten adres email jest już zarejestrowany';
+				} else if (error.message.includes('Password should be')) {
+					errorMessage = 'Hasło jest zbyt słabe. Użyj silniejszego hasła';
+				} else if (error.status === 429) {
+					errorMessage = 'Zbyt wiele prób rejestracji. Spróbuj ponownie za chwilę';
+				}
 
-        return fail(error.status || 400, {
-          email,
-          error: errorMessage
-        });
-      }
+				return fail(error.status || 400, {
+					email,
+					error: errorMessage
+				});
+			}
 
-      // 5. Check if user was created
-      if (!data.user) {
-        console.error('[AUTH_ERROR] No user returned after signUp', {
-          email,
-          timestamp: new Date().toISOString()
-        });
+			// 5. Check if user was created
+			if (!data.user) {
+				console.error('[AUTH_ERROR] No user returned after signUp', {
+					email,
+					timestamp: new Date().toISOString()
+				});
 
-        return fail(500, {
-          email,
-          error: 'Nie udało się utworzyć konta. Spróbuj ponownie później'
-        });
-      }
+				return fail(500, {
+					email,
+					error: 'Nie udało się utworzyć konta. Spróbuj ponownie później'
+				});
+			}
 
-      // 6. Success - user is automatically logged in by Supabase
-      console.info('[SUCCESS] User registered and logged in', {
-        userId: data.user.id,
-        email: data.user.email,
-        timestamp: new Date().toISOString()
-      });
+			// 6. Success - user is automatically logged in by Supabase
+			console.info('[SUCCESS] User registered and logged in', {
+				userId: data.user.id,
+				email: data.user.email,
+				timestamp: new Date().toISOString()
+			});
 
-      // 7. Redirect to home page (US 1.5)
-      throw redirect(303, '/');
+			// 7. Redirect to home page (US 1.5)
+			throw redirect(303, '/');
+		} catch (error: unknown) {
+			// Handle redirect (rethrow)
+			if (error instanceof Response && error.status === 303) {
+				throw error;
+			}
 
-    } catch (error: unknown) {
-      // Handle redirect (rethrow)
-      if (error instanceof Response && error.status === 303) {
-        throw error;
-      }
+			// Handle unexpected errors
+			console.error('[UNEXPECTED_ERROR] Registration process failed', {
+				error: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+				timestamp: new Date().toISOString()
+			});
 
-      // Handle unexpected errors
-      console.error('[UNEXPECTED_ERROR] Registration process failed', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        timestamp: new Date().toISOString()
-      });
-
-      return fail(500, {
-        error: 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie później'
-      });
-    }
-  }
+			return fail(500, {
+				error: 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie później'
+			});
+		}
+	}
 };
 ```
 
@@ -523,76 +533,82 @@ export const actions: Actions = {
 ### Istniejące typy (z Supabase)
 
 **Session** - Sesja użytkownika
+
 ```typescript
 import type { Session, User } from '@supabase/supabase-js';
 
 // Session - automatycznie z Supabase
 interface Session {
-  user: User;
-  access_token: string;
-  refresh_token: string;
-  expires_at?: number;
-  expires_in: number;
+	user: User;
+	access_token: string;
+	refresh_token: string;
+	expires_at?: number;
+	expires_in: number;
 }
 ```
 
 **AuthError** - Błędy z Supabase Auth
+
 ```typescript
 interface AuthError {
-  message: string;
-  status?: number;
-  // ... inne pola z Supabase
+	message: string;
+	status?: number;
+	// ... inne pola z Supabase
 }
 ```
 
 ### Nowe typy (specyficzne dla widoku)
 
 **PageData** - Dane z load function
+
 ```typescript
 // src/routes/register/+page.server.ts
 // Automatycznie generowane przez SvelteKit
 
 interface PageData {
-  // Puste - load function tylko sprawdza redirect
+	// Puste - load function tylko sprawdza redirect
 }
 ```
 
 **ActionData** - Odpowiedź z form action
+
 ```typescript
 // src/routes/register/+page.server.ts
 // Automatycznie generowane przez SvelteKit
 
 interface ActionData {
-  /** Email użytkownika (zachowany przy błędzie) */
-  email?: string;
+	/** Email użytkownika (zachowany przy błędzie) */
+	email?: string;
 
-  /** Ogólny komunikat błędu rejestracji */
-  error?: string;
+	/** Ogólny komunikat błędu rejestracji */
+	error?: string;
 
-  /** Błędy walidacji dla poszczególnych pól */
-  errors?: {
-    email?: string;
-    password?: string;
-  };
+	/** Błędy walidacji dla poszczególnych pól */
+	errors?: {
+		email?: string;
+		password?: string;
+	};
 }
 ```
 
 **RegisterFormData** - Dane formularza (lokalny typ)
+
 ```typescript
 // Lokalny typ w +page.server.ts
 interface RegisterFormData {
-  email: string;
-  password: string;
-  confirmPassword: string;
+	email: string;
+	password: string;
+	confirmPassword: string;
 }
 ```
 
 **SignUpWithPasswordCredentials** - Parametry Supabase Auth
+
 ```typescript
 // Z @supabase/supabase-js
 interface SignUpWithPasswordCredentials {
-  email: string;
-  password: string;
+	email: string;
+	password: string;
 }
 ```
 
@@ -601,6 +617,7 @@ interface SignUpWithPasswordCredentials {
 ### Stan lokalny (Svelte 5 runes)
 
 **1. Pola formularza**
+
 ```typescript
 // src/routes/register/+page.svelte
 let email = $state('');
@@ -609,6 +626,7 @@ let confirmPassword = $state('');
 ```
 
 **2. isSubmitting - Stan submitu formularza**
+
 ```typescript
 let isSubmitting = $state(false);
 
@@ -624,6 +642,7 @@ use:enhance(() => {
 ```
 
 **Cel:**
+
 - Wyświetlenie loading state na przycisku
 - Disabled button podczas submitu
 - Disabled inputs podczas submitu
@@ -632,34 +651,37 @@ use:enhance(() => {
 ### Derived State (Svelte $derived)
 
 **1. passwordsMatch - Czy hasła się zgadzają**
+
 ```typescript
-let passwordsMatch = $derived(
-  confirmPassword.length === 0 || password === confirmPassword
-);
+let passwordsMatch = $derived(confirmPassword.length === 0 || password === confirmPassword);
 ```
 
 **2. passwordMismatchError - Inline error message**
+
 ```typescript
 let passwordMismatchError = $derived(
-  confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
+	confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
 );
 ```
+
 **Realizuje US 1.3**: "Walidacja błędów (np. 'Hasła nie pasują') odbywa się inline"
 
 **3. canSubmit - Czy można submitować formularz**
+
 ```typescript
 let canSubmit = $derived(
-  email.length > 0 &&
-  password.length > 0 &&
-  confirmPassword.length > 0 &&
-  passwordsMatch &&
-  !isSubmitting
+	email.length > 0 &&
+		password.length > 0 &&
+		confirmPassword.length > 0 &&
+		passwordsMatch &&
+		!isSubmitting
 );
 ```
 
 ### Stan z SvelteKit
 
 **1. PageData (reaktywny)**
+
 ```typescript
 let { data }: Props = $props();
 
@@ -669,6 +691,7 @@ let { data }: Props = $props();
 ```
 
 **2. ActionData (reaktywny)**
+
 ```typescript
 let { form }: Props = $props();
 
@@ -680,6 +703,7 @@ let { form }: Props = $props();
 ### Stan globalny
 
 Widok **nie wymaga** globalnego stanu. Supabase Auth zarządza sesją automatycznie:
+
 - Session przechowywany w cookies
 - Auto-refresh przez Supabase SDK
 - Dostępny przez `locals.user` w server-side
@@ -715,6 +739,7 @@ function handleSubmit() {
 ### Przepływ stanu
 
 **Scenariusz: Udana rejestracja**
+
 ```
 1. User wypełnia formularz (email, password, confirmPassword)
 2. User wpisuje confirmPassword → passwordsMatch recalculated
@@ -728,6 +753,7 @@ function handleSubmit() {
 ```
 
 **Scenariusz: Hasła nie pasują (inline)**
+
 ```
 1. User wpisuje password: "Test1234"
 2. User wpisuje confirmPassword: "Test123" (literówka)
@@ -742,6 +768,7 @@ function handleSubmit() {
 ```
 
 **Scenariusz: Email już zarejestrowany**
+
 ```
 1. User wypełnia formularz
 2. Submit → isSubmitting = true
@@ -763,6 +790,7 @@ function handleSubmit() {
 **Kiedy:** Po submit formularza rejestracji (default action)
 
 **Typ żądania:**
+
 ```typescript
 // Credentials
 interface SignUpWithPasswordCredentials {
@@ -778,107 +806,110 @@ interface SignUpWithPasswordCredentials {
 ```
 
 **Typ odpowiedzi:**
+
 ```typescript
 // Success
 interface AuthResponse {
-  data: {
-    user: User;
-    session: Session;
-  };
-  error: null;
+	data: {
+		user: User;
+		session: Session;
+	};
+	error: null;
 }
 
 // Error
 interface AuthResponse {
-  data: {
-    user: null;
-    session: null;
-  };
-  error: AuthError;
+	data: {
+		user: null;
+		session: null;
+	};
+	error: AuthError;
 }
 
 // Session
 interface Session {
-  access_token: string;      // JWT token
-  refresh_token: string;     // For auto-refresh
-  expires_in: number;        // Usually 3600 (1 hour)
-  expires_at?: number;       // Unix timestamp
-  user: User;
+	access_token: string; // JWT token
+	refresh_token: string; // For auto-refresh
+	expires_in: number; // Usually 3600 (1 hour)
+	expires_at?: number; // Unix timestamp
+	user: User;
 }
 
 // User
 interface User {
-  id: string;                // UUID
-  email: string;
-  email_confirmed_at?: string;
-  created_at: string;
-  // ... other fields
+	id: string; // UUID
+	email: string;
+	email_confirmed_at?: string;
+	created_at: string;
+	// ... other fields
 }
 ```
 
 **Implementacja w +page.server.ts:**
+
 ```typescript
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
-    try {
-      // 1. Parse and validate
-      const formData = await request.formData();
-      const email = formData.get('email')?.toString();
-      const password = formData.get('password')?.toString();
-      const confirmPassword = formData.get('confirmPassword')?.toString();
+	default: async ({ request, locals }) => {
+		try {
+			// 1. Parse and validate
+			const formData = await request.formData();
+			const email = formData.get('email')?.toString();
+			const password = formData.get('password')?.toString();
+			const confirmPassword = formData.get('confirmPassword')?.toString();
 
-      // Validation...
+			// Validation...
 
-      // 2. Call Supabase Auth
-      const { data, error } = await locals.supabase.auth.signUp({
-        email,
-        password
-      });
+			// 2. Call Supabase Auth
+			const { data, error } = await locals.supabase.auth.signUp({
+				email,
+				password
+			});
 
-      // 3. Handle errors
-      if (error) {
-        console.error('Registration error:', error);
+			// 3. Handle errors
+			if (error) {
+				console.error('Registration error:', error);
 
-        // Map errors to Polish messages
-        const errorMessages: Record<string, string> = {
-          'already registered': 'Ten adres email jest już zarejestrowany',
-          'Password should be': 'Hasło jest zbyt słabe. Użyj silniejszego hasła',
-          '429': 'Zbyt wiele prób. Spróbuj za chwilę'
-        };
+				// Map errors to Polish messages
+				const errorMessages: Record<string, string> = {
+					'already registered': 'Ten adres email jest już zarejestrowany',
+					'Password should be': 'Hasło jest zbyt słabe. Użyj silniejszego hasła',
+					'429': 'Zbyt wiele prób. Spróbuj za chwilę'
+				};
 
-        return fail(error.status || 400, {
-          email,
-          error: errorMessages[error.message] || 'Nie udało się zarejestrować'
-        });
-      }
+				return fail(error.status || 400, {
+					email,
+					error: errorMessages[error.message] || 'Nie udało się zarejestrować'
+				});
+			}
 
-      // 4. Check user created
-      if (!data.user) {
-        return fail(500, {
-          email,
-          error: 'Nie udało się utworzyć konta'
-        });
-      }
+			// 4. Check user created
+			if (!data.user) {
+				return fail(500, {
+					email,
+					error: 'Nie udało się utworzyć konta'
+				});
+			}
 
-      // 5. Success - Supabase automatically logs in user
-      // Redirect to home (US 1.5)
-      throw redirect(303, '/');
-    } catch (error) {
-      // Re-throw redirect
-      if (error instanceof Response && error.status === 303) {
-        throw error;
-      }
+			// 5. Success - Supabase automatically logs in user
+			// Redirect to home (US 1.5)
+			throw redirect(303, '/');
+		} catch (error) {
+			// Re-throw redirect
+			if (error instanceof Response && error.status === 303) {
+				throw error;
+			}
 
-      console.error('Registration action error:', error);
-      return fail(500, {
-        error: 'Wystąpił nieoczekiwany błąd'
-      });
-    }
-  }
+			console.error('Registration action error:', error);
+			return fail(500, {
+				error: 'Wystąpił nieoczekiwany błąd'
+			});
+		}
+	}
 };
 ```
 
 **Registration Flow:**
+
 ```
 1. User submits form with email + password + confirmPassword
    ↓
@@ -896,6 +927,7 @@ export const actions: Actions = {
 ```
 
 **Session Management:**
+
 - Supabase automatycznie ustawia cookie z session po rejestracji
 - Hook `hooks.server.ts` parsuje cookie i udostępnia `locals.user`
 - Auto-refresh przez Supabase SDK
@@ -908,6 +940,7 @@ export const actions: Actions = {
 **Akcja użytkownika:** Wpisanie email, hasła i powtórzenia hasła
 
 **Ścieżka przepływu:**
+
 1. Użytkownik wpisuje email
 2. HTML5 validation: type="email", required
 3. Użytkownik wpisuje hasło: "Test1234"
@@ -923,11 +956,13 @@ export const actions: Actions = {
 13. Przycisk aktywny (`canSubmit = true`)
 
 **Walidacja:**
+
 - Email: required, type="email"
 - Password: required, minlength="8"
 - Confirm Password: required, minlength="8", match password (inline)
 
 **Oczekiwany rezultat:**
+
 - Formularz ready do submit
 - Natychmiastowa informacja zwrotna o zgodności haseł
 - Intuicyjny UX - użytkownik wie od razu czy hasła się zgadzają
@@ -939,6 +974,7 @@ export const actions: Actions = {
 **Akcja użytkownika:** Kliknięcie "Zarejestruj się" z prawidłowymi danymi
 
 **Ścieżka przepływu:**
+
 1. Użytkownik klika "Zarejestruj się"
 2. HTML5 validation sprawdza wszystkie pola
 3. Jeśli OK → submit
@@ -956,6 +992,7 @@ export const actions: Actions = {
 15. Navbar pokazuje "Generuj" i "Wyloguj" (zalogowany stan)
 
 **Oczekiwany rezultat:**
+
 - Loading state podczas rejestracji
 - Automatyczne logowanie
 - Redirect na `/` po sukcesie (zgodnie z US 1.5)
@@ -968,6 +1005,7 @@ export const actions: Actions = {
 **Akcja użytkownika:** Submit z różnymi hasłami (JS wyłączony lub manipulacja)
 
 **Ścieżka przepływu:**
+
 1. Użytkownik submituje formularz
 2. Server-side validation: `password !== confirmPassword`
 3. Server: `return fail(400, { email, error: 'Hasła nie pasują' })`
@@ -977,6 +1015,7 @@ export const actions: Actions = {
 7. Hasła puste (bezpieczeństwo)
 
 **Oczekiwany rezultat:**
+
 - Komunikat błędu wyświetlony
 - Email nie tracony
 - Możliwość poprawy i retry
@@ -988,6 +1027,7 @@ export const actions: Actions = {
 **Akcja użytkownika:** Próba rejestracji z istniejącym emailem
 
 **Ścieżka przepływu:**
+
 1. Użytkownik wpisuje email który już istnieje w bazie
 2. Wpisuje hasła poprawnie
 3. Submit → loading state
@@ -999,6 +1039,7 @@ export const actions: Actions = {
 9. Link "Zaloguj się" widoczny poniżej
 
 **Oczekiwany rezultat:**
+
 - Wyraźny komunikat że email zajęty
 - Możliwość przejścia do logowania (link widoczny)
 - Możliwość użycia innego emaila
@@ -1010,6 +1051,7 @@ export const actions: Actions = {
 **Akcja użytkownika:** Próba rejestracji ze słabym hasłem
 
 **Ścieżka przepływu:**
+
 1. Użytkownik wpisuje email: "test@example.com"
 2. Wpisuje hasło: "12345678" (tylko cyfry, słabe)
 3. Wpisuje confirm password: "12345678" (zgadza się)
@@ -1022,6 +1064,7 @@ export const actions: Actions = {
 10. Alert z sugestią silniejszego hasła
 
 **Oczekiwany rezultat:**
+
 - Komunikat o słabym haśle
 - Sugestia użycia silniejszego hasła
 - Email zachowany
@@ -1034,12 +1077,14 @@ export const actions: Actions = {
 **Akcja użytkownika:** Kliknięcie linku "Zaloguj się" dla użytkowników z kontem
 
 **Ścieżka przepływu:**
+
 1. Użytkownik zauważa tekst: "Masz już konto? Zaloguj się"
 2. Klika link
 3. **Navigation**: SvelteKit → `/login`
 4. Wyświetlenie widoku logowania
 
 **Oczekiwany rezultat:**
+
 - Płynne przejście na stronę logowania
 - Brak przeładowania strony (SPA navigation)
 - Realizacja US 1.7
@@ -1051,6 +1096,7 @@ export const actions: Actions = {
 **Akcja użytkownika:** Zalogowany użytkownik próbuje wejść na `/register`
 
 **Ścieżka przepływu:**
+
 1. Zalogowany użytkownik wpisuje `/register` w URL lub klika link
 2. SvelteKit wywołuje load function
 3. `if (locals.user)` → true
@@ -1058,6 +1104,7 @@ export const actions: Actions = {
 5. Użytkownik zostaje przekierowany na `/`
 
 **Oczekiwany rezultat:**
+
 - Natychmiastowe przekierowanie
 - Formularz rejestracji się nie renderuje
 - Zalogowani nie mogą się "re-zarejestrować"
@@ -1067,26 +1114,29 @@ export const actions: Actions = {
 ### Warunek 1: Redirect guard - zalogowani użytkownicy
 
 **Warunek:**
+
 ```typescript
 if (locals.user !== null) {
-  // Redirect na /
+	// Redirect na /
 }
 ```
 
 **Komponent:** `+page.server.ts` load function
 
 **Implementacja:**
+
 ```typescript
 export const load: PageServerLoad = async ({ locals }) => {
-  if (locals.user) {
-    throw redirect(303, '/');
-  }
+	if (locals.user) {
+		throw redirect(303, '/');
+	}
 
-  return {};
+	return {};
 };
 ```
 
 **Wpływ na UI:**
+
 - Zalogowani użytkownicy nie widzą formularza rejestracji
 - Automatyczne przekierowanie na stronę główną
 
@@ -1095,41 +1145,38 @@ export const load: PageServerLoad = async ({ locals }) => {
 ### Warunek 2: Inline walidacja - hasła się zgadzają (US 1.3)
 
 **Warunek:**
+
 ```typescript
 if (confirmPassword.length > 0 && password !== confirmPassword) {
-  // Wyświetl "Hasła nie pasują"
+	// Wyświetl "Hasła nie pasują"
 }
 ```
 
 **Komponent:** Confirm Password field w `+page.svelte`
 
 **Implementacja:**
+
 ```typescript
 // Svelte $derived
-let passwordsMatch = $derived(
-  confirmPassword.length === 0 || password === confirmPassword
-);
+let passwordsMatch = $derived(confirmPassword.length === 0 || password === confirmPassword);
 
 let passwordMismatchError = $derived(
-  confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
+	confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
 );
 ```
 
 ```svelte
-<input
-  type="password"
-  bind:value={confirmPassword}
-  class:input-error={passwordMismatchError}
-/>
+<input type="password" bind:value={confirmPassword} class:input-error={passwordMismatchError} />
 
 {#if passwordMismatchError}
-  <label class="label">
-    <span class="label-text-alt text-error">{passwordMismatchError}</span>
-  </label>
+	<label class="label">
+		<span class="label-text-alt text-error">{passwordMismatchError}</span>
+	</label>
 {/if}
 ```
 
 **Wpływ na UI:**
+
 - Komunikat "Hasła nie pasują" pojawia się natychmiast gdy użytkownik zaczyna wpisywać różne hasło
 - Czerwona ramka wokół pola
 - Przycisk submit disabled
@@ -1140,46 +1187,46 @@ let passwordMismatchError = $derived(
 ### Warunek 3: Submit button disabled
 
 **Warunek:**
+
 ```typescript
 if (
-  email.length === 0 ||
-  password.length === 0 ||
-  confirmPassword.length === 0 ||
-  !passwordsMatch ||
-  isSubmitting
+	email.length === 0 ||
+	password.length === 0 ||
+	confirmPassword.length === 0 ||
+	!passwordsMatch ||
+	isSubmitting
 ) {
-  // Disable button
+	// Disable button
 }
 ```
 
 **Komponent:** Button submit w formularzu
 
 **Implementacja:**
+
 ```typescript
 let canSubmit = $derived(
-  email.length > 0 &&
-  password.length > 0 &&
-  confirmPassword.length > 0 &&
-  passwordsMatch &&
-  !isSubmitting
+	email.length > 0 &&
+		password.length > 0 &&
+		confirmPassword.length > 0 &&
+		passwordsMatch &&
+		!isSubmitting
 );
 ```
 
 ```svelte
-<button
-  type="submit"
-  disabled={!canSubmit}
->
-  {#if isSubmitting}
-    <span class="loading loading-spinner"></span>
-    Rejestracja...
-  {:else}
-    Zarejestruj się
-  {/if}
+<button type="submit" disabled={!canSubmit}>
+	{#if isSubmitting}
+		<span class="loading loading-spinner"></span>
+		Rejestracja...
+	{:else}
+		Zarejestruj się
+	{/if}
 </button>
 ```
 
 **Wpływ na UI:**
+
 - Button disabled jeśli:
   - Jakiekolwiek pole puste
   - Hasła nie pasują
@@ -1193,39 +1240,38 @@ let canSubmit = $derived(
 ### Warunek 4: Walidacja email (HTML5 + backend)
 
 **Warunki:**
+
 1. **Required:** Pole musi być wypełnione
 2. **Type email:** Musi być prawidłowy format email (zawierać @)
 
 **Komponent:** Input email w formularzu
 
 **Implementacja HTML5:**
+
 ```svelte
-<input
-  type="email"
-  name="email"
-  required
-  class:input-error={form?.errors?.email}
-/>
+<input type="email" name="email" required class:input-error={form?.errors?.email} />
 
 {#if form?.errors?.email}
-  <span class="text-error">{form.errors.email}</span>
+	<span class="text-error">{form.errors.email}</span>
 {/if}
 ```
 
 **Implementacja Backend:**
+
 ```typescript
 // +page.server.ts
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 if (!email || !emailRegex.test(email)) {
-  return fail(400, {
-    email,
-    errors: { email: 'Podaj prawidłowy adres email' }
-  });
+	return fail(400, {
+		email,
+		errors: { email: 'Podaj prawidłowy adres email' }
+	});
 }
 ```
 
 **Wpływ na UI:**
+
 - HTML5 blokuje submit jeśli puste lub nieprawidłowy format
 - Backend validation jako fallback (bez JS)
 - Czerwona ramka i komunikat przy błędzie
@@ -1235,36 +1281,35 @@ if (!email || !emailRegex.test(email)) {
 ### Warunek 5: Walidacja password length
 
 **Warunki:**
+
 1. **Required:** Pole musi być wypełnione
 2. **Min length:** Minimum 8 znaków
 
 **Komponent:** Input password w formularzu
 
 **Implementacja HTML5:**
+
 ```svelte
-<input
-  type="password"
-  name="password"
-  required
-  minlength="8"
-/>
+<input type="password" name="password" required minlength="8" />
 
 <label class="label">
-  <span class="label-text-alt">Minimum 8 znaków</span>
+	<span class="label-text-alt">Minimum 8 znaków</span>
 </label>
 ```
 
 **Implementacja Backend:**
+
 ```typescript
 if (!password || password.length < 8) {
-  return fail(400, {
-    email,
-    errors: { password: 'Hasło musi mieć minimum 8 znaków' }
-  });
+	return fail(400, {
+		email,
+		errors: { password: 'Hasło musi mieć minimum 8 znaków' }
+	});
 }
 ```
 
 **Wpływ na UI:**
+
 - HTML5 blokuje submit jeśli za krótkie
 - Hint text pod polem: "Minimum 8 znaków"
 - Backend sprawdza min length
@@ -1275,25 +1320,28 @@ if (!password || password.length < 8) {
 ### Warunek 6: Server-side password match validation
 
 **Warunek:**
+
 ```typescript
 if (password !== confirmPassword) {
-  // Return error
+	// Return error
 }
 ```
 
 **Komponent:** `+page.server.ts` action
 
 **Implementacja:**
+
 ```typescript
 if (password !== confirmPassword) {
-  return fail(400, {
-    email,
-    error: 'Hasła nie pasują'
-  });
+	return fail(400, {
+		email,
+		error: 'Hasła nie pasują'
+	});
 }
 ```
 
 **Wpływ na UI:**
+
 - Fallback dla inline validation (gdy JS wyłączony)
 - Alert z komunikatem błędu
 - Email zachowany
@@ -1303,25 +1351,28 @@ if (password !== confirmPassword) {
 ### Warunek 7: Wyświetlanie błędów rejestracji
 
 **Warunek:**
+
 ```typescript
 if (form?.error) {
-  // Wyświetl alert z błędem
+	// Wyświetl alert z błędem
 }
 ```
 
 **Komponent:** Alert w formularzu
 
 **Implementacja:**
+
 ```svelte
 {#if form?.error}
-  <div class="alert alert-error">
-    <svg>...</svg>
-    <span>{form.error}</span>
-  </div>
+	<div class="alert alert-error">
+		<svg>...</svg>
+		<span>{form.error}</span>
+	</div>
 {/if}
 ```
 
 **Wpływ na UI:**
+
 - Alert wyświetlony gdy błąd rejestracji
 - Czerwony kolor, ikona X
 - Komunikat po polsku
@@ -1332,36 +1383,31 @@ if (form?.error) {
 ### Warunek 8: Zachowanie email przy błędzie
 
 **Warunek:**
+
 ```typescript
 if (form?.email) {
-  // Wypełnij pole email
+	// Wypełnij pole email
 }
 ```
 
 **Komponent:** Input email
 
 **Implementacja:**
+
 ```svelte
-<input
-  type="email"
-  name="email"
-  bind:value={email}
-/>
+<input type="email" name="email" bind:value={email} />
 
 <!-- On mount: -->
 {#if form?.email}
-  {email = form.email}
+	{(email = form.email)}
 {/if}
 
 <!-- Or simpler: -->
-<input
-  type="email"
-  name="email"
-  value={form?.email || ''}
-/>
+<input type="email" name="email" value={form?.email || ''} />
 ```
 
 **Wpływ na UI:**
+
 - Email nie jest tracony przy błędzie
 - Użytkownik nie musi wpisywać ponownie
 - Tylko hasła trzeba wpisać ponownie (bezpieczeństwo)
@@ -1371,26 +1417,32 @@ if (form?.email) {
 ### Scenariusz 1: Email już zarejestrowany (400/409)
 
 **Przyczyna:**
+
 - Email już istnieje w bazie danych
 - Użytkownik próbuje założyć drugie konto
 
 **Obsługa:**
+
 ```typescript
 // +page.server.ts
 const { data, error } = await locals.supabase.auth.signUp({
-  email,
-  password
+	email,
+	password
 });
 
-if (error && (error.message.includes('already registered') || error.message.includes('already exists'))) {
-  return fail(400, {
-    email,
-    error: 'Ten adres email jest już zarejestrowany. Jeśli to Twoje konto, zaloguj się'
-  });
+if (
+	error &&
+	(error.message.includes('already registered') || error.message.includes('already exists'))
+) {
+	return fail(400, {
+		email,
+		error: 'Ten adres email jest już zarejestrowany. Jeśli to Twoje konto, zaloguj się'
+	});
 }
 ```
 
 **Rezultat dla użytkownika:**
+
 - Alert z komunikatem "Ten adres email jest już zarejestrowany"
 - Email zachowany w polu
 - Link "Zaloguj się" widoczny poniżej alertu
@@ -1401,20 +1453,23 @@ if (error && (error.message.includes('already registered') || error.message.incl
 ### Scenariusz 2: Zbyt słabe hasło (400)
 
 **Przyczyna:**
+
 - Hasło nie spełnia wymagań Supabase (zbyt proste, bez znaków specjalnych, etc.)
 - Mimo że ma 8+ znaków, jest słabe
 
 **Obsługa:**
+
 ```typescript
 if (error && error.message.includes('Password should be')) {
-  return fail(400, {
-    email,
-    error: 'Hasło jest zbyt słabe. Użyj silniejszego hasła (wielkie litery, cyfry, znaki specjalne)'
-  });
+	return fail(400, {
+		email,
+		error: 'Hasło jest zbyt słabe. Użyj silniejszego hasła (wielkie litery, cyfry, znaki specjalne)'
+	});
 }
 ```
 
 **Rezultat dla użytkownika:**
+
 - Alert z wyraźną instrukcją: "Hasło jest zbyt słabe..."
 - Sugestia użycia wielkich liter, cyfr, znaków specjalnych
 - Email zachowany
@@ -1425,20 +1480,23 @@ if (error && error.message.includes('Password should be')) {
 ### Scenariusz 3: Rate limit (429)
 
 **Przyczyna:**
+
 - Zbyt wiele prób rejestracji w krótkim czasie
 - Supabase zabezpieczenie przed spamem/abusem
 
 **Obsługa:**
+
 ```typescript
 if (error && error.status === 429) {
-  return fail(429, {
-    email,
-    error: 'Zbyt wiele prób rejestracji. Spróbuj ponownie za kilka minut'
-  });
+	return fail(429, {
+		email,
+		error: 'Zbyt wiele prób rejestracji. Spróbuj ponownie za kilka minut'
+	});
 }
 ```
 
 **Rezultat dla użytkownika:**
+
 - Alert z informacją o rate limit
 - Sugestia odczekania kilku minut
 - Email zachowany
@@ -1449,20 +1507,21 @@ if (error && error.status === 429) {
 ### Scenariusz 4: Hasła nie pasują - inline (client-side)
 
 **Przyczyna:**
+
 - Użytkownik wpisał różne hasła w pole "Hasło" i "Powtórz hasło"
 - Literówka lub pomyłka
 
 **Obsługa:**
+
 ```typescript
 // +page.svelte - inline validation (US 1.3)
 let passwordMismatchError = $derived(
-  confirmPassword.length > 0 && password !== confirmPassword
-    ? 'Hasła nie pasują'
-    : null
+	confirmPassword.length > 0 && password !== confirmPassword ? 'Hasła nie pasują' : null
 );
 ```
 
 **Rezultat dla użytkownika:**
+
 - **Natychmiastowy feedback**: Czerwony komunikat "Hasła nie pasują" pod polem
 - Czerwona ramka wokół pola "Powtórz hasło"
 - Przycisk submit disabled
@@ -1474,22 +1533,25 @@ let passwordMismatchError = $derived(
 ### Scenariusz 5: Hasła nie pasują - server-side (400)
 
 **Przyczyna:**
+
 - JavaScript wyłączony
 - Manipulacja formularza
 - Fallback dla inline validation
 
 **Obsługa:**
+
 ```typescript
 // +page.server.ts - server validation
 if (password !== confirmPassword) {
-  return fail(400, {
-    email,
-    error: 'Hasła nie pasują. Upewnij się, że oba pola zawierają identyczne hasło'
-  });
+	return fail(400, {
+		email,
+		error: 'Hasła nie pasują. Upewnij się, że oba pola zawierają identyczne hasło'
+	});
 }
 ```
 
 **Rezultat dla użytkownika:**
+
 - Alert error nad formularzem
 - Email zachowany
 - Hasła wyczyszczone
@@ -1500,25 +1562,28 @@ if (password !== confirmPassword) {
 ### Scenariusz 6: Nieprawidłowy format email (400)
 
 **Przyczyna:**
+
 - Email pusty
 - Email bez @
 - Nieprawidłowy format (np. "test@")
 
 **Obsługa:**
+
 ```typescript
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 if (!email || !emailRegex.test(email)) {
-  return fail(400, {
-    email,
-    errors: {
-      email: 'Podaj prawidłowy adres email (np. twoj@email.pl)'
-    }
-  });
+	return fail(400, {
+		email,
+		errors: {
+			email: 'Podaj prawidłowy adres email (np. twoj@email.pl)'
+		}
+	});
 }
 ```
 
 **Rezultat dla użytkownika:**
+
 - Komunikat błędu pod polem email
 - Czerwona ramka wokół pola
 - Wyraźna instrukcja z przykładem
@@ -1529,20 +1594,23 @@ if (!email || !emailRegex.test(email)) {
 ### Scenariusz 7: Puste pola (400)
 
 **Przyczyna:**
+
 - Użytkownik submituje formularz bez wypełnienia wszystkich pól
 - JavaScript wyłączony (brak client-side validation)
 
 **Obsługa:**
+
 ```typescript
 if (!email || !password || !confirmPassword) {
-  return fail(400, {
-    email,
-    error: 'Wszystkie pola są wymagane. Wypełnij email, hasło i powtórzenie hasła'
-  });
+	return fail(400, {
+		email,
+		error: 'Wszystkie pola są wymagane. Wypełnij email, hasło i powtórzenie hasła'
+	});
 }
 ```
 
 **Rezultat dla użytkownika:**
+
 - Alert z wyraźną instrukcją
 - HTML5 `required` attribute jako pierwsza linia obrony
 - Server-side validation jako fallback
@@ -1552,27 +1620,30 @@ if (!email || !password || !confirmPassword) {
 ### Scenariusz 8: Błąd sieci / timeout (Network Error)
 
 **Przyczyna:**
+
 - Brak połączenia z internetem
 - Problem z Supabase API
 - Timeout
 
 **Obsługa:**
+
 ```typescript
 try {
-  const { data, error } = await locals.supabase.auth.signUp({
-    email,
-    password
-  });
+	const { data, error } = await locals.supabase.auth.signUp({
+		email,
+		password
+	});
 } catch (error) {
-  console.error('Network error:', error);
-  return fail(500, {
-    email,
-    error: 'Błąd połączenia. Sprawdź internet i spróbuj ponownie'
-  });
+	console.error('Network error:', error);
+	return fail(500, {
+		email,
+		error: 'Błąd połączenia. Sprawdź internet i spróbuj ponownie'
+	});
 }
 ```
 
 **Rezultat dla użytkownika:**
+
 - Alert z komunikatem o błędzie połączenia
 - Sugestia sprawdzenia internetu
 - Email zachowany
@@ -1583,12 +1654,14 @@ try {
 ### Scenariusz 9: Błąd wewnętrzny serwera (500)
 
 **Przyczyna:**
+
 - Nieoczekiwany błąd serwera
 - Błąd w kodzie
 - Problem z Supabase
 - Brak `data.user` mimo braku `error`
 
 **Obsługa:**
+
 ```typescript
 // No user returned
 if (!data.user) {
@@ -1618,6 +1691,7 @@ catch (error) {
 ```
 
 **Rezultat dla użytkownika:**
+
 - Ogólny komunikat błędu
 - Sugestia retry za chwilę
 - Email zachowany
@@ -1628,11 +1702,13 @@ catch (error) {
 ### Krok 1: Przygotowanie struktury plików
 
 **Zadania:**
+
 1. Utworzenie katalogu route
 2. Utworzenie plików widoku
 3. Przygotowanie podstawowej struktury
 
 **Struktura katalogów:**
+
 ```
 src/
 ├── routes/
@@ -1642,6 +1718,7 @@ src/
 ```
 
 **Polecenia:**
+
 ```bash
 # Utwórz katalog
 mkdir -p src/routes/register
@@ -1663,12 +1740,12 @@ import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ locals }) => {
-  // Guard: zalogowani użytkownicy → /
-  if (locals.user) {
-    throw redirect(303, '/');
-  }
+	// Guard: zalogowani użytkownicy → /
+	if (locals.user) {
+		throw redirect(303, '/');
+	}
 
-  return {};
+	return {};
 };
 ```
 
@@ -1676,108 +1753,110 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 ```typescript
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
-    try {
-      // 1. Parse form data
-      const formData = await request.formData();
-      const email = formData.get('email')?.toString();
-      const password = formData.get('password')?.toString();
-      const confirmPassword = formData.get('confirmPassword')?.toString();
+	default: async ({ request, locals }) => {
+		try {
+			// 1. Parse form data
+			const formData = await request.formData();
+			const email = formData.get('email')?.toString();
+			const password = formData.get('password')?.toString();
+			const confirmPassword = formData.get('confirmPassword')?.toString();
 
-      // 2. Server-side validation
-      if (!email || !password || !confirmPassword) {
-        return fail(400, {
-          email,
-          error: 'Wszystkie pola są wymagane'
-        });
-      }
+			// 2. Server-side validation
+			if (!email || !password || !confirmPassword) {
+				return fail(400, {
+					email,
+					error: 'Wszystkie pola są wymagane'
+				});
+			}
 
-      // Email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return fail(400, {
-          email,
-          errors: { email: 'Podaj prawidłowy adres email' }
-        });
-      }
+			// Email format
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) {
+				return fail(400, {
+					email,
+					errors: { email: 'Podaj prawidłowy adres email' }
+				});
+			}
 
-      // Password length
-      if (password.length < 8) {
-        return fail(400, {
-          email,
-          errors: { password: 'Hasło musi mieć minimum 8 znaków' }
-        });
-      }
+			// Password length
+			if (password.length < 8) {
+				return fail(400, {
+					email,
+					errors: { password: 'Hasło musi mieć minimum 8 znaków' }
+				});
+			}
 
-      // Password match
-      if (password !== confirmPassword) {
-        return fail(400, {
-          email,
-          error: 'Hasła nie pasują'
-        });
-      }
+			// Password match
+			if (password !== confirmPassword) {
+				return fail(400, {
+					email,
+					error: 'Hasła nie pasują'
+				});
+			}
 
-      // 3. Call Supabase Auth
-      const { data, error } = await locals.supabase.auth.signUp({
-        email,
-        password
-      });
+			// 3. Call Supabase Auth
+			const { data, error } = await locals.supabase.auth.signUp({
+				email,
+				password
+			});
 
-      // 4. Handle errors
-      if (error) {
-        console.error('[AUTH_ERROR] Registration failed', {
-          code: error.status,
-          message: error.message,
-          email,
-          timestamp: new Date().toISOString()
-        });
+			// 4. Handle errors
+			if (error) {
+				console.error('[AUTH_ERROR] Registration failed', {
+					code: error.status,
+					message: error.message,
+					email,
+					timestamp: new Date().toISOString()
+				});
 
-        // Map Supabase errors to Polish
-        let errorMessage = 'Nie udało się zarejestrować. Spróbuj ponownie później';
+				// Map Supabase errors to Polish
+				let errorMessage = 'Nie udało się zarejestrować. Spróbuj ponownie później';
 
-        if (error.message.includes('already registered') || error.message.includes('already exists')) {
-          errorMessage = 'Ten adres email jest już zarejestrowany';
-        } else if (error.message.includes('Password should be')) {
-          errorMessage = 'Hasło jest zbyt słabe. Użyj silniejszego hasła';
-        } else if (error.status === 429) {
-          errorMessage = 'Zbyt wiele prób rejestracji. Spróbuj za chwilę';
-        }
+				if (
+					error.message.includes('already registered') ||
+					error.message.includes('already exists')
+				) {
+					errorMessage = 'Ten adres email jest już zarejestrowany';
+				} else if (error.message.includes('Password should be')) {
+					errorMessage = 'Hasło jest zbyt słabe. Użyj silniejszego hasła';
+				} else if (error.status === 429) {
+					errorMessage = 'Zbyt wiele prób rejestracji. Spróbuj za chwilę';
+				}
 
-        return fail(error.status || 400, {
-          email,
-          error: errorMessage
-        });
-      }
+				return fail(error.status || 400, {
+					email,
+					error: errorMessage
+				});
+			}
 
-      // 5. Check user created
-      if (!data.user) {
-        console.error('[AUTH_ERROR] No user returned', { email });
-        return fail(500, {
-          email,
-          error: 'Nie udało się utworzyć konta. Spróbuj ponownie później'
-        });
-      }
+			// 5. Check user created
+			if (!data.user) {
+				console.error('[AUTH_ERROR] No user returned', { email });
+				return fail(500, {
+					email,
+					error: 'Nie udało się utworzyć konta. Spróbuj ponownie później'
+				});
+			}
 
-      // 6. Success - automatically logged in, redirect to home (US 1.5)
-      console.info('[SUCCESS] User registered', {
-        userId: data.user.id,
-        email: data.user.email
-      });
+			// 6. Success - automatically logged in, redirect to home (US 1.5)
+			console.info('[SUCCESS] User registered', {
+				userId: data.user.id,
+				email: data.user.email
+			});
 
-      throw redirect(303, '/');
+			throw redirect(303, '/');
+		} catch (error: unknown) {
+			// Re-throw redirect
+			if (error instanceof Response && error.status === 303) {
+				throw error;
+			}
 
-    } catch (error: unknown) {
-      // Re-throw redirect
-      if (error instanceof Response && error.status === 303) {
-        throw error;
-      }
-
-      console.error('[UNEXPECTED_ERROR] Registration failed', error);
-      return fail(500, {
-        error: 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie później'
-      });
-    }
-  }
+			console.error('[UNEXPECTED_ERROR] Registration failed', error);
+			return fail(500, {
+				error: 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie później'
+			});
+		}
+	}
 };
 ```
 
@@ -1787,42 +1866,38 @@ export const actions: Actions = {
 
 ```svelte
 <script lang="ts">
-  import type { PageData, ActionData } from './$types';
-  import { enhance } from '$app/forms';
-  import { goto } from '$app/navigation';
+	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 
-  interface Props {
-    data: PageData;
-    form?: ActionData;
-  }
+	interface Props {
+		data: PageData;
+		form?: ActionData;
+	}
 
-  let { data, form }: Props = $props();
+	let { data, form }: Props = $props();
 
-  // Local state
-  let email = $state('');
-  let password = $state('');
-  let confirmPassword = $state('');
-  let isSubmitting = $state(false);
+	// Local state
+	let email = $state('');
+	let password = $state('');
+	let confirmPassword = $state('');
+	let isSubmitting = $state(false);
 
-  // Derived state: inline validation (US 1.3)
-  let passwordsMatch = $derived(
-    confirmPassword.length === 0 || password === confirmPassword
-  );
+	// Derived state: inline validation (US 1.3)
+	let passwordsMatch = $derived(confirmPassword.length === 0 || password === confirmPassword);
 
-  let passwordMismatchError = $derived(
-    confirmPassword.length > 0 && !passwordsMatch
-      ? 'Hasła nie pasują'
-      : null
-  );
+	let passwordMismatchError = $derived(
+		confirmPassword.length > 0 && !passwordsMatch ? 'Hasła nie pasują' : null
+	);
 
-  // Can submit?
-  let canSubmit = $derived(
-    email.length > 0 &&
-    password.length > 0 &&
-    confirmPassword.length > 0 &&
-    passwordsMatch &&
-    !isSubmitting
-  );
+	// Can submit?
+	let canSubmit = $derived(
+		email.length > 0 &&
+			password.length > 0 &&
+			confirmPassword.length > 0 &&
+			passwordsMatch &&
+			!isSubmitting
+	);
 </script>
 ```
 
@@ -1832,36 +1907,30 @@ export const actions: Actions = {
 
 ```svelte
 <svelte:head>
-  <title>Rejestracja - MroczneHistorie</title>
-  <meta name="description" content="Załóż konto w MroczneHistorie" />
+	<title>Rejestracja - MroczneHistorie</title>
+	<meta name="description" content="Załóż konto w MroczneHistorie" />
 </svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-base-300 px-4 py-8">
-  <div class="w-full max-w-md">
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-4xl md:text-5xl font-bold mb-2">
-        Zarejestruj się
-      </h1>
-      <p class="text-lg opacity-80">
-        Dołącz do MroczneHistorie!
-      </p>
-    </div>
+	<div class="w-full max-w-md">
+		<!-- Header -->
+		<div class="text-center mb-8">
+			<h1 class="text-4xl md:text-5xl font-bold mb-2">Zarejestruj się</h1>
+			<p class="text-lg opacity-80">Dołącz do MroczneHistorie!</p>
+		</div>
 
-    <!-- Auth Card -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <!-- Form w następnym kroku -->
-      </div>
-    </div>
+		<!-- Auth Card -->
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<!-- Form w następnym kroku -->
+			</div>
+		</div>
 
-    <!-- Back to Home -->
-    <div class="text-center mt-4">
-      <a href="/" class="link link-hover text-sm opacity-70">
-        ← Powrót do strony głównej
-      </a>
-    </div>
-  </div>
+		<!-- Back to Home -->
+		<div class="text-center mt-4">
+			<a href="/" class="link link-hover text-sm opacity-70"> ← Powrót do strony głównej </a>
+		</div>
+	</div>
 </div>
 ```
 
@@ -1873,146 +1942,135 @@ export const actions: Actions = {
 <!-- Kontynuacja w card-body -->
 
 <form
-  method="POST"
-  use:enhance={() => {
-    isSubmitting = true;
+	method="POST"
+	use:enhance={() => {
+		isSubmitting = true;
 
-    return async ({ result, update }) => {
-      isSubmitting = false;
+		return async ({ result, update }) => {
+			isSubmitting = false;
 
-      if (result.type === 'redirect') {
-        await goto(result.location);
-      }
+			if (result.type === 'redirect') {
+				await goto(result.location);
+			}
 
-      await update();
-    };
-  }}
+			await update();
+		};
+	}}
 >
-  <!-- Email Field -->
-  <div class="form-control">
-    <label for="email" class="label">
-      <span class="label-text font-semibold">Adres email</span>
-      <span class="label-text-alt text-error">*wymagane</span>
-    </label>
-    <input
-      type="email"
-      name="email"
-      id="email"
-      class="input input-bordered"
-      class:input-error={form?.errors?.email}
-      placeholder="twoj@email.pl"
-      required
-      autocomplete="email"
-      bind:value={email}
-      disabled={isSubmitting}
-    />
-    {#if form?.errors?.email}
-      <label class="label">
-        <span class="label-text-alt text-error">
-          {form.errors.email}
-        </span>
-      </label>
-    {/if}
-  </div>
+	<!-- Email Field -->
+	<div class="form-control">
+		<label for="email" class="label">
+			<span class="label-text font-semibold">Adres email</span>
+			<span class="label-text-alt text-error">*wymagane</span>
+		</label>
+		<input
+			type="email"
+			name="email"
+			id="email"
+			class="input input-bordered"
+			class:input-error={form?.errors?.email}
+			placeholder="twoj@email.pl"
+			required
+			autocomplete="email"
+			bind:value={email}
+			disabled={isSubmitting}
+		/>
+		{#if form?.errors?.email}
+			<label class="label">
+				<span class="label-text-alt text-error">
+					{form.errors.email}
+				</span>
+			</label>
+		{/if}
+	</div>
 
-  <!-- Password Field -->
-  <div class="form-control mt-4">
-    <label for="password" class="label">
-      <span class="label-text font-semibold">Hasło</span>
-      <span class="label-text-alt text-error">*wymagane</span>
-    </label>
-    <input
-      type="password"
-      name="password"
-      id="password"
-      class="input input-bordered"
-      class:input-error={form?.errors?.password}
-      placeholder="••••••••"
-      required
-      minlength="8"
-      autocomplete="new-password"
-      bind:value={password}
-      disabled={isSubmitting}
-    />
-    <label class="label">
-      <span class="label-text-alt text-base-content/60">
-        Minimum 8 znaków
-      </span>
-    </label>
-    {#if form?.errors?.password}
-      <label class="label">
-        <span class="label-text-alt text-error">
-          {form.errors.password}
-        </span>
-      </label>
-    {/if}
-  </div>
+	<!-- Password Field -->
+	<div class="form-control mt-4">
+		<label for="password" class="label">
+			<span class="label-text font-semibold">Hasło</span>
+			<span class="label-text-alt text-error">*wymagane</span>
+		</label>
+		<input
+			type="password"
+			name="password"
+			id="password"
+			class="input input-bordered"
+			class:input-error={form?.errors?.password}
+			placeholder="••••••••"
+			required
+			minlength="8"
+			autocomplete="new-password"
+			bind:value={password}
+			disabled={isSubmitting}
+		/>
+		<label class="label">
+			<span class="label-text-alt text-base-content/60"> Minimum 8 znaków </span>
+		</label>
+		{#if form?.errors?.password}
+			<label class="label">
+				<span class="label-text-alt text-error">
+					{form.errors.password}
+				</span>
+			</label>
+		{/if}
+	</div>
 
-  <!-- Confirm Password Field with INLINE VALIDATION (US 1.3) -->
-  <div class="form-control mt-4">
-    <label for="confirmPassword" class="label">
-      <span class="label-text font-semibold">Powtórz hasło</span>
-      <span class="label-text-alt text-error">*wymagane</span>
-    </label>
-    <input
-      type="password"
-      name="confirmPassword"
-      id="confirmPassword"
-      class="input input-bordered"
-      class:input-error={passwordMismatchError}
-      placeholder="••••••••"
-      required
-      minlength="8"
-      autocomplete="new-password"
-      bind:value={confirmPassword}
-      disabled={isSubmitting}
-    />
+	<!-- Confirm Password Field with INLINE VALIDATION (US 1.3) -->
+	<div class="form-control mt-4">
+		<label for="confirmPassword" class="label">
+			<span class="label-text font-semibold">Powtórz hasło</span>
+			<span class="label-text-alt text-error">*wymagane</span>
+		</label>
+		<input
+			type="password"
+			name="confirmPassword"
+			id="confirmPassword"
+			class="input input-bordered"
+			class:input-error={passwordMismatchError}
+			placeholder="••••••••"
+			required
+			minlength="8"
+			autocomplete="new-password"
+			bind:value={confirmPassword}
+			disabled={isSubmitting}
+		/>
 
-    <!-- INLINE VALIDATION ERROR (US 1.3: "Walidacja błędów odbywa się inline") -->
-    {#if passwordMismatchError}
-      <label class="label">
-        <span class="label-text-alt text-error">
-          {passwordMismatchError}
-        </span>
-      </label>
-    {/if}
-  </div>
+		<!-- INLINE VALIDATION ERROR (US 1.3: "Walidacja błędów odbywa się inline") -->
+		{#if passwordMismatchError}
+			<label class="label">
+				<span class="label-text-alt text-error">
+					{passwordMismatchError}
+				</span>
+			</label>
+		{/if}
+	</div>
 
-  <!-- General Error Alert -->
-  {#if form?.error}
-    <div class="alert alert-error mt-4">
-      <svg
-        class="w-6 h-6 shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>{form.error}</span>
-    </div>
-  {/if}
+	<!-- General Error Alert -->
+	{#if form?.error}
+		<div class="alert alert-error mt-4">
+			<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+			<span>{form.error}</span>
+		</div>
+	{/if}
 
-  <!-- Submit Button -->
-  <div class="form-control mt-6">
-    <button
-      type="submit"
-      class="btn btn-primary btn-lg w-full"
-      disabled={!canSubmit}
-    >
-      {#if isSubmitting}
-        <span class="loading loading-spinner loading-sm"></span>
-        Rejestracja...
-      {:else}
-        Zarejestruj się
-      {/if}
-    </button>
-  </div>
+	<!-- Submit Button -->
+	<div class="form-control mt-6">
+		<button type="submit" class="btn btn-primary btn-lg w-full" disabled={!canSubmit}>
+			{#if isSubmitting}
+				<span class="loading loading-spinner loading-sm"></span>
+				Rejestracja...
+			{:else}
+				Zarejestruj się
+			{/if}
+		</button>
+	</div>
 </form>
 
 <!-- Divider -->
@@ -2020,12 +2078,10 @@ export const actions: Actions = {
 
 <!-- Link to Login (US 1.7) -->
 <div class="text-center">
-  <p class="text-sm">
-    Masz już konto?
-    <a href="/login" class="link link-primary font-semibold">
-      Zaloguj się
-    </a>
-  </p>
+	<p class="text-sm">
+		Masz już konto?
+		<a href="/login" class="link link-primary font-semibold"> Zaloguj się </a>
+	</p>
 </div>
 ```
 
@@ -2034,6 +2090,7 @@ export const actions: Actions = {
 ### Krok 6: Testowanie inline walidacji (US 1.3)
 
 **6.1. Test inline walidacji - hasła nie pasują:**
+
 ```bash
 # Otwórz http://localhost:5173/register
 # 1. Wpisz email: test@example.com
@@ -2061,6 +2118,7 @@ export const actions: Actions = {
 ### Krok 7: Testowanie funkcjonalności - redirect guard
 
 **7.1. Test redirect guard (zalogowany):**
+
 ```bash
 # Zaloguj się na istniejące konto
 # Spróbuj wejść na http://localhost:5173/register
@@ -2076,6 +2134,7 @@ export const actions: Actions = {
 ### Krok 8: Testowanie rejestracji - sukces
 
 **8.1. Test udanej rejestracji:**
+
 ```bash
 # Wyloguj się
 # Otwórz /register
@@ -2100,6 +2159,7 @@ export const actions: Actions = {
 ### Krok 9: Testowanie błędów rejestracji
 
 **9.1. Test - email już zarejestrowany:**
+
 ```bash
 # Użyj emaila który już istnieje
 # Submit
@@ -2112,6 +2172,7 @@ export const actions: Actions = {
 ```
 
 **9.2. Test - zbyt słabe hasło:**
+
 ```bash
 # Użyj słabego hasła: "12345678"
 # Submit
@@ -2123,6 +2184,7 @@ export const actions: Actions = {
 ```
 
 **9.3. Test - rate limit:**
+
 ```bash
 # Wykonaj wiele prób rejestracji (10+)
 
@@ -2136,6 +2198,7 @@ export const actions: Actions = {
 ### Krok 10: Testowanie progressive enhancement
 
 **10.1. Test bez JavaScript:**
+
 ```bash
 # Wyłącz JavaScript w przeglądarce
 
@@ -2151,6 +2214,7 @@ export const actions: Actions = {
 ```
 
 **10.2. Test z JavaScript:**
+
 ```bash
 # Włącz JavaScript
 
@@ -2183,6 +2247,7 @@ export const actions: Actions = {
 ### Krok 12: Accessibility
 
 **12.1. Keyboard navigation:**
+
 ```bash
 # Sprawdź:
 - [ ] Tab przełącza między polami
@@ -2192,6 +2257,7 @@ export const actions: Actions = {
 ```
 
 **12.2. Screen reader:**
+
 ```bash
 # Użyj screen readera (VoiceOver, NVDA)
 
@@ -2207,6 +2273,7 @@ export const actions: Actions = {
 ### Krok 13: Styling i responsywność
 
 **13.1. Mobile (< 768px):**
+
 ```bash
 # Sprawdź:
 - [ ] Formularz wypełnia ekran (max-w-md)
@@ -2218,6 +2285,7 @@ export const actions: Actions = {
 ```
 
 **13.2. Desktop (> 1024px):**
+
 ```bash
 # Sprawdź:
 - [ ] Card wyśrodkowany
@@ -2230,6 +2298,7 @@ export const actions: Actions = {
 ### Krok 14: Finalizacja
 
 **14.1. Code review checklist:**
+
 ```bash
 - [ ] Wszystkie typy poprawne (Props z $props())
 - [ ] Inline walidacja działa (US 1.3)
@@ -2244,6 +2313,7 @@ export const actions: Actions = {
 ```
 
 **14.2. User Stories verification:**
+
 ```bash
 - [ ] US 1.2: ✅ Można zarejestrować się z email + password
 - [ ] US 1.3: ✅ Walidacja "Hasła nie pasują" odbywa się inline
@@ -2252,6 +2322,7 @@ export const actions: Actions = {
 ```
 
 **14.3. Security checklist:**
+
 ```bash
 - [ ] Password type="password" (masked)
 - [ ] Autocomplete attributes (new-password)
@@ -2270,6 +2341,7 @@ Ten plan implementacji obejmuje kompletnie Widok 4: Rejestracja aplikacji Mroczn
 ### Kluczowe aspekty:
 
 **Funkcjonalności:**
+
 1. **Formularz rejestracji** - email + password + confirm password
 2. **Inline walidacja (US 1.3)** - "Hasła nie pasują" w czasie rzeczywistym
 3. **Supabase Auth** - signUp() z automatycznym logowaniem
@@ -2280,12 +2352,14 @@ Ten plan implementacji obejmuje kompletnie Widok 4: Rejestracja aplikacji Mroczn
 8. **Error handling** - wszystkie scenariusze błędów
 
 **Realizacja User Stories:**
+
 - ✅ **US 1.2**: Rejestracja z email + password
 - ✅ **US 1.3**: Inline walidacja "Hasła nie pasują"
 - ✅ **US 1.5**: Automatyczne przekierowanie na `/`
 - ✅ **US 1.7**: Link do przełączenia na logowanie
 
 **Technologie:**
+
 - SvelteKit Form Actions
 - Supabase Auth (@supabase/supabase-js)
 - Svelte 5 runes ($state, $derived)
@@ -2293,6 +2367,7 @@ Ten plan implementacji obejmuje kompletnie Widok 4: Rejestracja aplikacji Mroczn
 - HTML5 validation
 
 **UX:**
+
 - Inline walidacja zgodności haseł (natychmiastowy feedback)
 - Loading state na przycisku i inputs
 - Komunikaty błędów po polsku
@@ -2301,6 +2376,7 @@ Ten plan implementacji obejmuje kompletnie Widok 4: Rejestracja aplikacji Mroczn
 - Smooth transitions
 
 **Bezpieczeństwo:**
+
 - Password masked (type="password")
 - Autocomplete new-password
 - Password match validation (client + server)
@@ -2309,6 +2385,7 @@ Ten plan implementacji obejmuje kompletnie Widok 4: Rejestracja aplikacji Mroczn
 - Redirect guard
 
 **Accessibility:**
+
 - Keyboard navigation
 - Screen reader support
 - ARIA attributes (opcjonalnie)

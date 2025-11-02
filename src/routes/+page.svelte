@@ -107,10 +107,7 @@
 			await invalidateAll();
 		} catch (error) {
 			console.error('Delete error:', error);
-			toastStore.addToast(
-				'Błąd połączenia. Sprawdź internet i spróbuj ponownie.',
-				'error'
-			);
+			toastStore.addToast('Błąd połączenia. Sprawdź internet i spróbuj ponownie.', 'error');
 		} finally {
 			deleteState.isDeleting = false;
 		}
@@ -128,19 +125,13 @@
 			if (!response.ok) {
 				// 404 - no stories
 				if (response.status === 404) {
-					toastStore.addToast(
-						'Brak historii do wylosowania',
-						'warning'
-					);
+					toastStore.addToast('Brak historii do wylosowania', 'warning');
 					return;
 				}
 
 				// 401 - session expired
 				if (response.status === 401) {
-					toastStore.addToast(
-						'Sesja wygasła. Zaloguj się ponownie',
-						'error'
-					);
+					toastStore.addToast('Sesja wygasła. Zaloguj się ponownie', 'error');
 					await goto('/login');
 					return;
 				}
@@ -164,10 +155,7 @@
 			await goto(`/stories/${story.id}`);
 		} catch (error) {
 			console.error('Random story error:', error);
-			toastStore.addToast(
-				'Błąd połączenia. Sprawdź internet.',
-				'error'
-			);
+			toastStore.addToast('Błąd połączenia. Sprawdź internet.', 'error');
 		} finally {
 			isRandomizing = false;
 		}

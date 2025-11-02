@@ -39,9 +39,7 @@
 	</select>
 
 	<div class="label">
-		<span class="label-text-alt text-base-content/60">
-			To pole jest tylko do odczytu
-		</span>
+		<span class="label-text-alt text-base-content/60"> To pole jest tylko do odczytu </span>
 	</div>
 </div>
 

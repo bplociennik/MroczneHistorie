@@ -6,9 +6,9 @@ name: Test and Build
 # Runs on push to 'main' and on Pull Requests targeting 'main'.
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 # Permissions for GITHUB_TOKEN
 # Required for publishing reports if you extend this.
@@ -20,7 +20,7 @@ jobs:
   linting:
     name: 🔬 Linting
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: ⬇️ Check out code
         uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
   unit_tests:
     name: 🧪 Unit Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: ⬇️ Check out code
         uses: actions/checkout@v4

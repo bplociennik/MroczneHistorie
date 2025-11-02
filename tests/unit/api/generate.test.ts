@@ -364,9 +364,7 @@ describe('POST /api/stories/generate', () => {
 
 			// Mock the openaiService to throw generic error
 			const { openaiService } = await import('$lib/services/ai/openai.service');
-			vi.mocked(openaiService.generateStory).mockRejectedValueOnce(
-				new Error('Generic error')
-			);
+			vi.mocked(openaiService.generateStory).mockRejectedValueOnce(new Error('Generic error'));
 
 			// Act
 			const response = await POST({ request, locals } as any);

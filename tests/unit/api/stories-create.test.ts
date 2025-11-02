@@ -199,9 +199,7 @@ describe('POST /api/stories', () => {
 			expect(body).toEqual(validStoryFixture);
 			expect(body.id).toBeDefined();
 			expect(body.created_at).toBeDefined();
-			expect(response.headers.get('Location')).toBe(
-				`/api/stories/${validStoryFixture.id}`
-			);
+			expect(response.headers.get('Location')).toBe(`/api/stories/${validStoryFixture.id}`);
 		});
 
 		it('should include user_id in database insert', async () => {
@@ -217,9 +215,7 @@ describe('POST /api/stories', () => {
 			const mockSupabase = locals.supabase;
 			const insertMock = vi.fn().mockReturnThis();
 			const selectMock = vi.fn().mockReturnThis();
-			const singleMock = vi
-				.fn()
-				.mockResolvedValue({ data: validStoryFixture, error: null });
+			const singleMock = vi.fn().mockResolvedValue({ data: validStoryFixture, error: null });
 
 			mockSupabase.from = vi.fn().mockReturnValue({
 				insert: insertMock,

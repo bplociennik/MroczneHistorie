@@ -86,13 +86,13 @@ export class OpenAIService {
 	private buildPrompt(subject: string, difficulty: number, darkness: number): string {
 		const difficultyDefinitions: Record<number, string> = {
 			1: 'Łatwa: Rozwiązanie jest proste i logiczne, opiera się na 1-2 kluczowych, oczywistych faktach.',
-			2: 'Średnia: Rozwiązanie wymaga zadania kilku pytań i celowo zawiera 1-2 \'zmyłki\', aby skierować graczy na fałszywy trop.',
-			3: 'Trudna: Rozwiązanie jest nieszablonowe, wielowątkowe i bardzo trudne do odgadnięcia bez dogłębnej analizy i myślenia \'poza pudełkiem\'.'
+			2: "Średnia: Rozwiązanie wymaga zadania kilku pytań i celowo zawiera 1-2 'zmyłki', aby skierować graczy na fałszywy trop.",
+			3: "Trudna: Rozwiązanie jest nieszablonowe, wielowątkowe i bardzo trudne do odgadnięcia bez dogłębnej analizy i myślenia 'poza pudełkiem'."
 		};
 
 		const darknessDefinitions: Record<number, string> = {
 			1: 'Tajemnica: Historia jest mroczna w sensie nastroju i tajemnicy. Unikaj jawnych opisów przemocy, krwi czy obrażeń. Skup się na psychologii, niewyjaśnionych zdarzeniach i niepokojącym nastroju.',
-			2: 'Niepokojąca: Dopuszczalne są opisy sugerujące przemoc lub jej skutki. Możesz wspomnieć o \'krwi\', \'ciele\' lub \'walce\', ale bez naturalistycznych, brutalnych szczegółów. Ton ma być wyraźnie niepokojący.',
+			2: "Niepokojąca: Dopuszczalne są opisy sugerujące przemoc lub jej skutki. Możesz wspomnieć o 'krwi', 'ciele' lub 'walce', ale bez naturalistycznych, brutalnych szczegółów. Ton ma być wyraźnie niepokojący.",
 			3: 'Brutalna: Pełna dowolność. Historia może być brutalna, krwawa i zawierać naturalistyczne opisy przemocy, śmierci lub obrażeń fizycznych. Celem jest wywołanie silnego wrażenia, nawet szoku.'
 		};
 

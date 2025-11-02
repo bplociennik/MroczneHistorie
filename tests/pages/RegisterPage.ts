@@ -14,7 +14,9 @@ export class RegisterPage extends BasePage {
 	readonly emailInput = this.page.locator('#email');
 	readonly passwordInput = this.page.locator('#password');
 	readonly confirmPasswordInput = this.page.locator('#confirmPassword');
-	readonly submitButton = this.page.locator(`button[type="submit"]:has-text("${BUTTON_LABELS.register}")`);
+	readonly submitButton = this.page.locator(
+		`button[type="submit"]:has-text("${BUTTON_LABELS.register}")`
+	);
 	readonly loginLink = this.page.locator(`a:has-text("${BUTTON_LABELS.login}")`);
 
 	/**

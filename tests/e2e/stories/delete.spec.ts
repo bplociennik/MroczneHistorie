@@ -62,7 +62,11 @@ test.describe('Story Delete', () => {
 		expect(dbCount).toBe(5);
 	});
 
-	test('TC-CRUD-010: Delete story from detail page', async ({ storyDetailPage, homePage, seededStories }) => {
+	test('TC-CRUD-010: Delete story from detail page', async ({
+		storyDetailPage,
+		homePage,
+		seededStories
+	}) => {
 		const story = seededStories[0];
 
 		// Navigate to detail page
@@ -85,7 +89,10 @@ test.describe('Story Delete', () => {
 		expect(remainingCount).toBe(4);
 	});
 
-	test('TC-CRUD-011: Cancel deletion from detail page', async ({ storyDetailPage, seededStories }) => {
+	test('TC-CRUD-011: Cancel deletion from detail page', async ({
+		storyDetailPage,
+		seededStories
+	}) => {
 		const story = seededStories[0];
 
 		await storyDetailPage.navigate(story.id);

@@ -11,15 +11,21 @@ export class StoryEditPage extends BasePage {
 	}
 
 	// Locators - Read-only fields (non-editable)
-	readonly readOnlySubject = this.page.locator('[data-testid="readonly-subject"], input[name="subject"][readonly]');
+	readonly readOnlySubject = this.page.locator(
+		'[data-testid="readonly-subject"], input[name="subject"][readonly]'
+	);
 	readonly readOnlyDifficulty = this.page.locator('[data-testid="readonly-difficulty"]');
 	readonly readOnlyDarkness = this.page.locator('[data-testid="readonly-darkness"]');
 
 	// Locators - Editable fields
 	readonly questionInput = this.page.locator('textarea[name="question"], input[name="question"]');
 	readonly answerInput = this.page.locator('textarea[name="answer"], input[name="answer"]');
-	readonly saveButton = this.page.locator(`button[type="submit"]:has-text("${BUTTON_LABELS.saveChanges}"), button[type="submit"]:has-text("${BUTTON_LABELS.save}")`);
-	readonly cancelButton = this.page.locator(`a:has-text("${BUTTON_LABELS.cancel}"), button:has-text("${BUTTON_LABELS.cancel}")`);
+	readonly saveButton = this.page.locator(
+		`button[type="submit"]:has-text("${BUTTON_LABELS.saveChanges}"), button[type="submit"]:has-text("${BUTTON_LABELS.save}")`
+	);
+	readonly cancelButton = this.page.locator(
+		`a:has-text("${BUTTON_LABELS.cancel}"), button:has-text("${BUTTON_LABELS.cancel}")`
+	);
 
 	/**
 	 * Navigate to edit page
@@ -33,9 +39,11 @@ export class StoryEditPage extends BasePage {
 	 */
 	async getReadOnlyValues(): Promise<{ subject: string; difficulty: string; darkness: string }> {
 		return {
-			subject: await this.readOnlySubject.inputValue().catch(() => this.readOnlySubject.textContent() || ''),
-			difficulty: await this.readOnlyDifficulty.textContent() || '',
-			darkness: await this.readOnlyDarkness.textContent() || ''
+			subject: await this.readOnlySubject
+				.inputValue()
+				.catch(() => this.readOnlySubject.textContent() || ''),
+			difficulty: (await this.readOnlyDifficulty.textContent()) || '',
+			darkness: (await this.readOnlyDarkness.textContent()) || ''
 		};
 	}
 
@@ -111,6 +119,6 @@ export class StoryEditPage extends BasePage {
 	 */
 	async getValidationError(): Promise<string> {
 		const errorLocator = this.page.locator('.error, [role="alert"]').first();
-		return await errorLocator.textContent() || '';
+		return (await errorLocator.textContent()) || '';
 	}
 }

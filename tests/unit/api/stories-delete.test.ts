@@ -27,23 +27,20 @@ describe('DELETE /api/stories/[id]', () => {
 	});
 
 	describe('UUID Validation', () => {
-		it.each(invalidUUIDs)(
-			'should return 400 when UUID is invalid: %s',
-			async (invalidUUID) => {
-				// Arrange
-				const params = { id: invalidUUID };
-				const locals = createMockLocals({ authenticated: true });
+		it.each(invalidUUIDs)('should return 400 when UUID is invalid: %s', async (invalidUUID) => {
+			// Arrange
+			const params = { id: invalidUUID };
+			const locals = createMockLocals({ authenticated: true });
 
-				// Act
-				const response = await DELETE({ params, locals } as any);
-				const body: ErrorDTO = await response.json();
+			// Act
+			const response = await DELETE({ params, locals } as any);
+			const body: ErrorDTO = await response.json();
 
-				// Assert
-				expect(response.status).toBe(400);
-				expect(body.error.code).toBe('VALIDATION_ERROR');
-				expect(body.error.message).toContain('Nieprawidłowy format');
-			}
-		);
+			// Assert
+			expect(response.status).toBe(400);
+			expect(body.error.code).toBe('VALIDATION_ERROR');
+			expect(body.error.message).toContain('Nieprawidłowy format');
+		});
 	});
 
 	describe('Happy Path', () => {

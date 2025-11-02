@@ -36,28 +36,25 @@ describe('PATCH /api/stories/[id]', () => {
 	});
 
 	describe('UUID Validation', () => {
-		it.each(invalidUUIDs)(
-			'should return 400 when UUID is invalid: %s',
-			async (invalidUUID) => {
-				// Arrange
-				const params = { id: invalidUUID };
-				const request = createMockRequest({
-					method: 'PATCH',
-					body: validUpdateCommand
-				});
-				const locals = createMockLocals({ authenticated: true });
+		it.each(invalidUUIDs)('should return 400 when UUID is invalid: %s', async (invalidUUID) => {
+			// Arrange
+			const params = { id: invalidUUID };
+			const request = createMockRequest({
+				method: 'PATCH',
+				body: validUpdateCommand
+			});
+			const locals = createMockLocals({ authenticated: true });
 
-				// Act
-				const response = await PATCH({ params, request, locals } as any);
-				const body: ErrorDTO = await response.json();
+			// Act
+			const response = await PATCH({ params, request, locals } as any);
+			const body: ErrorDTO = await response.json();
 
-				// Assert
-				expect(response.status).toBe(400);
-				expect(body.error.code).toBe('VALIDATION_ERROR');
-				expect(body.error.message).toContain('Nieprawidłowy format');
-				expect(body.error.field).toBe('id');
-			}
-		);
+			// Assert
+			expect(response.status).toBe(400);
+			expect(body.error.code).toBe('VALIDATION_ERROR');
+			expect(body.error.message).toContain('Nieprawidłowy format');
+			expect(body.error.field).toBe('id');
+		});
 	});
 
 	describe('Request Body Parsing', () => {
@@ -80,14 +77,7 @@ describe('PATCH /api/stories/[id]', () => {
 	});
 
 	describe('Read-Only Fields Protection', () => {
-		const readOnlyFields = [
-			'subject',
-			'difficulty',
-			'darkness',
-			'user_id',
-			'created_at',
-			'id'
-		];
+		const readOnlyFields = ['subject', 'difficulty', 'darkness', 'user_id', 'created_at', 'id'];
 
 		it.each(readOnlyFields)(
 			'should return 400 when trying to update read-only field: %s',
@@ -306,15 +296,13 @@ describe('PATCH /api/stories/[id]', () => {
 
 			// Mock PGRST116 error (not found)
 			const mockSupabase = locals.supabase;
-			mockSupabase.from('stories').update().eq().select().single = vi
-				.fn()
-				.mockResolvedValue({
-					data: null,
-					error: {
-						code: 'PGRST116',
-						message: 'Not found'
-					}
-				});
+			mockSupabase.from('stories').update().eq().select().single = vi.fn().mockResolvedValue({
+				data: null,
+				error: {
+					code: 'PGRST116',
+					message: 'Not found'
+				}
+			});
 
 			// Act
 			const response = await PATCH({ params, request, locals } as any);
@@ -368,15 +356,13 @@ describe('PATCH /api/stories/[id]', () => {
 
 			// Mock database error
 			const mockSupabase = locals.supabase;
-			mockSupabase.from('stories').update().eq().select().single = vi
-				.fn()
-				.mockResolvedValue({
-					data: null,
-					error: {
-						code: '23505',
-						message: 'Database error'
-					}
-				});
+			mockSupabase.from('stories').update().eq().select().single = vi.fn().mockResolvedValue({
+				data: null,
+				error: {
+					code: '23505',
+					message: 'Database error'
+				}
+			});
 
 			// Act
 			const response = await PATCH({ params, request, locals } as any);
