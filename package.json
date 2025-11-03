@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"dev:e2e": "dotenv -e .env.e2e -q -- vite dev",
+		"dev:e2e": "node --env-file=.env.e2e node_modules/.bin/vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -17,11 +17,11 @@
 		"test:unit": "vitest run",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
-		"test:e2e": "playwright test",
+		"test:e2e": "node --env-file-if-exists=.env.e2e node_modules/.bin/playwright test",
 		"test:e2e:ui": "playwright test --ui",
-		"test:e2e:ui:e2e": "dotenv -e .env.e2e -q -- playwright test --ui",
+		"test:e2e:ui:e2e": "node --env-file=.env.e2e node_modules/.bin/playwright test --ui",
 		"test:e2e:debug": "playwright test --debug",
-		"test:e2e:debug:e2e": "dotenv -e .env.e2e -q -- playwright test --debug",
+		"test:e2e:debug:e2e": "node --env-file=.env.e2e node_modules/.bin/playwright test --debug",
 		"test:e2e:report": "playwright show-report"
 	},
 	"devDependencies": {
@@ -36,7 +36,6 @@
 		"autoprefixer": "^10.4.21",
 		"daisyui": "^5.3.10",
 		"dotenv": "^17.2.3",
-		"dotenv-cli": "^11.0.0",
 		"eslint": "^9.36.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",

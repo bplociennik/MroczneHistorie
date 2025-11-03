@@ -62,9 +62,81 @@ jobs:
 
   # Job 3: End-to-End Tests (Playwright)
   e2e_tests:
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      test_name: All
-      grep_pattern: ".*"
-      report_name: e2e
-    secrets: inherit
+    name: 🎭 E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Check out code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🌐 Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: 🌐 Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: 💾 Cache SvelteKit build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .svelte-kit
+            build
+          key: build-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            build-${{ runner.os }}-
+
+      - name: 🏗️ Build SvelteKit application
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run build
+
+      - name: 🌐 Start preview server in background
+        run: npx vite preview --port 5173 > /tmp/preview-server.log 2>&1 &
+
+      - name: ⏳ Wait for preview server to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:5173 > /dev/null 2>&1; then
+              echo "✓ Preview server is ready!"
+              exit 0
+            fi
+            echo "Waiting for preview server... ($i/30)"
+            sleep 2
+          done
+          echo "✗ Preview server startup timeout!"
+          cat /tmp/preview-server.log
+          exit 1
+
+      - name: 🎭 Run E2E Tests
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
+          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASS: ${{ secrets.E2E_USER_PASS }}
+        run: npm run test:e2e
+
+      - name: 📦 Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

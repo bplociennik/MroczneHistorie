@@ -2,9 +2,14 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
-// Load E2E environment variables only locally
+// Load E2E environment variables only locally and only if not already loaded
 // In CI (GitHub Actions), variables come from GitHub secrets via workflow env vars
-if (!process.env.CI && fs.existsSync('.env.e2e')) {
+// If using `node --env-file=.env.e2e`, variables are already loaded in process.env
+if (
+	!process.env.CI &&
+	!process.env.E2E_USER_EMAIL && // Check if variables are already loaded
+	fs.existsSync('.env.e2e')
+) {
 	dotenv.config({ path: '.env.e2e' });
 }
 
