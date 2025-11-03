@@ -20,9 +20,9 @@ export default defineConfig({
 		timeout: 5000
 	},
 
-	// Run tests sequentially to avoid database conflicts on staging
+	// Run tests in parallel for faster execution on CI
 	fullyParallel: false,
-	workers: 1,
+	workers: process.env.CI ? 3 : 1,
 
 	// Fail the build on CI if you accidentally left test.only in the source code
 	forbidOnly: !!process.env.CI,
