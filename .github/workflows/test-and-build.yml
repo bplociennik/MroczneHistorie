@@ -86,6 +86,9 @@ jobs:
 
       - name: 🏗️ Build SvelteKit application
         # This step is required so Playwright can test the production build
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: 🚀 Run E2E tests
