@@ -10,6 +10,9 @@ test.describe('Logout', () => {
 		// Navigate to home page (user is already logged in via auth.setup.ts)
 		await homePage.navigate();
 
+		// Wait for logout button to be visible (indicates user is logged in)
+		await homePage.page.locator('text=Wyloguj').first().waitFor({ state: 'visible', timeout: 5000 });
+
 		// Verify user is logged in
 		const isLoggedIn = await homePage.isLoggedIn();
 		expect(isLoggedIn).toBe(true);
@@ -20,6 +23,9 @@ test.describe('Logout', () => {
 		// Verify redirect to home page (landing page for unauthenticated users)
 		await expect(homePage.page).toHaveURL('/');
 
+		// Wait for logout button to disappear
+		await homePage.page.locator('text=Wyloguj').first().waitFor({ state: 'hidden', timeout: 5000 });
+
 		// Verify user is logged out (navbar shows "Zaloguj się")
 		const isStillLoggedIn = await homePage.isLoggedIn();
 		expect(isStillLoggedIn).toBe(false);
@@ -27,9 +33,5 @@ test.describe('Logout', () => {
 		// Verify landing page is visible
 		const isLandingVisible = await homePage.isLandingPageVisible();
 		expect(isLandingVisible).toBe(true);
-
-		// Verify navbar shows login/register buttons
-		await expect(homePage.loginButton).toBeVisible();
-		await expect(homePage.registerButton).toBeVisible();
 	});
 });

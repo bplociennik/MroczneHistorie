@@ -7,6 +7,148 @@ import { ApiErrors } from '$lib/server/utils/api-error';
 import type { ErrorDTO, UpdateStoryCommand } from '../../../../types';
 
 /**
+ * Get Story API Endpoint
+ *
+ * @route GET /api/stories/:id
+ * @auth Required (JWT Bearer token via Supabase)
+ *
+ * @param {string} id - Story UUID (URL parameter)
+ * @returns {StoryDTO} Story with all fields
+ *
+ * @throws {400} VALIDATION_ERROR - Invalid UUID format
+ * @throws {401} AUTHENTICATION_ERROR - Missing or invalid token
+ * @throws {404} NOT_FOUND - Story not found or no access (RLS)
+ * @throws {500} INTERNAL_ERROR - Database error
+ */
+export const GET: RequestHandler = async ({ params, locals }) => {
+	try {
+		// 1. Authentication check (handled by hooks.server.ts)
+		if (!locals.user) {
+			return json(
+				{
+					error: {
+						code: 'AUTHENTICATION_ERROR',
+						message: 'Brakujący lub nieprawidłowy token uwierzytelniający'
+					}
+				} satisfies ErrorDTO,
+				{ status: 401 }
+			);
+		}
+
+		// 2. Validate UUID format
+		const { id } = params;
+
+		if (!isValidUUID(id)) {
+			console.warn('[VALIDATION_ERROR] Invalid UUID format in GET', {
+				providedId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
+
+			return json(
+				{
+					error: {
+						code: 'VALIDATION_ERROR',
+						message: 'Nieprawidłowy format identyfikatora historii',
+						field: 'id'
+					}
+				} satisfies ErrorDTO,
+				{ status: 400 }
+			);
+		}
+
+		// 3. Fetch story from database
+		const { data, error } = await locals.supabase
+			.from('stories')
+			.select('*')
+			.eq('id', id)
+			.single();
+
+		// 4. Handle database errors
+		if (error) {
+			// Check if "not found" (PGRST116 = PostgREST not found)
+			if (error.code === 'PGRST116') {
+				console.warn('[NOT_FOUND] Story not found or no access during GET', {
+					storyId: id,
+					userId: locals.user.id,
+					timestamp: new Date().toISOString()
+				});
+
+				return json(
+					{
+						error: {
+							code: 'NOT_FOUND',
+							message: 'Nie znaleziono historii lub nie masz do niej dostępu'
+						}
+					} satisfies ErrorDTO,
+					{ status: 404 }
+				);
+			}
+
+			// Other database errors
+			console.error('[DB_ERROR] GET failed', {
+				code: error.code,
+				message: error.message,
+				storyId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
+
+			return json(
+				{
+					error: {
+						code: 'INTERNAL_ERROR',
+						message: 'Nie udało się pobrać historii. Spróbuj ponownie później'
+					}
+				} satisfies ErrorDTO,
+				{ status: 500 }
+			);
+		}
+
+		// 5. Check if data is null (RLS blocked or not found)
+		if (!data) {
+			console.warn('[NOT_FOUND] Story not found or no access (RLS) during GET', {
+				storyId: id,
+				userId: locals.user.id,
+				timestamp: new Date().toISOString()
+			});
+
+			return json(
+				{
+					error: {
+						code: 'NOT_FOUND',
+						message: 'Nie znaleziono historii lub nie masz do niej dostępu'
+					}
+				} satisfies ErrorDTO,
+				{ status: 404 }
+			);
+		}
+
+		// 6. Return success response (200 OK with story data)
+		return json(data, { status: 200 });
+	} catch (error: unknown) {
+		// 7. Handle unexpected errors
+		console.error('[API_ERROR] GET /api/stories/:id', {
+			error: error instanceof Error ? error.message : 'Unknown error',
+			stack: error instanceof Error ? error.stack : undefined,
+			storyId: params.id,
+			userId: locals.user?.id,
+			timestamp: new Date().toISOString()
+		});
+
+		return json(
+			{
+				error: {
+					code: 'INTERNAL_ERROR',
+					message: 'Nie udało się pobrać historii. Spróbuj ponownie później'
+				}
+			} satisfies ErrorDTO,
+			{ status: 500 }
+		);
+	}
+};
+
+/**
  * Update Story API Endpoint
  *
  * @route PATCH /api/stories/:id

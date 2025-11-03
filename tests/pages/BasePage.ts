@@ -132,7 +132,7 @@ export class BasePage {
 	 * Logout user via navbar
 	 */
 	async logout(): Promise<void> {
-		await this.clickButton('text=Wyloguj');
+		await this.page.locator('text=Wyloguj').first().click();
 		await this.waitForUrl('/');
 	}
 

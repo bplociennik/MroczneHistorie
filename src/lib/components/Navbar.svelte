@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { Session } from '@supabase/supabase-js';
+	import type { User } from '@supabase/supabase-js';
 	import type { SupabaseClient } from '@supabase/supabase-js';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { toastStore } from '$lib/stores/toasts';
 
 	interface NavbarProps {
-		session: Session | null;
+		user: User | null;
 		supabase: SupabaseClient;
 	}
 
-	let { session, supabase }: NavbarProps = $props();
+	let { user, supabase }: NavbarProps = $props();
 
 	/**
 	 * Handle logout
@@ -46,7 +46,7 @@
 	<!-- Desktop Menu -->
 	<div class="flex-none hidden lg:flex">
 		<ul class="menu menu-horizontal px-1">
-			{#if session}
+			{#if user}
 				<li><a href={resolve('/')}>Moje Historie</a></li>
 				<li>
 					<a href={resolve('/generate')} class="flex items-center gap-2">
@@ -102,7 +102,7 @@
 				tabindex="0"
 				class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
 			>
-				{#if session}
+				{#if user}
 					<li><a href={resolve('/')}>Moje Historie</a></li>
 					<li>
 						<a href={resolve('/generate')} class="flex items-center gap-2">

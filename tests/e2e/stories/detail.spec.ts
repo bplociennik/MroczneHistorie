@@ -1,4 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
+import { E2E_USER } from '../../utils/test-data';
+import { seedMultipleStories, cleanupUserStories, type Story } from '../../utils/db-helpers';
 
 /**
  * E2E Tests for Story Detail page (game mode)
@@ -6,10 +8,20 @@ import { test, expect } from '../../fixtures/test-fixtures';
  */
 
 test.describe('Story Detail', () => {
-	test('TC-CRUD-006: Display story in game mode (Happy Path)', async ({
-		storyDetailPage,
-		seededStories
-	}) => {
+	test.describe.configure({ mode: 'serial' });
+
+	let seededStories: Story[];
+
+	test.beforeEach(async () => {
+		await cleanupUserStories(E2E_USER.id);
+		seededStories = await seedMultipleStories(E2E_USER.id, 5);
+	});
+
+	test.afterEach(async () => {
+		await cleanupUserStories(E2E_USER.id);
+	});
+
+	test('TC-CRUD-006: Display story in game mode (Happy Path)', async ({ storyDetailPage }) => {
 		const story = seededStories[0];
 
 		// Navigate to story detail page
@@ -27,7 +39,7 @@ test.describe('Story Detail', () => {
 		await expect(storyDetailPage.revealButton).toBeVisible();
 	});
 
-	test('TC-CRUD-006: Reveal and hide answer toggle', async ({ storyDetailPage, seededStories }) => {
+	test('TC-CRUD-006: Reveal and hide answer toggle', async ({ storyDetailPage }) => {
 		const story = seededStories[0];
 		await storyDetailPage.navigate(story.id);
 
@@ -60,7 +72,7 @@ test.describe('Story Detail', () => {
 		await expect(storyDetailPage.revealButton).toBeVisible();
 	});
 
-	test('TC-CRUD-006: Navigate to edit page', async ({ storyDetailPage, seededStories }) => {
+	test('TC-CRUD-006: Navigate to edit page', async ({ storyDetailPage }) => {
 		const story = seededStories[0];
 		await storyDetailPage.navigate(story.id);
 
@@ -71,7 +83,7 @@ test.describe('Story Detail', () => {
 		await expect(storyDetailPage.page).toHaveURL(new RegExp(`/stories/${story.id}/edit`));
 	});
 
-	test('TC-CRUD-006: Navigate back to list', async ({ storyDetailPage, seededStories }) => {
+	test('TC-CRUD-006: Navigate back to list', async ({ storyDetailPage }) => {
 		const story = seededStories[0];
 		await storyDetailPage.navigate(story.id);
 

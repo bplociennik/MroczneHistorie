@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
 import { SUCCESS_MESSAGES } from '../../utils/test-data';
-import { getStoriesCount } from '../../utils/db-helpers';
+import { getStoriesCount, seedMultipleStories, cleanupUserStories, type Story } from '../../utils/db-helpers';
 import { E2E_USER } from '../../utils/test-data';
 
 /**
@@ -9,10 +9,26 @@ import { E2E_USER } from '../../utils/test-data';
  */
 
 test.describe('Story Delete', () => {
+	// Run tests serially to avoid database conflicts
+	test.describe.configure({ mode: 'serial' });
+
+	let seededStories: Story[];
+
+	test.beforeEach(async () => {
+		// Clean and seed before each test
+		await cleanupUserStories(E2E_USER.id);
+		seededStories = await seedMultipleStories(E2E_USER.id, 5);
+	});
+
+	test.afterEach(async () => {
+		// Clean after each test
+		await cleanupUserStories(E2E_USER.id);
+	});
+
 	test('TC-CRUD-010: Delete story from list (Happy Path)', async ({ homePage }) => {
 		await homePage.navigate();
 
-		// Get initial count
+		// Get initial count (should be 5 from seededStories fixture)
 		const initialCount = await homePage.getStoriesCount();
 		expect(initialCount).toBe(5);
 
@@ -62,11 +78,7 @@ test.describe('Story Delete', () => {
 		expect(dbCount).toBe(5);
 	});
 
-	test('TC-CRUD-010: Delete story from detail page', async ({
-		storyDetailPage,
-		homePage,
-		seededStories
-	}) => {
+	test('TC-CRUD-010: Delete story from detail page', async ({ storyDetailPage, homePage }) => {
 		const story = seededStories[0];
 
 		// Navigate to detail page
@@ -89,10 +101,7 @@ test.describe('Story Delete', () => {
 		expect(remainingCount).toBe(4);
 	});
 
-	test('TC-CRUD-011: Cancel deletion from detail page', async ({
-		storyDetailPage,
-		seededStories
-	}) => {
+	test('TC-CRUD-011: Cancel deletion from detail page', async ({ storyDetailPage }) => {
 		const story = seededStories[0];
 
 		await storyDetailPage.navigate(story.id);

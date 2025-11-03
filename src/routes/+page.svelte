@@ -164,7 +164,7 @@
 </script>
 
 <div class="container mx-auto px-4 py-8">
-	{#if !data.session}
+	{#if !data.user}
 		<LandingPage />
 	{:else if data.stories.length === 0}
 		<EmptyState />

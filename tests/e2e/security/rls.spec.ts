@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import { E2E_USER } from '../../utils/test-data';
-import { getUserStories } from '../../utils/db-helpers';
+import { E2E_USER, SAMPLE_STORIES } from '../../utils/test-data';
+import { getUserStories, seedMultipleStories, cleanupUserStories } from '../../utils/db-helpers';
 
 /**
  * E2E Tests for Row Level Security (RLS)
@@ -9,6 +9,20 @@ import { getUserStories } from '../../utils/db-helpers';
  */
 
 test.describe('RLS Security', () => {
+	// Run tests serially to avoid database conflicts
+	test.describe.configure({ mode: 'serial' });
+
+	test.beforeEach(async () => {
+		// Clean and seed before each test
+		await cleanupUserStories(E2E_USER.id);
+		await seedMultipleStories(E2E_USER.id, 5);
+	});
+
+	test.afterEach(async () => {
+		// Clean after each test
+		await cleanupUserStories(E2E_USER.id);
+	});
+
 	test('TC-AUTH-007: User sees only their own stories in list', async ({ homePage }) => {
 		// Seed stories for E2E user
 		await homePage.navigate();
@@ -44,8 +58,8 @@ test.describe('RLS Security', () => {
 	});
 
 	test('TC-AUTH-007: Cannot access another user story by ID (404)', async ({ page }) => {
-		// Create a fake UUID that doesn't belong to E2E user
-		const otherUserStoryId = '00000000-0000-0000-0000-000000000001';
+		// Create a valid UUID v4 that doesn't belong to E2E user
+		const otherUserStoryId = '00000000-0000-4000-8000-000000000001';
 
 		// Try to access via API
 		const response = await page.request.get(`/api/stories/${otherUserStoryId}`);
@@ -55,14 +69,14 @@ test.describe('RLS Security', () => {
 	});
 
 	test('TC-AUTH-007: Cannot update another user story (404)', async ({ page }) => {
-		const otherUserStoryId = '00000000-0000-0000-0000-000000000001';
+		const otherUserStoryId = '00000000-0000-4000-8000-000000000001';
 
 		// Try to update via API
 		const response = await page.request.patch(`/api/stories/${otherUserStoryId}`, {
-			data: {
+			data: JSON.stringify({
 				question: 'Hacked question',
 				answer: 'Hacked answer'
-			}
+			})
 		});
 
 		// Should return 404 (RLS prevents update)
@@ -70,7 +84,7 @@ test.describe('RLS Security', () => {
 	});
 
 	test('TC-AUTH-007: Cannot delete another user story (404)', async ({ page }) => {
-		const otherUserStoryId = '00000000-0000-0000-0000-000000000001';
+		const otherUserStoryId = '00000000-0000-4000-8000-000000000001';
 
 		// Try to delete via API
 		const response = await page.request.delete(`/api/stories/${otherUserStoryId}`);

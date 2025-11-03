@@ -1,5 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import { PAGE_TITLES, BUTTON_LABELS } from '../../utils/test-data';
+import { PAGE_TITLES, BUTTON_LABELS, E2E_USER } from '../../utils/test-data';
+import { cleanupUserStories, seedMultipleStories, type Story } from '../../utils/db-helpers';
 
 /**
  * E2E Tests for Stories List
@@ -7,7 +8,9 @@ import { PAGE_TITLES, BUTTON_LABELS } from '../../utils/test-data';
  */
 
 test.describe('Stories List', () => {
-	test('TC-CRUD-001: Display empty state when no stories', async ({ homePage }) => {
+	test.describe.configure({ mode: 'serial' });
+
+	test('TC-CRUD-001: Display empty state when no stories', async ({ homePage, cleanDatabase }) => {
 		// Navigate to home page (database is clean)
 		await homePage.navigate();
 
@@ -31,9 +34,19 @@ test.describe('Stories List', () => {
 		expect(storiesCount).toBe(0);
 	});
 
-	test('TC-CRUD-002: Display list of stories (Happy Path)', async ({ homePage }) => {
-		// Navigate to home page (database has 5 seeded stories)
-		await homePage.navigate();
+	test.describe('With seeded stories', () => {
+		test.beforeEach(async () => {
+			await cleanupUserStories(E2E_USER.id);
+			await seedMultipleStories(E2E_USER.id, 5);
+		});
+
+		test.afterEach(async () => {
+			await cleanupUserStories(E2E_USER.id);
+		});
+
+		test('TC-CRUD-002: Display list of stories (Happy Path)', async ({ homePage }) => {
+			// Navigate to home page (database has 5 seeded stories)
+			await homePage.navigate();
 
 		// Verify empty state is NOT visible
 		const isEmptyVisible = await homePage.isEmptyStateVisible();
@@ -65,26 +78,27 @@ test.describe('Stories List', () => {
 		// Verify stories are sorted by created_at DESC (newest first)
 		// First seeded story should be "#5" (last created)
 		const firstCardText = await homePage.getStoryQuestion(0);
-		expect(firstCardText).toContain('#5');
-	});
+			expect(firstCardText).toContain('#5');
+		});
 
-	test('TC-CRUD-002: Navigate to story detail by clicking card', async ({ homePage }) => {
-		await homePage.navigate();
+		test('TC-CRUD-002: Navigate to story detail by clicking card', async ({ homePage }) => {
+			await homePage.navigate();
 
-		// Click on first story card
-		await homePage.clickStory(0);
+			// Click on first story card
+			await homePage.clickStory(0);
 
-		// Verify navigation to story detail page
-		await homePage.page.waitForURL(/\/stories\/[a-f0-9-]+/);
-	});
+			// Verify navigation to story detail page
+			await homePage.page.waitForURL(/\/stories\/[a-f0-9-]+/);
+		});
 
-	test('TC-CRUD-002: Navigate to edit page via edit button', async ({ homePage }) => {
-		await homePage.navigate();
+		test('TC-CRUD-002: Navigate to edit page via edit button', async ({ homePage }) => {
+			await homePage.navigate();
 
-		// Click edit button on first story
-		await homePage.clickEditOnStory(0);
+			// Click edit button on first story
+			await homePage.clickEditOnStory(0);
 
-		// Verify navigation to edit page
-		await homePage.page.waitForURL(/\/stories\/[a-f0-9-]+\/edit/);
+			// Verify navigation to edit page
+			await homePage.page.waitForURL(/\/stories\/[a-f0-9-]+\/edit/);
+		});
 	});
 });

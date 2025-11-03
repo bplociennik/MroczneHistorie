@@ -1,5 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import { SUCCESS_MESSAGES } from '../../utils/test-data';
+import { SUCCESS_MESSAGES, E2E_USER } from '../../utils/test-data';
+import { seedMultipleStories, cleanupUserStories, type Story } from '../../utils/db-helpers';
 
 /**
  * E2E Tests for Story Edit functionality
@@ -7,11 +8,20 @@ import { SUCCESS_MESSAGES } from '../../utils/test-data';
  */
 
 test.describe('Story Edit', () => {
-	test('TC-CRUD-008: Edit story (Happy Path)', async ({
-		storyEditPage,
-		storyDetailPage,
-		seededStories
-	}) => {
+	test.describe.configure({ mode: 'serial' });
+
+	let seededStories: Story[];
+
+	test.beforeEach(async () => {
+		await cleanupUserStories(E2E_USER.id);
+		seededStories = await seedMultipleStories(E2E_USER.id, 5);
+	});
+
+	test.afterEach(async () => {
+		await cleanupUserStories(E2E_USER.id);
+	});
+
+	test('TC-CRUD-008: Edit story (Happy Path)', async ({ storyEditPage, storyDetailPage }) => {
 		const story = seededStories[0];
 
 		// Navigate to edit page
@@ -49,10 +59,7 @@ test.describe('Story Edit', () => {
 		expect(displayedAnswer).toContain(newAnswer);
 	});
 
-	test('TC-CRUD-008: Read-only fields cannot be modified', async ({
-		storyEditPage,
-		seededStories
-	}) => {
+	test('TC-CRUD-008: Read-only fields cannot be modified', async ({ storyEditPage }) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 

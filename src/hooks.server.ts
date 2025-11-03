@@ -62,11 +62,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 			const { data } = await serviceRoleClient.auth.getUser(token);
 			event.locals.user = data.user ?? null;
 		} else {
-			// Internal server-side fetch - use cookie-based session from ANON client
+			// Internal server-side fetch - verify user with getUser() for security
 			const {
-				data: { session }
-			} = await event.locals.supabase.auth.getSession();
-			event.locals.user = session?.user ?? null;
+				data: { user }
+			} = await event.locals.supabase.auth.getUser();
+			event.locals.user = user ?? null;
 		}
 	} else {
 		// For browser routes: Use Anon client with cookie-based auth
@@ -82,11 +82,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 		});
 
-		// Get user from session
+		// Verify user with getUser() for security
 		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
-		event.locals.user = session?.user ?? null;
+			data: { user }
+		} = await event.locals.supabase.auth.getUser();
+		event.locals.user = user ?? null;
 	}
 
 	return resolve(event);

@@ -10,19 +10,19 @@ import type { LayoutServerLoad } from './$types';
  */
 export const load: LayoutServerLoad = async ({ locals }) => {
 	try {
-		// Get session from Supabase
+		// Get verified user from Supabase
 		const {
-			data: { session }
-		} = await locals.supabase.auth.getSession();
+			data: { user }
+		} = await locals.supabase.auth.getUser();
 
 		return {
-			session
+			user
 		};
 	} catch (error) {
-		console.error('Error loading session:', error);
-		// Treat as unauthenticated if session fetch fails
+		console.error('Error loading user:', error);
+		// Treat as unauthenticated if user fetch fails
 		return {
-			session: null
+			user: null
 		};
 	}
 };

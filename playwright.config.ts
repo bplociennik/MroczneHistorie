@@ -1,11 +1,28 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Environment variables are loaded via:
  * - `node --env-file=.env.e2e` flag in npm scripts (locally)
  * - GitHub secrets passed as env vars in workflow (CI)
- * No need to manually load dotenv here
+ * We also try to load .env.e2e here as a fallback
  */
+
+// Load .env.e2e if it exists and we're not in CI
+if (!process.env.CI && process.env.NODE_ENV !== 'test') {
+	const envPath = path.resolve('.env.e2e');
+	if (fs.existsSync(envPath)) {
+		const envContent = fs.readFileSync(envPath, 'utf-8');
+		envContent.split('\n').forEach((line) => {
+			const [key, ...valueParts] = line.split('=');
+			const trimmedKey = key.trim();
+			if (trimmedKey && !trimmedKey.startsWith('#') && !process.env[trimmedKey]) {
+				process.env[trimmedKey] = valueParts.join('=').trim();
+			}
+		});
+	}
+}
 
 /**
  * Playwright configuration for MroczneHistorie E2E tests
@@ -16,16 +33,16 @@ export default defineConfig({
 	testDir: './tests',
 
 	// Maximum time one test can run (most tests should be faster)
-	timeout: 30000,
+	timeout: 20000,
 
 	// Expect timeout for assertions
 	expect: {
-		timeout: 5000
+		timeout: 4000
 	},
 
 	// Run tests in parallel for faster execution on CI
 	fullyParallel: false,
-	workers: process.env.CI ? 5 : 1,
+	workers: process.env.CI ? 5 : 4,
 
 	// Fail the build on CI if you accidentally left test.only in the source code
 	forbidOnly: !!process.env.CI,

@@ -7,17 +7,30 @@ import { createClient } from '@supabase/supabase-js';
  * Environment variables are loaded via `node --env-file=.env.e2e` in npm scripts
  */
 
-// Initialize Supabase client with service role key (bypasses RLS)
-const supabase = createClient(
-	process.env.PUBLIC_SUPABASE_URL!,
-	process.env.SUPABASE_SERVICE_ROLE_KEY!,
-	{
-		auth: {
-			autoRefreshToken: false,
-			persistSession: false
+// Lazy initialization - create client only when needed
+let supabase: ReturnType<typeof createClient> | null = null;
+
+function getSupabaseClient() {
+	if (!supabase) {
+		const url = process.env.PUBLIC_SUPABASE_URL;
+		const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+		if (!url) {
+			throw new Error('PUBLIC_SUPABASE_URL environment variable is required');
 		}
+		if (!key) {
+			throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required');
+		}
+
+		supabase = createClient(url, key, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false
+			}
+		});
 	}
-);
+	return supabase;
+}
 
 export interface Story {
 	id: string;
@@ -37,7 +50,7 @@ export interface Story {
  * @param userId - User ID to cleanup stories for
  */
 export async function cleanupUserStories(userId: string): Promise<void> {
-	const { error } = await supabase.from('stories').delete().eq('user_id', userId);
+	const { error } = await getSupabaseClient().from('stories').delete().eq('user_id', userId);
 
 	if (error) {
 		console.error(`Failed to cleanup stories for user ${userId}:`, error);
@@ -64,7 +77,7 @@ export async function seedStory(
 		...storyData
 	};
 
-	const { data, error } = await supabase
+	const { data, error } = await getSupabaseClient()
 		.from('stories')
 		.insert({
 			user_id: userId,
@@ -115,7 +128,7 @@ export async function seedMultipleStories(
  * @returns Number of stories
  */
 export async function getStoriesCount(userId: string): Promise<number> {
-	const { count, error } = await supabase
+	const { count, error } = await getSupabaseClient()
 		.from('stories')
 		.select('*', { count: 'exact', head: true })
 		.eq('user_id', userId);
@@ -133,7 +146,7 @@ export async function getStoriesCount(userId: string): Promise<number> {
  * @param storyId - Story ID to delete
  */
 export async function deleteStory(storyId: string): Promise<void> {
-	const { error } = await supabase.from('stories').delete().eq('id', storyId);
+	const { error } = await getSupabaseClient().from('stories').delete().eq('id', storyId);
 
 	if (error) {
 		console.error(`Failed to delete story ${storyId}:`, error);
@@ -147,7 +160,7 @@ export async function deleteStory(storyId: string): Promise<void> {
  * @returns Story or null if not found
  */
 export async function getStory(storyId: string): Promise<Story | null> {
-	const { data, error } = await supabase.from('stories').select('*').eq('id', storyId).single();
+	const { data, error } = await getSupabaseClient().from('stories').select('*').eq('id', storyId).single();
 
 	if (error) {
 		if (error.code === 'PGRST116') {
@@ -167,7 +180,7 @@ export async function getStory(storyId: string): Promise<Story | null> {
  * @returns Array of stories
  */
 export async function getUserStories(userId: string): Promise<Story[]> {
-	const { data, error } = await supabase
+	const { data, error } = await getSupabaseClient()
 		.from('stories')
 		.select('*')
 		.eq('user_id', userId)

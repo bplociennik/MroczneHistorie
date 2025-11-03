@@ -19,7 +19,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-base-300" data-theme="dark">
-	<Navbar session={data.session} supabase={data.supabase} />
+	<Navbar user={data.user} supabase={data.supabase} />
 
 	<main class="container mx-auto px-4 py-8">
 		{@render children?.()}
