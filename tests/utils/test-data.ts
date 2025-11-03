@@ -1,12 +1,9 @@
 /**
  * Test data constants and generators for E2E tests
  * All user-facing messages are in Polish (as per application requirements)
+ *
+ * Environment variables are loaded via `node --env-file=.env.e2e` in npm scripts
  */
-
-import dotenv from 'dotenv';
-
-// Load E2E environment variables
-dotenv.config({ path: '.env.e2e' });
 
 // E2E Test User Credentials (from .env.e2e)
 export const E2E_USER = {

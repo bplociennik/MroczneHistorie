@@ -1,12 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-
-// Load E2E environment variables
-dotenv.config({ path: '.env.e2e' });
 
 /**
  * Database helper utilities for E2E tests
  * Uses Supabase Service Role to bypass RLS for cleanup operations
+ *
+ * Environment variables are loaded via `node --env-file=.env.e2e` in npm scripts
  */
 
 // Initialize Supabase client with service role key (bypasses RLS)
