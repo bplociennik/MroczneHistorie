@@ -64,7 +64,6 @@ jobs:
   build:
     name: 🏗️ Build SvelteKit
     runs-on: ubuntu-latest
-    needs: [linting]
 
     steps:
       - name: ⬇️ Check out code
