@@ -60,255 +60,27 @@ jobs:
         # Use 'test:unit' (vitest run) as defined in package.json
         run: npm run test:unit
 
-  # Job 3: Build SvelteKit application (shared for E2E tests)
-  build:
-    name: 🏗️ Build SvelteKit
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: ⬇️ Check out code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 💾 Cache SvelteKit build
-        # Cache build artifacts to avoid rebuilding if package-lock.json hasn't changed
-        uses: actions/cache@v4
-        with:
-          path: .svelte-kit
-          key: build-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            build-${{ runner.os }}-
-
-      - name: 🏗️ Build SvelteKit application
-        # Build the production bundle
-        env:
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npm run build
-
-      - name: 📤 Upload build artifacts
-        # Upload build to use in E2E test jobs
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            build/
-            .svelte-kit/
-          retention-days: 1
-
-  # Job 4-6: Parallel E2E Test Shards
+  # Job 3-5: Parallel E2E Test Shards (using reusable workflow)
   e2e_auth:
-    name: 🎭 E2E Tests - Auth
-    runs-on: ubuntu-latest
-    needs: [build]
-
-    steps:
-      - name: ⬇️ Check out code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 🌐 Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: 🌐 Install Playwright browsers
-        run: npx playwright install chromium --with-deps
-
-      - name: 📥 Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-
-      - name: 🌐 Start preview server in background
-        run: npx vite preview --port 5173 > /tmp/preview-server.log 2>&1 &
-
-      - name: ⏳ Wait for preview server to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:5173 > /dev/null 2>&1; then
-              echo "✓ Preview server is ready!"
-              exit 0
-            fi
-            echo "Waiting for preview server... ($i/30)"
-            sleep 2
-          done
-          echo "✗ Preview server startup timeout!"
-          cat /tmp/preview-server.log
-          exit 1
-
-      - name: 🎭 Run E2E Auth Tests
-        env:
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
-          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
-          E2E_USER_PASS: ${{ secrets.E2E_USER_PASS }}
-        run: npm run test:e2e -- --grep "Auth|authenticate"
-
-      - name: 📦 Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-auth
-          path: playwright-report/
-          retention-days: 7
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      test_name: Auth
+      grep_pattern: "Auth|authenticate"
+      report_name: auth
+    secrets: inherit
 
   e2e_crud:
-    name: 🎭 E2E Tests - CRUD
-    runs-on: ubuntu-latest
-    needs: [build]
-
-    steps:
-      - name: ⬇️ Check out code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 🌐 Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: 🌐 Install Playwright browsers
-        run: npx playwright install chromium --with-deps
-
-      - name: 📥 Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-
-      - name: 🌐 Start preview server in background
-        run: npx vite preview --port 5173 > /tmp/preview-server.log 2>&1 &
-
-      - name: ⏳ Wait for preview server to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:5173 > /dev/null 2>&1; then
-              echo "✓ Preview server is ready!"
-              exit 0
-            fi
-            echo "Waiting for preview server... ($i/30)"
-            sleep 2
-          done
-          echo "✗ Preview server startup timeout!"
-          cat /tmp/preview-server.log
-          exit 1
-
-      - name: 🎭 Run E2E CRUD Tests
-        env:
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
-          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
-          E2E_USER_PASS: ${{ secrets.E2E_USER_PASS }}
-        run: npm run test:e2e -- --grep "CRUD|Story|generate"
-
-      - name: 📦 Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-crud
-          path: playwright-report/
-          retention-days: 7
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      test_name: CRUD
+      grep_pattern: "CRUD|Story|generate"
+      report_name: crud
+    secrets: inherit
 
   e2e_security:
-    name: 🎭 E2E Tests - Security
-    runs-on: ubuntu-latest
-    needs: [build]
-
-    steps:
-      - name: ⬇️ Check out code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: 🌐 Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: 🌐 Install Playwright browsers
-        run: npx playwright install chromium --with-deps
-
-      - name: 📥 Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-
-      - name: 🌐 Start preview server in background
-        run: npx vite preview --port 5173 > /tmp/preview-server.log 2>&1 &
-
-      - name: ⏳ Wait for preview server to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:5173 > /dev/null 2>&1; then
-              echo "✓ Preview server is ready!"
-              exit 0
-            fi
-            echo "Waiting for preview server... ($i/30)"
-            sleep 2
-          done
-          echo "✗ Preview server startup timeout!"
-          cat /tmp/preview-server.log
-          exit 1
-
-      - name: 🎭 Run E2E Security Tests
-        env:
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
-          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
-          E2E_USER_PASS: ${{ secrets.E2E_USER_PASS }}
-        run: npm run test:e2e -- --grep "RLS|Security|cannot"
-
-      - name: 📦 Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-security
-          path: playwright-report/
-          retention-days: 7
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      test_name: Security
+      grep_pattern: "RLS|Security|cannot"
+      report_name: security
+    secrets: inherit
