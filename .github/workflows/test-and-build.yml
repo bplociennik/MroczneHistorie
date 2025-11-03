@@ -60,27 +60,11 @@ jobs:
         # Use 'test:unit' (vitest run) as defined in package.json
         run: npm run test:unit
 
-  # Job 3-5: Parallel E2E Test Shards (using reusable workflow)
-  e2e_auth:
+  # Job 3: End-to-End Tests (Playwright)
+  e2e_tests:
     uses: ./.github/workflows/e2e-tests.yml
     with:
-      test_name: Auth
-      grep_pattern: "Auth|authenticate"
-      report_name: auth
-    secrets: inherit
-
-  e2e_crud:
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      test_name: CRUD
-      grep_pattern: "CRUD|Story|generate"
-      report_name: crud
-    secrets: inherit
-
-  e2e_security:
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      test_name: Security
-      grep_pattern: "RLS|Security|cannot"
-      report_name: security
+      test_name: All
+      grep_pattern: ".*"
+      report_name: e2e
     secrets: inherit

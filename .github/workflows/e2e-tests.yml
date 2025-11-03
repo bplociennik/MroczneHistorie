@@ -88,7 +88,7 @@ jobs:
           E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
           E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
           E2E_USER_PASS: ${{ secrets.E2E_USER_PASS }}
-        run: npm run test:e2e -- --grep "${{ inputs.grep_pattern }}"
+        run: npx dotenv -e .env.e2e -q -- npx playwright test --grep "${{ inputs.grep_pattern }}"
 
       - name: 📦 Upload Playwright report
         if: always()

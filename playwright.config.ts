@@ -1,8 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
-// Load E2E environment variables
-dotenv.config({ path: '.env.e2e' });
+// Load E2E environment variables only locally
+// In CI (GitHub Actions), variables come from GitHub secrets via workflow env vars
+if (!process.env.CI && fs.existsSync('.env.e2e')) {
+	dotenv.config({ path: '.env.e2e' });
+}
 
 /**
  * Playwright configuration for MroczneHistorie E2E tests
