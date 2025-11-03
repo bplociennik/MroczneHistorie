@@ -1,17 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-import fs from 'fs';
 
-// Load E2E environment variables only locally and only if not already loaded
-// In CI (GitHub Actions), variables come from GitHub secrets via workflow env vars
-// If using `node --env-file=.env.e2e`, variables are already loaded in process.env
-if (
-	!process.env.CI &&
-	!process.env.E2E_USER_EMAIL && // Check if variables are already loaded
-	fs.existsSync('.env.e2e')
-) {
-	dotenv.config({ path: '.env.e2e' });
-}
+/**
+ * Environment variables are loaded via:
+ * - `node --env-file=.env.e2e` flag in npm scripts (locally)
+ * - GitHub secrets passed as env vars in workflow (CI)
+ * No need to manually load dotenv here
+ */
 
 /**
  * Playwright configuration for MroczneHistorie E2E tests
