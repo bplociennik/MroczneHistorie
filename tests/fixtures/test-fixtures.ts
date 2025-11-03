@@ -58,6 +58,7 @@ export const test = base.extend<TestFixtures>({
 	 * Use this for tests that create/modify data
 	 */
 	cleanDatabase: [
+		// eslint-disable-next-line no-empty-pattern
 		async ({}, use) => {
 			// Clean before test
 			await cleanupUserStories(E2E_USER.id);
@@ -76,6 +77,7 @@ export const test = base.extend<TestFixtures>({
 	 * Creates 5 test stories by default
 	 */
 	seededStories: [
+		// eslint-disable-next-line no-empty-pattern
 		async ({}, use) => {
 			// Clean first
 			await cleanupUserStories(E2E_USER.id);
