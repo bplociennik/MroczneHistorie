@@ -22,7 +22,7 @@ export default defineConfig({
 
 	// Run tests in parallel for faster execution on CI
 	fullyParallel: false,
-	workers: process.env.CI ? 3 : 1,
+	workers: process.env.CI ? 5 : 1,
 
 	// Fail the build on CI if you accidentally left test.only in the source code
 	forbidOnly: !!process.env.CI,
