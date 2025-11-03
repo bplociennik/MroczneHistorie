@@ -39,7 +39,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	let body: unknown;
 	try {
 		body = await request.json();
-	} catch (error) {
+	} catch {
 		return json(
 			{
 				error: {

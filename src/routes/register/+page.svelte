@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
+	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	// Use $props() for Svelte 5 runes mode
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { form }: { form: ActionData } = $props();
 
 	// Local state for form fields and submission
 	let email = $state('');
@@ -52,7 +53,7 @@
 						isSubmitting = false;
 
 						if (result.type === 'redirect') {
-							await goto(result.location);
+							await goto(resolve(result.location));
 						}
 
 						await update();
@@ -165,7 +166,7 @@
 				<div class="text-center mt-4">
 					<p class="text-sm">
 						Masz już konto?
-						<a href="/login" class="link link-primary">Zaloguj się</a>
+						<a href={resolve('/login')} class="link link-primary">Zaloguj się</a>
 					</p>
 				</div>
 			</form>

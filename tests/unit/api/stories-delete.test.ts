@@ -52,10 +52,6 @@ describe('DELETE /api/stories/[id]', () => {
 
 			// Mock successful database delete
 			const mockSupabase = locals.supabase;
-			const deleteMock = vi.fn().mockResolvedValue({
-				error: null,
-				count: 1
-			});
 
 			mockSupabase.from = vi.fn().mockReturnValue({
 				delete: vi.fn().mockReturnValue({

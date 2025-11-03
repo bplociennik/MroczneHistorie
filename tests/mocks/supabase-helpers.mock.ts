@@ -4,8 +4,8 @@ import type { StoryDTO } from '../../src/types';
 /**
  * Helper to create a Supabase mock that returns success for SELECT operations
  */
-export function mockSupabaseSelect(data: any) {
-	const mock: any = {};
+export function mockSupabaseSelect(data: unknown) {
+	const mock: Record<string, unknown> = {};
 
 	mock.select = vi.fn(() => mock);
 	mock.order = vi.fn(() => mock);
@@ -22,7 +22,7 @@ export function mockSupabaseSelect(data: any) {
  * Helper to create a Supabase mock that returns success for INSERT operations
  */
 export function mockSupabaseInsert(returnData: StoryDTO) {
-	const mock: any = {};
+	const mock: Record<string, unknown> = {};
 
 	mock.insert = vi.fn(() => mock);
 	mock.select = vi.fn(() => mock);
@@ -37,7 +37,7 @@ export function mockSupabaseInsert(returnData: StoryDTO) {
  * Helper to create a Supabase mock that returns success for UPDATE operations
  */
 export function mockSupabaseUpdate(returnData: StoryDTO) {
-	const mock: any = {};
+	const mock: Record<string, unknown> = {};
 
 	mock.update = vi.fn(() => mock);
 	mock.eq = vi.fn(() => mock);
@@ -53,7 +53,7 @@ export function mockSupabaseUpdate(returnData: StoryDTO) {
  * Helper to create a Supabase mock that returns success for DELETE operations
  */
 export function mockSupabaseDelete(count: number = 1) {
-	const mock: any = {};
+	const mock: Record<string, unknown> = {};
 
 	mock.delete = vi.fn(() => mock);
 	mock.eq = vi.fn(() => Promise.resolve({ error: null, count }));
@@ -66,8 +66,8 @@ export function mockSupabaseDelete(count: number = 1) {
 /**
  * Helper to create a Supabase mock that returns an error
  */
-export function mockSupabaseError(error: any) {
-	const mock: any = {};
+export function mockSupabaseError(error: unknown) {
+	const mock: Record<string, unknown> = {};
 
 	mock.select = vi.fn(() => mock);
 	mock.insert = vi.fn(() => mock);
@@ -86,7 +86,7 @@ export function mockSupabaseError(error: any) {
 /**
  * Helper to create a Supabase mock for RPC calls
  */
-export function mockSupabaseRpc(data: any = null, error: any = null) {
+export function mockSupabaseRpc(data: unknown = null, error: unknown = null) {
 	return {
 		rpc: vi.fn(() => ({
 			maybeSingle: vi.fn(() => Promise.resolve({ data, error }))

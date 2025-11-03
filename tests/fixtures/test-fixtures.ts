@@ -58,7 +58,7 @@ export const test = base.extend<TestFixtures>({
 	 * Use this for tests that create/modify data
 	 */
 	cleanDatabase: [
-		async ({}, use) => {
+		async (_unused, use) => {
 			// Clean before test
 			await cleanupUserStories(E2E_USER.id);
 
@@ -76,7 +76,7 @@ export const test = base.extend<TestFixtures>({
 	 * Creates 5 test stories by default
 	 */
 	seededStories: [
-		async ({}, use) => {
+		async (_unused, use) => {
 			// Clean first
 			await cleanupUserStories(E2E_USER.id);
 

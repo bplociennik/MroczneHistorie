@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
+	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	// Use $props() for Svelte 5 runes mode
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { form }: { form: ActionData } = $props();
 
 	// Loading state
 	let isSubmitting = $state(false);
@@ -34,7 +35,7 @@
 						isSubmitting = false;
 
 						if (result.type === 'redirect') {
-							await goto(result.location);
+							await goto(resolve(result.location));
 						}
 
 						await update();
@@ -117,7 +118,7 @@
 				<div class="text-center mt-4">
 					<p class="text-sm">
 						Nie masz konta?
-						<a href="/register" class="link link-primary">Zarejestruj się</a>
+						<a href={resolve('/register')} class="link link-primary">Zarejestruj się</a>
 					</p>
 				</div>
 			</form>

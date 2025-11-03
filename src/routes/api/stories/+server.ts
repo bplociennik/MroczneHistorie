@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { CreateStorySchema, ListStoriesQueryParamsSchema } from '$lib/validation/story.validation';
 import { formatValidationError } from '$lib/utils/validation';
-import type { ErrorDTO, StoryDTO, ListStoriesDTO } from '../../../types';
+import type { ErrorDTO, ListStoriesDTO } from '../../../types';
 
 /**
  * List Stories API Endpoint
@@ -145,7 +145,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	let body: unknown;
 	try {
 		body = await request.json();
-	} catch (error) {
+	} catch {
 		return json(
 			{
 				error: {

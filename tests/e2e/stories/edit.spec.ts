@@ -131,7 +131,7 @@ test.describe('Story Edit', () => {
 		// Verify error toast or validation
 		await storyEditPage.waitForToast('error');
 		const toastText = await storyEditPage.getToastText();
-		expect(toastText.toLowerCase()).toContain('pytanie' || 'question');
+		expect(toastText.toLowerCase()).toMatch(/(pytanie|question)/i);
 	});
 
 	test('TC-CRUD-009: Cannot save with empty answer', async ({ storyEditPage, seededStories }) => {
@@ -145,7 +145,7 @@ test.describe('Story Edit', () => {
 		// Verify error toast or validation
 		await storyEditPage.waitForToast('error');
 		const toastText = await storyEditPage.getToastText();
-		expect(toastText.toLowerCase()).toContain('odpowiedź' || 'answer');
+		expect(toastText.toLowerCase()).toMatch(/(odpowiedź|answer)/i);
 	});
 
 	test('TC-CRUD-008: Cancel edit returns to detail page', async ({

@@ -20,9 +20,7 @@ const test = mergeTests(testFixtures, mockTest);
 test.describe('Generate Story', () => {
 	test('TC-GEN-001: Generate story successfully (Happy Path)', async ({
 		generatePage,
-		homePage,
-		cleanDatabase,
-		mockOpenAI
+		homePage
 	}) => {
 		// Use success mock (default)
 		test.use({ mockOpenAI: 'success' });
@@ -109,7 +107,6 @@ test.describe('Generate Story', () => {
 		expect(subjectValue.length).toBeGreaterThan(0);
 
 		// Click random again
-		const firstValue = subjectValue;
 		await generatePage.clickRandomSubject();
 		subjectValue = await generatePage.getSubjectValue();
 
@@ -124,9 +121,6 @@ test.describe('Generate Story', () => {
 
 		// Generate first story
 		await generatePage.generateStory(SAMPLE_SUBJECTS[1], 1, 1);
-
-		const firstQuestion = await generatePage.getGeneratedQuestion();
-		const firstAnswer = await generatePage.getGeneratedAnswer();
 
 		// Click regenerate
 		await generatePage.clickRegenerate();

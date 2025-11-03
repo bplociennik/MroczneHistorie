@@ -9,7 +9,7 @@ import { E2E_USER } from '../../utils/test-data';
  */
 
 test.describe('Story Delete', () => {
-	test('TC-CRUD-010: Delete story from list (Happy Path)', async ({ homePage, seededStories }) => {
+	test('TC-CRUD-010: Delete story from list (Happy Path)', async ({ homePage }) => {
 		await homePage.navigate();
 
 		// Get initial count
@@ -38,7 +38,7 @@ test.describe('Story Delete', () => {
 		expect(dbCount).toBe(4);
 	});
 
-	test('TC-CRUD-011: Cancel deletion keeps story', async ({ homePage, seededStories }) => {
+	test('TC-CRUD-011: Cancel deletion keeps story', async ({ homePage }) => {
 		await homePage.navigate();
 
 		const initialCount = await homePage.getStoriesCount();
@@ -111,7 +111,7 @@ test.describe('Story Delete', () => {
 		expect(questionText).toContain(story.question);
 	});
 
-	test('TC-CRUD-011: Close modal with Escape key', async ({ homePage, seededStories }) => {
+	test('TC-CRUD-011: Close modal with Escape key', async ({ homePage }) => {
 		await homePage.navigate();
 
 		const initialCount = await homePage.getStoriesCount();

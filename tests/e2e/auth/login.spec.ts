@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import { E2E_USER, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/test-data';
+import { ERROR_MESSAGES } from '../../utils/test-data';
 
 /**
  * E2E Tests for Login functionality

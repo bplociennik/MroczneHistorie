@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 	import { DIFFICULTY_LABELS, DARKNESS_LABELS } from '$lib/constants/forms';
 	import type { SelectOption } from '$lib/types/viewModels';
 
@@ -141,7 +142,7 @@
 						class="select w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed"
 						disabled
 					>
-						{#each difficultyOptions as option}
+						{#each difficultyOptions as option (option.value)}
 							<option value={option.value} selected={option.value === data.story.difficulty}>
 								{option.label}
 							</option>
@@ -156,7 +157,7 @@
 						class="select w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed"
 						disabled
 					>
-						{#each darknessOptions as option}
+						{#each darknessOptions as option (option.value)}
 							<option value={option.value} selected={option.value === data.story.darkness}>
 								{option.label}
 							</option>
@@ -183,6 +184,6 @@
 
 	<!-- Back Link -->
 	<div class="text-center mt-8">
-		<a href="/" class="btn btn-ghost">← Powrót do moich historii</a>
+		<a href={resolve('/')} class="btn btn-ghost">← Powrót do moich historii</a>
 	</div>
 </div>

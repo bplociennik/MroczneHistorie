@@ -1,16 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 
-// Define ActionData type for form responses
-interface RegisterActionData {
-	email?: string;
-	error?: string;
-	errors?: {
-		email?: string;
-		password?: string;
-	};
-}
-
 export const load: PageServerLoad = async ({ locals }) => {
 	// Guard: logged in users → redirect to home
 	if (locals.user) {

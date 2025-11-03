@@ -4,7 +4,7 @@ import { isValidUUID, isValidUpdateStoryCommand } from '../../../../types';
 import { UpdateStorySchema } from '$lib/validation/story.validation';
 import { formatValidationError } from '$lib/utils/validation';
 import { ApiErrors } from '$lib/server/utils/api-error';
-import type { ErrorDTO, StoryDTO, UpdateStoryCommand } from '../../../../types';
+import type { ErrorDTO, UpdateStoryCommand } from '../../../../types';
 
 /**
  * Update Story API Endpoint
@@ -61,7 +61,7 @@ export const PATCH: RequestHandler = async ({ params, locals, request }) => {
 	let body: unknown;
 	try {
 		body = await request.json();
-	} catch (error) {
+	} catch {
 		return json(
 			{
 				error: {

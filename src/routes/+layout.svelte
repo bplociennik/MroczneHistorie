@@ -8,7 +8,7 @@
 
 	interface LayoutProps {
 		data: LayoutData;
-		children: any;
+		children: import('svelte').Snippet;
 	}
 
 	let { data, children }: LayoutProps = $props();

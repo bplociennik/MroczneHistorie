@@ -7,7 +7,7 @@ import { PAGE_TITLES, BUTTON_LABELS } from '../../utils/test-data';
  */
 
 test.describe('Stories List', () => {
-	test('TC-CRUD-001: Display empty state when no stories', async ({ homePage, cleanDatabase }) => {
+	test('TC-CRUD-001: Display empty state when no stories', async ({ homePage }) => {
 		// Navigate to home page (database is clean)
 		await homePage.navigate();
 
@@ -31,7 +31,7 @@ test.describe('Stories List', () => {
 		expect(storiesCount).toBe(0);
 	});
 
-	test('TC-CRUD-002: Display list of stories (Happy Path)', async ({ homePage, seededStories }) => {
+	test('TC-CRUD-002: Display list of stories (Happy Path)', async ({ homePage }) => {
 		// Navigate to home page (database has 5 seeded stories)
 		await homePage.navigate();
 
@@ -68,10 +68,7 @@ test.describe('Stories List', () => {
 		expect(firstCardText).toContain('#5');
 	});
 
-	test('TC-CRUD-002: Navigate to story detail by clicking card', async ({
-		homePage,
-		seededStories
-	}) => {
+	test('TC-CRUD-002: Navigate to story detail by clicking card', async ({ homePage }) => {
 		await homePage.navigate();
 
 		// Click on first story card
@@ -81,10 +78,7 @@ test.describe('Stories List', () => {
 		await homePage.page.waitForURL(/\/stories\/[a-f0-9-]+/);
 	});
 
-	test('TC-CRUD-002: Navigate to edit page via edit button', async ({
-		homePage,
-		seededStories
-	}) => {
+	test('TC-CRUD-002: Navigate to edit page via edit button', async ({ homePage }) => {
 		await homePage.navigate();
 
 		// Click edit button on first story

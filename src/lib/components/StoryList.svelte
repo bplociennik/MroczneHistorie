@@ -1,26 +1,18 @@
 <script lang="ts">
 	import StoryCard from './StoryCard.svelte';
 	import type { StoryDTO } from '../../types';
-	import { createEventDispatcher } from 'svelte';
 
 	interface Props {
 		stories: StoryDTO[];
+		ondelete: (id: string) => void;
 	}
 
-	let { stories }: Props = $props();
-
-	const dispatch = createEventDispatcher<{
-		delete: string; // story ID
-	}>();
-
-	function handleDelete(event: CustomEvent<string>) {
-		dispatch('delete', event.detail);
-	}
+	let { stories, ondelete }: Props = $props();
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 	{#each stories as story (story.id)}
-		<StoryCard {story} on:delete={handleDelete} />
+		<StoryCard {story} {ondelete} />
 	{/each}
 </div>
 

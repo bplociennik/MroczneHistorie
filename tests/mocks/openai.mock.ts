@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import type { GeneratedStoryDTO } from '../../src/types';
+
 import { generatedStoryFixture } from '../fixtures/stories.fixture';
 
 /**

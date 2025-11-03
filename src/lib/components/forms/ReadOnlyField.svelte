@@ -31,7 +31,7 @@
 		aria-label={label}
 		aria-readonly="true"
 	>
-		{#each options as option}
+		{#each options as option (option.value)}
 			<option value={option.value} selected={option.value === value}>
 				{option.label}
 			</option>

@@ -1,20 +1,16 @@
 <script lang="ts">
 	import type { StoryDTO } from '../../types';
-	import { createEventDispatcher } from 'svelte';
 	import { resolve } from '$app/paths';
 
 	interface Props {
 		story: StoryDTO;
+		ondelete: (id: string) => void;
 	}
 
-	let { story }: Props = $props();
-
-	const dispatch = createEventDispatcher<{
-		delete: string;
-	}>();
+	let { story, ondelete }: Props = $props();
 
 	function handleDeleteClick() {
-		dispatch('delete', story.id);
+		ondelete(story.id);
 	}
 
 	// Labels for difficulty and darkness

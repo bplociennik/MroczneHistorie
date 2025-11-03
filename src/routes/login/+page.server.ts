@@ -1,16 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 
-// Define ActionData type for form responses
-interface LoginActionData {
-	email?: string;
-	error?: string;
-	errors?: {
-		email?: string;
-		password?: string;
-	};
-}
-
 export const load: PageServerLoad = async ({ locals }) => {
 	// Guard: logged in users → redirect to home
 	if (locals.user) {
@@ -52,7 +42,7 @@ export const actions: Actions = {
 			}
 
 			// 3. Call Supabase Auth
-			const { data, error } = await locals.supabase.auth.signInWithPassword({
+			const { error } = await locals.supabase.auth.signInWithPassword({
 				email,
 				password
 			});

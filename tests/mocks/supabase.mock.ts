@@ -4,7 +4,7 @@ import { vi } from 'vitest';
  * Creates a mock Supabase client for testing with full chainable support
  */
 export function createMockSupabaseClient() {
-	const mock: any = {
+	const mock: Record<string, unknown> = {
 		from: vi.fn(() => mock),
 		select: vi.fn(() => mock),
 		insert: vi.fn(() => mock),

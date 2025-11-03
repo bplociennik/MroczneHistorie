@@ -176,7 +176,7 @@ Pytanie musi być intrygujące i logiczne. Odpowiedź powinna być zaskakująca,
 		let parsed: unknown;
 		try {
 			parsed = JSON.parse(content);
-		} catch (error) {
+		} catch {
 			throw new Error('Failed to parse OpenAI response as JSON');
 		}
 

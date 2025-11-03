@@ -35,10 +35,10 @@
 	});
 
 	// Handle opening delete modal
-	function openDeleteModal(event: CustomEvent<string>) {
+	function openDeleteModal(storyId: string) {
 		deleteState = {
 			modalOpen: true,
-			storyId: event.detail,
+			storyId: storyId,
 			isDeleting: false
 		};
 	}
@@ -181,7 +181,7 @@
 			</a>
 		</div>
 
-		<StoryList stories={data.stories} on:delete={openDeleteModal} />
+		<StoryList stories={data.stories} ondelete={openDeleteModal} />
 	{/if}
 </div>
 

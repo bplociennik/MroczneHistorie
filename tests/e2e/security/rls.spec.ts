@@ -9,10 +9,7 @@ import { getUserStories } from '../../utils/db-helpers';
  */
 
 test.describe('RLS Security', () => {
-	test('TC-AUTH-007: User sees only their own stories in list', async ({
-		homePage,
-		seededStories
-	}) => {
+	test('TC-AUTH-007: User sees only their own stories in list', async ({ homePage }) => {
 		// Seed stories for E2E user
 		await homePage.navigate();
 
@@ -30,10 +27,7 @@ test.describe('RLS Security', () => {
 		});
 	});
 
-	test('TC-AUTH-007: API /api/stories returns only user stories', async ({
-		page,
-		seededStories
-	}) => {
+	test('TC-AUTH-007: API /api/stories returns only user stories', async ({ page }) => {
 		// Make API call to get stories
 		const response = await page.request.get('/api/stories');
 		expect(response.ok()).toBe(true);
@@ -44,15 +38,12 @@ test.describe('RLS Security', () => {
 		expect(data.stories).toBeDefined();
 		expect(data.stories.length).toBe(5);
 
-		data.stories.forEach((story: any) => {
+		data.stories.forEach((story) => {
 			expect(story.user_id).toBe(E2E_USER.id);
 		});
 	});
 
-	test('TC-AUTH-007: Cannot access another user story by ID (404)', async ({
-		page,
-		seededStories
-	}) => {
+	test('TC-AUTH-007: Cannot access another user story by ID (404)', async ({ page }) => {
 		// Create a fake UUID that doesn't belong to E2E user
 		const otherUserStoryId = '00000000-0000-0000-0000-000000000001';
 
@@ -88,10 +79,7 @@ test.describe('RLS Security', () => {
 		expect(response.status()).toBe(404);
 	});
 
-	test('TC-AUTH-007: API /api/stories/random returns only user stories', async ({
-		page,
-		seededStories
-	}) => {
+	test('TC-AUTH-007: API /api/stories/random returns only user stories', async ({ page }) => {
 		// Call random endpoint multiple times
 		for (let i = 0; i < 3; i++) {
 			const response = await page.request.get('/api/stories/random');

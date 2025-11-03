@@ -1,14 +1,20 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
+	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { loadingStore } from '$lib/stores/loading';
 	import { toastStore } from '$lib/stores/toasts';
 	import { slide } from 'svelte/transition';
 	import type { GeneratedStoryDTO } from '../../types';
 
+	// Type for form action failure result
+	interface FailureResult {
+		error?: string;
+	}
+
 	// Props
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { form }: { form: ActionData } = $props();
 
 	// Local state
 	let showAnswer = $state(false);
@@ -132,7 +138,7 @@
 
 						if (result.type === 'failure') {
 							const errorMessage =
-								(result.data as any)?.error || 'Nie udało się wygenerować historii';
+								(result.data as FailureResult)?.error || 'Nie udało się wygenerować historii';
 							toastStore.addToast(errorMessage, 'error');
 						}
 
@@ -234,7 +240,7 @@
 
 		<!-- Back -->
 		<div class="text-center mt-8">
-			<a href="/" class="btn btn-ghost">← Powrót do strony głównej</a>
+			<a href={resolve('/')} class="btn btn-ghost">← Powrót do strony głównej</a>
 		</div>
 	{:else}
 		<!-- State 2: Preview -->
@@ -334,12 +340,12 @@
 
 								if (result.type === 'redirect') {
 									toastStore.addToast('Historia została zapisana!', 'success');
-									await goto(result.location);
+									await goto(resolve(result.location));
 								}
 
 								if (result.type === 'failure') {
 									const errorMessage =
-										(result.data as any)?.error || 'Nie udało się zapisać historii';
+										(result.data as FailureResult)?.error || 'Nie udało się zapisać historii';
 									toastStore.addToast(errorMessage, 'error');
 								}
 
@@ -388,7 +394,7 @@
 
 								if (result.type === 'failure') {
 									const errorMessage =
-										(result.data as any)?.error || 'Nie udało się wygenerować historii';
+										(result.data as FailureResult)?.error || 'Nie udało się wygenerować historii';
 									toastStore.addToast(errorMessage, 'error');
 								}
 
@@ -425,7 +431,7 @@
 
 		<!-- Back -->
 		<div class="text-center mt-8">
-			<a href="/" class="btn btn-ghost">← Powrót do strony głównej</a>
+			<a href={resolve('/')} class="btn btn-ghost">← Powrót do strony głównej</a>
 		</div>
 	{/if}
 </div>
