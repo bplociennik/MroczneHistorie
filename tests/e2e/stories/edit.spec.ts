@@ -12,9 +12,12 @@ test.describe.configure({ mode: 'serial' });
 test.describe('Story Edit', () => {
 	let seededStories: Story[];
 
-	test.beforeEach(async () => {
+	test.beforeEach(async ({ homePage }) => {
 		await cleanupUserStories(E2E_USER.id);
 		seededStories = await seedMultipleStories(E2E_USER.id, 5);
+
+		// Navigate once to bust cache and ensure auth is valid
+		await homePage.navigate();
 	});
 
 	test.afterEach(async () => {

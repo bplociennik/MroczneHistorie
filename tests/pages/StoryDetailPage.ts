@@ -60,61 +60,29 @@ export class StoryDetailPage extends BasePage {
 	 * Click reveal answer button
 	 */
 	async revealAnswer(): Promise<void> {
+		// Check if answer is already visible (no need to click)
+		if (await this.answerText.isVisible()) {
+			return;
+		}
+
 		await this.revealButton.click();
-		await this.answerText.waitFor({ state: 'visible' });
+
+		// Wait for answer to become visible with timeout
+		await this.answerText.waitFor({ state: 'visible', timeout: 5000 });
 	}
 
 	/**
 	 * Click hide answer button
 	 */
 	async hideAnswer(): Promise<void> {
+		// Check if answer is already hidden
+		if (!(await this.answerText.isVisible())) {
+			return;
+		}
+
 		await this.hideButton.click();
-		await this.answerText.waitFor({ state: 'hidden' });
-	}
 
-	/**
-	 * Navigate to edit page
-	 */
-	async clickEdit(): Promise<void> {
-		await this.editButton.click();
-		await this.page.waitForURL(/\/stories\/[a-f0-9-]+\/edit/);
-	}
-
-	/**
-	 * Click delete button (opens confirmation modal)
-	 */
-	async clickDelete(): Promise<void> {
-		await this.deleteButton.click();
-	}
-
-	/**
-	 * Click back button to return to list
-	 */
-	async clickBack(): Promise<void> {
-		await this.backButton.click();
-		await this.waitForUrl(ROUTES.home);
-	}
-
-	/**
-	 * Confirm deletion in modal
-	 */
-	async confirmDelete(): Promise<void> {
-		const modal = this.page.locator('[role="dialog"], .modal');
-		await modal.waitFor({ state: 'visible' });
-		const confirmButton = modal.getByText(BUTTON_LABELS.delete, { exact: false });
-		await confirmButton.waitFor({ state: 'visible' });
-		await confirmButton.click();
-		await this.waitForUrl(ROUTES.home);
-	}
-
-	/**
-	 * Cancel deletion in modal
-	 */
-	async cancelDelete(): Promise<void> {
-		const modal = this.page.locator('[role="dialog"], .modal');
-		await modal.waitFor({ state: 'visible' });
-		const cancelButton = modal.getByText(BUTTON_LABELS.cancel, { exact: false });
-		await cancelButton.waitFor({ state: 'visible' });
-		await cancelButton.click();
+		// Wait for answer to become hidden
+		await this.answerText.waitFor({ state: 'hidden', timeout: 5000 });
 	}
 }

@@ -36,9 +36,11 @@ test.describe('Stories List', () => {
 	test.describe.configure({ mode: 'serial' });
 
 	test.describe('With seeded stories', () => {
-		test.beforeEach(async () => {
+		test.beforeEach(async ({ homePage }) => {
 			await cleanupUserStories(E2E_USER.id);
 			await seedMultipleStories(E2E_USER.id, 5);
+			// Navigate once to bust cache and ensure data is loaded
+			await homePage.navigate();
 		});
 
 		test.afterEach(async () => {
@@ -46,7 +48,7 @@ test.describe('Stories List', () => {
 		});
 
 		test('TC-CRUD-002: Display list of stories (Happy Path)', async ({ homePage }) => {
-			// Navigate to home page (database has 5 seeded stories)
+			// Navigate to home page (database has 5 seeded stories - already done in beforeEach)
 			await homePage.navigate();
 
 			// Verify empty state is NOT visible

@@ -20,7 +20,10 @@ test.describe('RLS Security', () => {
 	});
 
 	test('TC-AUTH-007: User sees only their own stories in list', async ({ homePage }) => {
+		// Seed stories
 		await seedMultipleStories(E2E_USER.id, 5);
+
+		// Navigate to home page to load seeded data
 		await homePage.navigate();
 
 		// Verify user sees all 5 seeded stories

@@ -25,10 +25,13 @@ test.describe('Story Delete', () => {
 	});
 
 	test('TC-CRUD-010: Delete story from list (Happy Path)', async ({ homePage }) => {
+		// Seed stories
 		await seedMultipleStories(E2E_USER.id, 5);
+
+		// Navigate to load seeded data
 		await homePage.navigate();
 
-		// Get initial count (should be 5 from seededStories fixture)
+		// Get initial count (should be 5 from seeded stories)
 		const initialCount = await homePage.getStoriesCount();
 		expect(initialCount).toBe(5);
 
@@ -65,7 +68,10 @@ test.describe('Story Delete', () => {
 	});
 
 	test('TC-CRUD-011: Cancel deletion keeps story', async ({ homePage }) => {
+		// Seed stories
 		await seedMultipleStories(E2E_USER.id, 5);
+
+		// Navigate to load seeded data
 		await homePage.navigate();
 
 		const initialCount = await homePage.getStoriesCount();
@@ -90,7 +96,10 @@ test.describe('Story Delete', () => {
 	});
 
 	test('TC-CRUD-012: Close modal with Escape key', async ({ homePage }) => {
+		// Seed stories
 		await seedMultipleStories(E2E_USER.id, 5);
+
+		// Navigate to load seeded data
 		await homePage.navigate();
 
 		const initialCount = await homePage.getStoriesCount();

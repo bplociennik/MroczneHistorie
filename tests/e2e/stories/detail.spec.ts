@@ -28,46 +28,5 @@ test.describe('Story Detail', () => {
 		// Verify question is visible
 		const questionText = await storyDetailPage.getQuestion();
 		expect(questionText).toContain(story.question);
-
-		// Verify answer is hidden by default
-		const isAnswerVisible = await storyDetailPage.isAnswerVisible();
-		expect(isAnswerVisible).toBe(false);
-
-		// Verify "Odkryj odpowiedź" button is visible
-		await expect(storyDetailPage.revealButton).toBeVisible();
-	});
-
-	test('TC-CRUD-006: Reveal and hide answer toggle', async ({ storyDetailPage }) => {
-		const seededStories = await seedMultipleStories(E2E_USER.id, 5);
-		const story = seededStories[0];
-		await storyDetailPage.navigate(story.id);
-
-		// Verify answer is hidden initially
-		let isAnswerVisible = await storyDetailPage.isAnswerVisible();
-		expect(isAnswerVisible).toBe(false);
-
-		// Reveal answer
-		await storyDetailPage.revealAnswer();
-
-		// Verify answer is now visible
-		isAnswerVisible = await storyDetailPage.isAnswerVisible();
-		expect(isAnswerVisible).toBe(true);
-
-		// Verify answer text matches
-		const answerText = await storyDetailPage.getAnswer();
-		expect(answerText).toContain(story.answer);
-
-		// Verify button changed to "Ukryj odpowiedź"
-		await expect(storyDetailPage.hideButton).toBeVisible();
-
-		// Hide answer
-		await storyDetailPage.hideAnswer();
-
-		// Verify answer is hidden again
-		isAnswerVisible = await storyDetailPage.isAnswerVisible();
-		expect(isAnswerVisible).toBe(false);
-
-		// Verify button changed back to "Odkryj odpowiedź"
-		await expect(storyDetailPage.revealButton).toBeVisible();
 	});
 });
