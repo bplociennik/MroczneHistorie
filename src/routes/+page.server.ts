@@ -1,4 +1,5 @@
 import type { PageServerLoad } from './$types';
+import type { StoryDTO } from '../types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	// 1. Check session (available from +layout.server.ts)

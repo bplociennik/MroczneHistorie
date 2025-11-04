@@ -16,9 +16,9 @@ export class HomePage extends BasePage {
 	readonly emptyState = this.page.locator(`text=${PAGE_TITLES.emptyState}`);
 	readonly storyCards = this.page.locator('[data-testid="story-card"], .story-card');
 	readonly generateButton = this.page.locator(
-		`a:has-text("${BUTTON_LABELS.generate}"), button:has-text("Generuj")`
+		`a:has-text("Wygeneruj"), button:has-text("Generuj")`
 	);
-	readonly randomButton = this.page.locator(`button:has-text("${BUTTON_LABELS.random}")`);
+	readonly randomButton = this.page.getByText(BUTTON_LABELS.random, { exact: false });
 	readonly loginButton = this.page.locator(`a:has-text("${BUTTON_LABELS.login}")`);
 	readonly registerButton = this.page.locator(`a:has-text("${BUTTON_LABELS.register}")`);
 
@@ -27,6 +27,12 @@ export class HomePage extends BasePage {
 	 */
 	async navigate(): Promise<void> {
 		await this.goto(ROUTES.home);
+		// Wait for one of the possible page states to be visible
+		await Promise.race([
+			this.storyCards.first().waitFor({ state: 'visible' }).catch(() => {}),
+			this.emptyState.waitFor({ state: 'visible' }).catch(() => {}),
+			this.landingPage.waitFor({ state: 'visible' }).catch(() => {})
+		]);
 	}
 
 	/**
@@ -63,7 +69,9 @@ export class HomePage extends BasePage {
 	 * @param index - Zero-based index
 	 */
 	async clickStory(index: number): Promise<void> {
-		await this.getStoryCard(index).click();
+		const card = this.getStoryCard(index);
+		const link = card.locator('a.card-title');
+		await link.click();
 	}
 
 	/**
@@ -118,8 +126,11 @@ export class HomePage extends BasePage {
 
 	/**
 	 * Check if Random button is enabled
+	 * Returns false if button doesn't exist (e.g., in empty state)
 	 */
 	async isRandomButtonEnabled(): Promise<boolean> {
+		const count = await this.randomButton.count();
+		if (count === 0) return false;
 		return await this.randomButton.isEnabled();
 	}
 
@@ -146,7 +157,10 @@ export class HomePage extends BasePage {
 	 */
 	async confirmDelete(): Promise<void> {
 		const modal = this.page.locator('[role="dialog"], .modal');
-		const confirmButton = modal.locator(`button:has-text("${BUTTON_LABELS.delete}")`);
+		await modal.waitFor({ state: 'visible' });
+		// Match any element containing "Usuń" text (button text may vary: "Usuń", "Usuń historię", etc.)
+		const confirmButton = modal.getByText(BUTTON_LABELS.delete, { exact: false });
+		await confirmButton.waitFor({ state: 'visible' });
 		await confirmButton.click();
 	}
 
@@ -155,7 +169,9 @@ export class HomePage extends BasePage {
 	 */
 	async cancelDelete(): Promise<void> {
 		const modal = this.page.locator('[role="dialog"], .modal');
-		const cancelButton = modal.locator(`button:has-text("${BUTTON_LABELS.cancel}")`);
+		await modal.waitFor({ state: 'visible' });
+		const cancelButton = modal.getByText(BUTTON_LABELS.cancel, { exact: false });
+		await cancelButton.waitFor({ state: 'visible' });
 		await cancelButton.click();
 	}
 

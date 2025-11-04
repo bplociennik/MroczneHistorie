@@ -76,9 +76,9 @@ export const SUCCESS_MESSAGES = {
 		loggedIn: 'Zalogowano pomyślnie'
 	},
 	story: {
-		saved: 'Historia zapisana pomyślnie',
+		saved: 'Historia została zapisana',
 		updated: 'Historia zaktualizowana pomyślnie',
-		deleted: 'Historia usunięta pomyślnie'
+		deleted: 'Historia została usunięta'
 	}
 };
 

@@ -27,7 +27,7 @@
 	};
 </script>
 
-<div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+<div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow" data-testid="story-card">
 	<div class="card-body">
 		<!-- Subject -->
 		<p class="text-sm opacity-60 mt-2">

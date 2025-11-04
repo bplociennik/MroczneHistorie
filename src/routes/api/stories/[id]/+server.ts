@@ -58,11 +58,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		}
 
 		// 3. Fetch story from database
-		const { data, error } = await locals.supabase
-			.from('stories')
-			.select('*')
-			.eq('id', id)
-			.single();
+		const { data, error } = await locals.supabase.from('stories').select('*').eq('id', id).single();
 
 		// 4. Handle database errors
 		if (error) {

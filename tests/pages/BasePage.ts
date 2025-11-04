@@ -70,14 +70,15 @@ export class BasePage {
 	 * Wait for global loader to disappear
 	 */
 	async waitForLoaderToDisappear(timeout = TIMEOUTS.generation): Promise<void> {
-		await this.globalLoader.waitFor({ state: 'hidden', timeout });
+		await this.globalLoader.first().waitFor({ state: 'hidden', timeout });
 	}
 
 	/**
 	 * Check if global loader is visible
 	 */
 	async isLoaderVisible(): Promise<boolean> {
-		return await this.globalLoader.isVisible();
+		const count = await this.globalLoader.count();
+		return count > 0 && (await this.globalLoader.first().isVisible());
 	}
 
 	/**

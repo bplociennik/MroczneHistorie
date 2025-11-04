@@ -8,23 +8,19 @@ import { getUserStories, seedMultipleStories, cleanupUserStories } from '../../u
  * Verifies that users can only see and modify their own stories
  */
 
-test.describe('RLS Security', () => {
-	// Run tests serially to avoid database conflicts
-	test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: 'serial' });
 
+test.describe('RLS Security', () => {
 	test.beforeEach(async () => {
-		// Clean and seed before each test
 		await cleanupUserStories(E2E_USER.id);
-		await seedMultipleStories(E2E_USER.id, 5);
 	});
 
 	test.afterEach(async () => {
-		// Clean after each test
 		await cleanupUserStories(E2E_USER.id);
 	});
 
 	test('TC-AUTH-007: User sees only their own stories in list', async ({ homePage }) => {
-		// Seed stories for E2E user
+		await seedMultipleStories(E2E_USER.id, 5);
 		await homePage.navigate();
 
 		// Verify user sees all 5 seeded stories
@@ -42,6 +38,7 @@ test.describe('RLS Security', () => {
 	});
 
 	test('TC-AUTH-007: API /api/stories returns only user stories', async ({ page }) => {
+		await seedMultipleStories(E2E_USER.id, 5);
 		// Make API call to get stories
 		const response = await page.request.get('/api/stories');
 		expect(response.ok()).toBe(true);
@@ -94,6 +91,7 @@ test.describe('RLS Security', () => {
 	});
 
 	test('TC-AUTH-007: API /api/stories/random returns only user stories', async ({ page }) => {
+		await seedMultipleStories(E2E_USER.id, 5);
 		// Call random endpoint multiple times
 		for (let i = 0; i < 3; i++) {
 			const response = await page.request.get('/api/stories/random');

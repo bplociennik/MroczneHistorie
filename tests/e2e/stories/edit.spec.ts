@@ -7,9 +7,9 @@ import { seedMultipleStories, cleanupUserStories, type Story } from '../../utils
  * Tests: TC-CRUD-008, TC-CRUD-009
  */
 
-test.describe('Story Edit', () => {
-	test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: 'serial' });
 
+test.describe('Story Edit', () => {
 	let seededStories: Story[];
 
 	test.beforeEach(async () => {
@@ -75,8 +75,7 @@ test.describe('Story Edit', () => {
 
 	test('TC-CRUD-009: Edit only question field', async ({
 		storyEditPage,
-		storyDetailPage,
-		seededStories
+		storyDetailPage
 	}) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
@@ -102,8 +101,7 @@ test.describe('Story Edit', () => {
 
 	test('TC-CRUD-009: Edit only answer field', async ({
 		storyEditPage,
-		storyDetailPage,
-		seededStories
+		storyDetailPage
 	}) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
@@ -127,7 +125,7 @@ test.describe('Story Edit', () => {
 		expect(displayedAnswer).toContain(newAnswer);
 	});
 
-	test('TC-CRUD-009: Cannot save with empty question', async ({ storyEditPage, seededStories }) => {
+	test('TC-CRUD-009: Cannot save with empty question', async ({ storyEditPage }) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -141,7 +139,7 @@ test.describe('Story Edit', () => {
 		expect(toastText.toLowerCase()).toMatch(/(pytanie|question)/i);
 	});
 
-	test('TC-CRUD-009: Cannot save with empty answer', async ({ storyEditPage, seededStories }) => {
+	test('TC-CRUD-009: Cannot save with empty answer', async ({ storyEditPage }) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -156,8 +154,7 @@ test.describe('Story Edit', () => {
 	});
 
 	test('TC-CRUD-008: Cancel edit returns to detail page', async ({
-		storyEditPage,
-		seededStories
+		storyEditPage
 	}) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);

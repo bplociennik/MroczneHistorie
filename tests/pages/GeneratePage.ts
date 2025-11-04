@@ -13,25 +13,29 @@ export class GeneratePage extends BasePage {
 	// Locators
 	readonly subjectInput = this.page.locator('input[name="subject"], textarea[name="subject"]');
 	readonly randomSubjectButton = this.page.locator(`button:has-text("${BUTTON_LABELS.random}")`);
-	readonly difficultySlider = this.page.locator('input[name="difficulty"]');
-	readonly darknessSlider = this.page.locator('input[name="darkness"]');
-	readonly generateButton = this.page.locator(
-		`button[type="submit"]:has-text("${BUTTON_LABELS.generate}")`
-	);
-	readonly regenerateButton = this.page.locator(`button:has-text("${BUTTON_LABELS.regenerate}")`);
-	readonly saveButton = this.page.locator(`button:has-text("${BUTTON_LABELS.save}")`);
+	readonly difficultySlider = this.page.locator('select[name="difficulty"]');
+	readonly darknessSlider = this.page.locator('select[name="darkness"]');
+	readonly generateButton = this.page.getByRole('button', { name: /generuj.*histori/i });
+	readonly regenerateButton = this.page.getByText(/wygeneruj.*ponownie/i);
+	readonly saveButton = this.page.getByText(/zapisz.*na.*mojej.*liście/i);
 
 	// Preview fields (shown after generation)
-	readonly previewQuestion = this.page.locator(
-		'[data-testid="preview-question"], .preview-question'
-	);
-	readonly previewAnswer = this.page.locator('[data-testid="preview-answer"], .preview-answer');
+	// Use "Twoja Nowa Historia" heading as marker that we're on preview page
+	readonly previewHeading = this.page.getByRole('heading', { name: /twoja nowa historia/i });
+	// Find paragraphs with substantial text (story question/answer will be long)
+	// Index 0: instruction text "Przejrzyj wygenerowaną zagadkę..."
+	// Index 1: actual question paragraph (after "❓ Pytanie:" heading)
+	readonly previewQuestion = this.page.locator('p').filter({ hasText: /.{50,}/ }).nth(1);
+	// Index 2: actual answer paragraph (revealed after clicking "Odkryj odpowiedź")
+	readonly previewAnswer = this.page.locator('p').filter({ hasText: /.{50,}/ }).nth(2);
 
 	/**
 	 * Navigate to generate page
 	 */
 	async navigate(): Promise<void> {
 		await this.goto(ROUTES.generate);
+		// Wait for form to be visible
+		await this.subjectInput.waitFor({ state: 'visible' });
 	}
 
 	/**
@@ -59,14 +63,14 @@ export class GeneratePage extends BasePage {
 	 * Set difficulty value (1-3)
 	 */
 	async setDifficulty(value: number): Promise<void> {
-		await this.difficultySlider.fill(value.toString());
+		await this.difficultySlider.selectOption(value.toString());
 	}
 
 	/**
 	 * Set darkness value (1-3)
 	 */
 	async setDarkness(value: number): Promise<void> {
-		await this.darknessSlider.fill(value.toString());
+		await this.darknessSlider.selectOption(value.toString());
 	}
 
 	/**
@@ -105,8 +109,18 @@ export class GeneratePage extends BasePage {
 
 	/**
 	 * Get generated answer from preview
+	 * Clicks "Odkryj odpowiedź" if answer is not visible yet
 	 */
 	async getGeneratedAnswer(): Promise<string> {
+		// Check if answer is already visible
+		const isAnswerVisible = await this.previewAnswer.isVisible().catch(() => false);
+
+		if (!isAnswerVisible) {
+			// Click "Odkryj odpowiedź" to reveal the answer
+			const revealButton = this.page.getByText(/odkryj.*odpowied/i);
+			await revealButton.click();
+		}
+
 		await this.previewAnswer.waitFor({ state: 'visible' });
 		return (await this.previewAnswer.textContent()) || '';
 	}
@@ -115,7 +129,8 @@ export class GeneratePage extends BasePage {
 	 * Check if preview is visible (story was generated)
 	 */
 	async isPreviewVisible(): Promise<boolean> {
-		return await this.previewQuestion.isVisible();
+		// Check if "Twoja Nowa Historia" heading is visible as indicator
+		return await this.previewHeading.isVisible();
 	}
 
 	/**

@@ -14,8 +14,8 @@ export class StoryDetailPage extends BasePage {
 	// Locators
 	readonly questionText = this.page.locator('[data-testid="story-question"], .story-question');
 	readonly answerText = this.page.locator('[data-testid="story-answer"], .story-answer');
-	readonly revealButton = this.page.locator(`button:has-text("${BUTTON_LABELS.revealAnswer}")`);
-	readonly hideButton = this.page.locator(`button:has-text("${BUTTON_LABELS.hideAnswer}")`);
+	readonly revealButton = this.page.locator(`a:has-text("${BUTTON_LABELS.revealAnswer}"), button:has-text("${BUTTON_LABELS.revealAnswer}")`);
+	readonly hideButton = this.page.locator(`a:has-text("${BUTTON_LABELS.hideAnswer}"), button:has-text("${BUTTON_LABELS.hideAnswer}")`);
 	readonly editButton = this.page.locator(
 		`a:has-text("${BUTTON_LABELS.edit}"), button:has-text("${BUTTON_LABELS.edit}")`
 	);
@@ -29,6 +29,8 @@ export class StoryDetailPage extends BasePage {
 	 */
 	async navigate(storyId: string): Promise<void> {
 		await this.goto(ROUTES.stories(storyId));
+		// Wait for question to be visible
+		await this.questionText.waitFor({ state: 'visible' });
 	}
 
 	/**
@@ -98,7 +100,9 @@ export class StoryDetailPage extends BasePage {
 	 */
 	async confirmDelete(): Promise<void> {
 		const modal = this.page.locator('[role="dialog"], .modal');
-		const confirmButton = modal.locator(`button:has-text("${BUTTON_LABELS.delete}")`);
+		await modal.waitFor({ state: 'visible' });
+		const confirmButton = modal.getByText(BUTTON_LABELS.delete, { exact: false });
+		await confirmButton.waitFor({ state: 'visible' });
 		await confirmButton.click();
 		await this.waitForUrl(ROUTES.home);
 	}
@@ -108,7 +112,9 @@ export class StoryDetailPage extends BasePage {
 	 */
 	async cancelDelete(): Promise<void> {
 		const modal = this.page.locator('[role="dialog"], .modal');
-		const cancelButton = modal.locator(`button:has-text("${BUTTON_LABELS.cancel}")`);
+		await modal.waitFor({ state: 'visible' });
+		const cancelButton = modal.getByText(BUTTON_LABELS.cancel, { exact: false });
+		await cancelButton.waitFor({ state: 'visible' });
 		await cancelButton.click();
 	}
 }

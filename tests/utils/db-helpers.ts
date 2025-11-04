@@ -160,7 +160,11 @@ export async function deleteStory(storyId: string): Promise<void> {
  * @returns Story or null if not found
  */
 export async function getStory(storyId: string): Promise<Story | null> {
-	const { data, error } = await getSupabaseClient().from('stories').select('*').eq('id', storyId).single();
+	const { data, error } = await getSupabaseClient()
+		.from('stories')
+		.select('*')
+		.eq('id', storyId)
+		.single();
 
 	if (error) {
 		if (error.code === 'PGRST116') {

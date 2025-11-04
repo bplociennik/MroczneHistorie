@@ -41,8 +41,10 @@ export default defineConfig({
 	},
 
 	// Run tests in parallel for faster execution on CI
+	// NOTE: Using workers: 1 because all E2E tests share the same E2E_USER.id
+	// Running multiple test files in parallel causes database conflicts
 	fullyParallel: false,
-	workers: process.env.CI ? 5 : 4,
+	workers: 1,
 
 	// Fail the build on CI if you accidentally left test.only in the source code
 	forbidOnly: !!process.env.CI,
@@ -86,7 +88,8 @@ export default defineConfig({
 			testIgnore: [
 				'**/e2e/auth/login.spec.ts',
 				'**/e2e/auth/register.spec.ts',
-				'**/e2e/auth/route-protection.spec.ts'
+				'**/e2e/auth/route-protection.spec.ts',
+				'**/e2e/auth/logout.spec.ts'
 			],
 			use: {
 				...devices['Desktop Chrome'],
@@ -109,6 +112,18 @@ export default defineConfig({
 				// No authentication state
 				storageState: { cookies: [], origins: [] }
 			}
+		},
+
+		// Logout test - needs authenticated state initially but then destroys it
+		{
+			name: 'chromium-logout',
+			testMatch: ['**/e2e/auth/logout.spec.ts'],
+			use: {
+				...devices['Desktop Chrome'],
+				// Use saved authentication state
+				storageState: '.auth/user.json'
+			},
+			dependencies: ['setup']
 		}
 	],
 

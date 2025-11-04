@@ -8,7 +8,7 @@
 			<!-- Icon or illustration -->
 			<div class="text-6xl mb-4 opacity-50">📖</div>
 
-			<h2 class="text-3xl font-bold mb-4">Twoja księga mrocznych historii jest jeszcze pusta...</h2>
+			<h2 class="text-3xl font-bold mb-4">Twoja księga mrocznych historii jest jeszcze pusta</h2>
 
 			<p class="text-lg mb-6 opacity-80">
 				Zacznij swoją przygodę z tworzeniem mrocznych zagadek. Wygeneruj pierwszą historię i zbuduj

@@ -11,7 +11,10 @@ test.describe('Logout', () => {
 		await homePage.navigate();
 
 		// Wait for logout button to be visible (indicates user is logged in)
-		await homePage.page.locator('text=Wyloguj').first().waitFor({ state: 'visible', timeout: 5000 });
+		await homePage.page
+			.locator('text=Wyloguj')
+			.first()
+			.waitFor({ state: 'visible', timeout: 5000 });
 
 		// Verify user is logged in
 		const isLoggedIn = await homePage.isLoggedIn();

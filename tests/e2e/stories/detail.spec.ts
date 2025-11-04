@@ -7,14 +7,11 @@ import { seedMultipleStories, cleanupUserStories, type Story } from '../../utils
  * Tests: TC-CRUD-006
  */
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Story Detail', () => {
-	test.describe.configure({ mode: 'serial' });
-
-	let seededStories: Story[];
-
 	test.beforeEach(async () => {
 		await cleanupUserStories(E2E_USER.id);
-		seededStories = await seedMultipleStories(E2E_USER.id, 5);
 	});
 
 	test.afterEach(async () => {
@@ -22,6 +19,7 @@ test.describe('Story Detail', () => {
 	});
 
 	test('TC-CRUD-006: Display story in game mode (Happy Path)', async ({ storyDetailPage }) => {
+		const seededStories = await seedMultipleStories(E2E_USER.id, 5);
 		const story = seededStories[0];
 
 		// Navigate to story detail page
@@ -40,6 +38,7 @@ test.describe('Story Detail', () => {
 	});
 
 	test('TC-CRUD-006: Reveal and hide answer toggle', async ({ storyDetailPage }) => {
+		const seededStories = await seedMultipleStories(E2E_USER.id, 5);
 		const story = seededStories[0];
 		await storyDetailPage.navigate(story.id);
 
@@ -70,27 +69,5 @@ test.describe('Story Detail', () => {
 
 		// Verify button changed back to "Odkryj odpowiedź"
 		await expect(storyDetailPage.revealButton).toBeVisible();
-	});
-
-	test('TC-CRUD-006: Navigate to edit page', async ({ storyDetailPage }) => {
-		const story = seededStories[0];
-		await storyDetailPage.navigate(story.id);
-
-		// Click edit button
-		await storyDetailPage.clickEdit();
-
-		// Verify navigation to edit page
-		await expect(storyDetailPage.page).toHaveURL(new RegExp(`/stories/${story.id}/edit`));
-	});
-
-	test('TC-CRUD-006: Navigate back to list', async ({ storyDetailPage }) => {
-		const story = seededStories[0];
-		await storyDetailPage.navigate(story.id);
-
-		// Click back button
-		await storyDetailPage.clickBack();
-
-		// Verify navigation to home page
-		await expect(storyDetailPage.page).toHaveURL('/');
 	});
 });

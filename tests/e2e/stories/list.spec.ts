@@ -8,7 +8,6 @@ import { cleanupUserStories, seedMultipleStories, type Story } from '../../utils
  */
 
 test.describe('Stories List', () => {
-	test.describe.configure({ mode: 'serial' });
 
 	test('TC-CRUD-001: Display empty state when no stories', async ({ homePage, cleanDatabase }) => {
 		// Navigate to home page (database is clean)
@@ -34,6 +33,8 @@ test.describe('Stories List', () => {
 		expect(storiesCount).toBe(0);
 	});
 
+	test.describe.configure({ mode: 'serial' });
+
 	test.describe('With seeded stories', () => {
 		test.beforeEach(async () => {
 			await cleanupUserStories(E2E_USER.id);
@@ -48,36 +49,36 @@ test.describe('Stories List', () => {
 			// Navigate to home page (database has 5 seeded stories)
 			await homePage.navigate();
 
-		// Verify empty state is NOT visible
-		const isEmptyVisible = await homePage.isEmptyStateVisible();
-		expect(isEmptyVisible).toBe(false);
+			// Verify empty state is NOT visible
+			const isEmptyVisible = await homePage.isEmptyStateVisible();
+			expect(isEmptyVisible).toBe(false);
 
-		// Verify story cards are displayed
-		const storiesCount = await homePage.getStoriesCount();
-		expect(storiesCount).toBe(5);
+			// Verify story cards are displayed
+			const storiesCount = await homePage.getStoriesCount();
+			expect(storiesCount).toBe(5);
 
-		// Verify Random button is enabled
-		const isRandomEnabled = await homePage.isRandomButtonEnabled();
-		expect(isRandomEnabled).toBe(true);
+			// Verify Random button is enabled
+			const isRandomEnabled = await homePage.isRandomButtonEnabled();
+			expect(isRandomEnabled).toBe(true);
 
-		// Verify first story card contains expected data
-		const firstCard = homePage.getStoryCard(0);
-		await expect(firstCard).toBeVisible();
+			// Verify first story card contains expected data
+			const firstCard = homePage.getStoryCard(0);
+			await expect(firstCard).toBeVisible();
 
-		// Verify story card has action buttons (edit, delete)
-		const editButton = firstCard.locator(
-			`button:has-text("${BUTTON_LABELS.edit}"), a:has-text("${BUTTON_LABELS.edit}")`
-		);
-		const deleteButton = firstCard.locator(
-			`button:has-text("${BUTTON_LABELS.delete}"), [data-testid="delete-button"]`
-		);
+			// Verify story card has action buttons (edit, delete)
+			const editButton = firstCard.locator(
+				`button:has-text("${BUTTON_LABELS.edit}"), a:has-text("${BUTTON_LABELS.edit}")`
+			);
+			const deleteButton = firstCard.locator(
+				`button:has-text("${BUTTON_LABELS.delete}"), [data-testid="delete-button"]`
+			);
 
-		await expect(editButton).toBeVisible();
-		await expect(deleteButton).toBeVisible();
+			await expect(editButton).toBeVisible();
+			await expect(deleteButton).toBeVisible();
 
-		// Verify stories are sorted by created_at DESC (newest first)
-		// First seeded story should be "#5" (last created)
-		const firstCardText = await homePage.getStoryQuestion(0);
+			// Verify stories are sorted by created_at DESC (newest first)
+			// First seeded story should be "#5" (last created)
+			const firstCardText = await homePage.getStoryQuestion(0);
 			expect(firstCardText).toContain('#5');
 		});
 

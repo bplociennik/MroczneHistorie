@@ -32,6 +32,8 @@ export class StoryEditPage extends BasePage {
 	 */
 	async navigate(storyId: string): Promise<void> {
 		await this.goto(ROUTES.editStory(storyId));
+		// Wait for form inputs to be visible
+		await this.questionInput.waitFor({ state: 'visible' });
 	}
 
 	/**
