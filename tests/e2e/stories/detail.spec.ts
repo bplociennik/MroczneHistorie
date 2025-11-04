@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
 import { E2E_USER } from '../../utils/test-data';
-import { seedMultipleStories, cleanupUserStories, type Story } from '../../utils/db-helpers';
+import { seedMultipleStories, cleanupUserStories } from '../../utils/db-helpers';
 
 /**
  * E2E Tests for Story Detail page (game mode)

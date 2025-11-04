@@ -76,10 +76,7 @@ test.describe('Story Edit', () => {
 		expect(readOnlyValues.darkness).toBeTruthy();
 	});
 
-	test('TC-CRUD-009: Edit only question field', async ({
-		storyEditPage,
-		storyDetailPage
-	}) => {
+	test('TC-CRUD-009: Edit only question field', async ({ storyEditPage, storyDetailPage }) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -102,10 +99,7 @@ test.describe('Story Edit', () => {
 		expect(displayedAnswer).toContain(story.answer);
 	});
 
-	test('TC-CRUD-009: Edit only answer field', async ({
-		storyEditPage,
-		storyDetailPage
-	}) => {
+	test('TC-CRUD-009: Edit only answer field', async ({ storyEditPage, storyDetailPage }) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 
@@ -156,9 +150,7 @@ test.describe('Story Edit', () => {
 		expect(toastText.toLowerCase()).toMatch(/(odpowiedź|answer)/i);
 	});
 
-	test('TC-CRUD-008: Cancel edit returns to detail page', async ({
-		storyEditPage
-	}) => {
+	test('TC-CRUD-008: Cancel edit returns to detail page', async ({ storyEditPage }) => {
 		const story = seededStories[0];
 		await storyEditPage.navigate(story.id);
 

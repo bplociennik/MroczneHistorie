@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
 import { PAGE_TITLES, BUTTON_LABELS, E2E_USER } from '../../utils/test-data';
-import { cleanupUserStories, seedMultipleStories, type Story } from '../../utils/db-helpers';
+import { cleanupUserStories, seedMultipleStories } from '../../utils/db-helpers';
 
 /**
  * E2E Tests for Stories List
@@ -8,8 +8,7 @@ import { cleanupUserStories, seedMultipleStories, type Story } from '../../utils
  */
 
 test.describe('Stories List', () => {
-
-	test('TC-CRUD-001: Display empty state when no stories', async ({ homePage, cleanDatabase }) => {
+	test('TC-CRUD-001: Display empty state when no stories', async ({ homePage }) => {
 		// Navigate to home page (database is clean)
 		await homePage.navigate();
 

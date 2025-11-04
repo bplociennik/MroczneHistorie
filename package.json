@@ -3,10 +3,10 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
-    "engines": {
-      "node": "22.x",
-      "npm": "10.x"
-    },
+	"engines": {
+		"node": "22.x",
+		"npm": "10.x"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"dev:e2e": "node --env-file=.env.e2e node_modules/.bin/vite dev",

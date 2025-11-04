@@ -14,8 +14,12 @@ export class StoryDetailPage extends BasePage {
 	// Locators
 	readonly questionText = this.page.locator('[data-testid="story-question"], .story-question');
 	readonly answerText = this.page.locator('[data-testid="story-answer"], .story-answer');
-	readonly revealButton = this.page.locator(`a:has-text("${BUTTON_LABELS.revealAnswer}"), button:has-text("${BUTTON_LABELS.revealAnswer}")`);
-	readonly hideButton = this.page.locator(`a:has-text("${BUTTON_LABELS.hideAnswer}"), button:has-text("${BUTTON_LABELS.hideAnswer}")`);
+	readonly revealButton = this.page.locator(
+		`a:has-text("${BUTTON_LABELS.revealAnswer}"), button:has-text("${BUTTON_LABELS.revealAnswer}")`
+	);
+	readonly hideButton = this.page.locator(
+		`a:has-text("${BUTTON_LABELS.hideAnswer}"), button:has-text("${BUTTON_LABELS.hideAnswer}")`
+	);
 	readonly editButton = this.page.locator(
 		`a:has-text("${BUTTON_LABELS.edit}"), button:has-text("${BUTTON_LABELS.edit}")`
 	);

@@ -29,7 +29,10 @@ export class HomePage extends BasePage {
 		await this.goto(ROUTES.home);
 		// Wait for one of the possible page states to be visible
 		await Promise.race([
-			this.storyCards.first().waitFor({ state: 'visible' }).catch(() => {}),
+			this.storyCards
+				.first()
+				.waitFor({ state: 'visible' })
+				.catch(() => {}),
 			this.emptyState.waitFor({ state: 'visible' }).catch(() => {}),
 			this.landingPage.waitFor({ state: 'visible' }).catch(() => {})
 		]);

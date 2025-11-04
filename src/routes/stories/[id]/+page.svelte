@@ -9,7 +9,10 @@
 <div class="min-h-screen flex flex-col items-center justify-start pt-16 p-6 gap-8">
 	<!-- Question section -->
 	<section class="w-full max-w-4xl text-center">
-		<p class="text-2xl md:text-3xl lg:text-4xl font-bold leading-relaxed" data-testid="story-question">
+		<p
+			class="text-2xl md:text-3xl lg:text-4xl font-bold leading-relaxed"
+			data-testid="story-question"
+		>
 			{data.story.question}
 		</p>
 	</section>
@@ -26,7 +29,10 @@
 	<!-- Answer section (conditional) -->
 	{#if showAnswer}
 		<section class="w-full max-w-4xl text-center" transition:fade={{ duration: 300 }}>
-			<p class="text-lg md:text-xl lg:text-2xl leading-relaxed text-base-content/80" data-testid="story-answer">
+			<p
+				class="text-lg md:text-xl lg:text-2xl leading-relaxed text-base-content/80"
+				data-testid="story-answer"
+			>
 				{data.story.answer}
 			</p>
 		</section>

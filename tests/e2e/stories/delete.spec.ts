@@ -1,11 +1,6 @@
 import { test, expect } from '../../fixtures/test-fixtures';
 import { SUCCESS_MESSAGES } from '../../utils/test-data';
-import {
-	getStoriesCount,
-	seedMultipleStories,
-	cleanupUserStories,
-	type Story
-} from '../../utils/db-helpers';
+import { getStoriesCount, seedMultipleStories, cleanupUserStories } from '../../utils/db-helpers';
 import { E2E_USER } from '../../utils/test-data';
 
 /**

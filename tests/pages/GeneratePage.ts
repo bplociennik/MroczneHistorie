@@ -25,9 +25,15 @@ export class GeneratePage extends BasePage {
 	// Find paragraphs with substantial text (story question/answer will be long)
 	// Index 0: instruction text "Przejrzyj wygenerowaną zagadkę..."
 	// Index 1: actual question paragraph (after "❓ Pytanie:" heading)
-	readonly previewQuestion = this.page.locator('p').filter({ hasText: /.{50,}/ }).nth(1);
+	readonly previewQuestion = this.page
+		.locator('p')
+		.filter({ hasText: /.{50,}/ })
+		.nth(1);
 	// Index 2: actual answer paragraph (revealed after clicking "Odkryj odpowiedź")
-	readonly previewAnswer = this.page.locator('p').filter({ hasText: /.{50,}/ }).nth(2);
+	readonly previewAnswer = this.page
+		.locator('p')
+		.filter({ hasText: /.{50,}/ })
+		.nth(2);
 
 	/**
 	 * Navigate to generate page

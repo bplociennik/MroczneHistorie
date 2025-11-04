@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import { E2E_USER, SAMPLE_STORIES } from '../../utils/test-data';
+import { E2E_USER } from '../../utils/test-data';
 import { getUserStories, seedMultipleStories, cleanupUserStories } from '../../utils/db-helpers';
 
 /**
