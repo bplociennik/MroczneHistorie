@@ -63,7 +63,6 @@ jobs:
   # Job 3: End-to-End Tests (Playwright)
   e2e_tests:
     name: 🎭 E2E Tests
-    if: false
     runs-on: ubuntu-latest
 
     steps:
