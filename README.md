@@ -1,76 +1,103 @@
 # MroczneHistorie
 
-Aplikacja webowa (mobile-first) do generowania zagadek w stylu "Czarnych Historii" z wykorzystaniem AI.
+Aplikacja webowa (mobile-first) do generowania zagadek w stylu "Czarnych Historii" przy użyciu AI (OpenAI). Umożliwia tworzenie, przechowywanie i prowadzenie gier towarzyskich.
 
-## O Projekcie
+> 🛑 **Informacja:** Projekt został w większości wygenerowany przy 
+> wsparciu modeli AI (głównie Gemini 2.5 Pro oraz Claude Code 
+> Sonnet 4.5) na potrzeby kursu [10xdevs AI](https://www.10xdevs.pl/).
 
-MroczneHistorie to narzdzie, kt�re rozwizuje problem trudno[ci w tworzeniu anga|ujcych zagadek logicznych. Aplikacja wykorzystuje API OpenAI do generowania unikalnych, mrocznych historii na podstawie pomysB�w u|ytkownika, umo|liwiajc ich przechowywanie i zarzdzanie w jednym miejscu.
+## 🚀 Kluczowe Funkcjonalności
 
-### GB�wne Funkcjonalno[ci
+* **Generowanie AI:** Tworzenie unikalnych zagadek (Pytanie + Odpowiedź) na podstawie tematu podanego przez użytkownika.
+* **Kontrola parametrów:** Możliwość dostosowania **Trudności** (1-3) i **Mroczności** (1-3) generowanej historii.
+* **Prywatna biblioteka:** Przechowywanie wszystkich wygenerowanych historii na prywatnym koncie użytkownika (sortowanie od najnowszej).
+* **Tryb gry:** Dedykowany, minimalistyczny widok (`/history/[id]`) dla Mistrza Gry, pozwalający na wygodne prowadzenie rozgrywki z opcją odkrywania i ukrywania rozwiązania.
+* **Zarządzanie zagadkami:** Pełne operacje CRUD – edycja treści pytania i odpowiedzi oraz usuwanie historii z biblioteki.
+* **Uwierzytelnianie:** System rejestracji i logowania użytkowników oparty o e-mail i hasło.
+* **Design:** Aplikacja zaprojektowana w podejściu **Mobile-First** i dostępna wyłącznie w **Trybie Ciemnym (Dark Mode)**.
 
-- Generowanie zagadek AI z kontrol trudno[ci i mroczno[ci
-- Prywatna biblioteka wygenerowanych historii
-- Tryb gry dla Mistrza Gry (czysty interfejs bez rozpraszaczy)
-- Edycja i zarzdzanie zapisanymi historiami
-- Losowanie historii z biblioteki
-- Responsywny design (mobile-first, dark mode)
+## 🛠️ Stos Technologiczny
 
-## Tech Stack
+* **Frontend:** SvelteKit (Svelte 5) z TypeScript.
+* **Backend:** Endpointy API w SvelteKit.
+* **Baza Danych i Auth:** Supabase (Zarządzana baza PostgreSQL, Uwierzytelnianie, Row Level Security).
+* **AI:** Integracja z API OpenAI.
+* **Styling:** Tailwind CSS z biblioteką komponentów DaisyUI.
+* **Testowanie:**
+    * Testy jednostkowe: Vitest
+    * Testy End-to-End: Playwright
+* **CI/CD i Hosting:** GitHub Actions oraz Cloudflare Pages.
 
-Projekt wykorzystuje nowoczesny stack technologiczny:
+## 🌐 Demo
 
-- **Frontend:** SvelteKit + TypeScript + Tailwind CSS + DaisyUI
-- **Backend:** SvelteKit API Routes + Supabase (PostgreSQL, Auth, RLS)
-- **AI:** OpenAI API
-- **Testy:** Playwright, Vitest
-- **CI/CD:** GitHub Actions + Cloudflare Pages
+Aplikacja jest dostępna publicznie pod adresem:
+**[https://mrocznehistorie.pages.dev/login](https://mrocznehistorie.pages.dev/login)**
 
-Szczeg�Bowe informacje o stosie technologicznym znajduj si w [.ai/tech-stack.md](.ai/tech-stack.md).
+## ⚙️ Proces CI/CD
 
-## Rozpoczcie Pracy
+Projekt wykorzystuje **GitHub Actions** do automatyzacji procesów budowania i testowania.
 
-### Wymagania
+Każdy `push` oraz `pull_request` do gałęzi `main` uruchamia workflow, który wykonuje następujące zadania:
 
-- Node.js (najnowsza wersja LTS)
-- Konto Supabase
-- Klucz API OpenAI
+1.  **🔬 Linting:** Sprawdzenie spójności kodu za pomocą ESLint i Prettier (`npm run lint`).
+2.  **🧪 Unit Tests:** Uruchomienie testów jednostkowych za pomocą Vitest (`npm run test:unit`).
+3.  **🎭 E2E Tests:** Uruchomienie pełnych testów End-to-End przy użyciu Playwright (`npm run test:e2e`).
 
-### Instalacja
+Jeśli wszystkie powyższe kroki zakończą się sukcesem, a zmiana dotyczy gałęzi `main`, automatycznie uruchamiany jest deployment na **Cloudflare Pages**.
+
+## 🏁 Postawienie Środowiska (Uruchomienie Lokalne)
+
+### Wymagania wstępne
+
+* Node.js wersja 22.x
+* NPM wersja 10.x
+* Konto Supabase (oraz klucze API)
+* Klucz API OpenAI
+
+### Kroki instalacji
+
+1.  Sklonuj repozytorium:
+    ```bash
+    git clone git@github.com:bplociennik/MroczneHistorie.git
+    cd MroczneHistorie
+    ```
+
+2.  Zainstaluj zależności:
+    ```bash
+    npm install
+    ```
+
+3.  Skonfiguruj zmienne środowiskowe:
+    Skopiuj plik przykładowy:
+    ```bash
+    cp .env.example .env
+    ```
+    Następnie uzupełnij plik `.env` wymaganymi kluczami (Supabase, OpenAI). Dla testów E2E może być wymagane stworzenie analogicznego pliku `.env.e2e`.
+
+### Uruchomienie aplikacji
 
 ```bash
-# Sklonuj repozytorium
-git clone git@github.com:bplociennik/MroczneHistorie.git
-cd MroczneHistorie
-
-# Zainstaluj zale|no[ci
-npm install
-
-# Skonfiguruj zmienne [rodowiskowe
-cp .env.example .env
-# UzupeBnij .env odpowiednimi kluczami API
-```
-
-### Uruchomienie Projektu
-
-```bash
-# Tryb deweloperski
+# Uruchom serwer deweloperski
 npm run dev
-
-# Build produkcyjny
-npm run build
-
-# Podgld buildu
-npm run preview
 ```
 
-### Testowanie
+Aplikacja będzie dostępna pod adresem http://localhost:5173.
+
+### Dostępne skrypty
 
 ```bash
-# Uruchom testy E2E
-npm run test
+# Sprawdzenie formatowania i błędów (Lint)
+npm run lint
+
+# Automatyczne formatowanie kodu
+npm run format
+
+# Uruchomienie testów jednostkowych (Vitest)
+npm run test:unit
+
+# Uruchomienie testów E2E (Playwright) - wymaga pliku .env.e2e
+npm run test:e2e:local
+
+# Uruchomienie testów E2E w trybie UI (Playwright)
+npm run test:e2e:ui:local
 ```
-
-## Dokumentacja
-
-- [Product Requirements Document (PRD)](.ai/prd.md) - szczeg�Bowe wymagania funkcjonalne i biznesowe
-- [Tech Stack](.ai/tech-stack.md) - peBny opis stosu technologicznego
