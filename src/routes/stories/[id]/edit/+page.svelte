@@ -137,8 +137,9 @@
 			<fieldset class="fieldset !gap-4">
 				<legend class="fieldset-legend text-base mb-2">Temat historii</legend>
 				<div
-				data-testid="readonly-subject"
-				class="input w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed">
+					data-testid="readonly-subject"
+					class="input w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed"
+				>
 					{data.story.subject}
 				</div>
 			</fieldset>
@@ -149,7 +150,7 @@
 				<fieldset class="fieldset !gap-4">
 					<legend class="fieldset-legend text-base mb-2">Poziom trudności</legend>
 					<select
-					data-testid="readonly-difficulty"
+						data-testid="readonly-difficulty"
 						class="select w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed"
 						disabled
 					>
@@ -165,7 +166,7 @@
 				<fieldset class="fieldset !gap-4">
 					<legend class="fieldset-legend text-base mb-2">Poziom mroczności</legend>
 					<select
-					data-testid="readonly-darkness"
+						data-testid="readonly-darkness"
 						class="select w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed"
 						disabled
 					>

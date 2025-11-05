@@ -20,45 +20,45 @@ test.describe('Generate Story', () => {
 	test.describe('Success scenarios', () => {
 		test.use({ mockOpenAI: 'success' });
 
-		test.fixme('TC-GEN-001: Generate story successfully (Happy Path)', async ({
-			generatePage,
-			homePage
-		}) => {
-			// Navigate to generate page
-			await generatePage.navigate();
+		test.fixme(
+			'TC-GEN-001: Generate story successfully (Happy Path)',
+			async ({ generatePage, homePage }) => {
+				// Navigate to generate page
+				await generatePage.navigate();
 
-			// Fill form
-			await generatePage.fillSubject(SAMPLE_SUBJECTS[0]);
-			await generatePage.setDifficulty(2);
-			await generatePage.setDarkness(2);
+				// Fill form
+				await generatePage.fillSubject(SAMPLE_SUBJECTS[0]);
+				await generatePage.setDifficulty(2);
+				await generatePage.setDarkness(2);
 
-			// Click generate
-			await generatePage.clickGenerate();
+				// Click generate
+				await generatePage.clickGenerate();
 
-			// Wait for generation to complete (loader may be too fast to catch with mock)
-			await generatePage.waitForGeneration();
+				// Wait for generation to complete (loader may be too fast to catch with mock)
+				await generatePage.waitForGeneration();
 
-			// Verify generated question and answer exist and have content
-			// (this implicitly verifies that preview is visible)
-			const question = await generatePage.getGeneratedQuestion();
-            const answer = await generatePage.getGeneratedAnswer();
+				// Verify generated question and answer exist and have content
+				// (this implicitly verifies that preview is visible)
+				const question = await generatePage.getGeneratedQuestion();
+				const answer = await generatePage.getGeneratedAnswer();
 
-			expect(question.length).toBeGreaterThan(20);
-            expect(answer.length).toBeGreaterThan(20);
+				expect(question.length).toBeGreaterThan(20);
+				expect(answer.length).toBeGreaterThan(20);
 
-			// Click save
-			await generatePage.clickSave();
+				// Click save
+				await generatePage.clickSave();
 
-			// Verify redirect to home page
-			await expect(generatePage.page).toHaveURL('/');
+				// Verify redirect to home page
+				await expect(generatePage.page).toHaveURL('/');
 
-			// Verify success toast
-			await generatePage.waitForToast('success', SUCCESS_MESSAGES.story.saved);
+				// Verify success toast
+				await generatePage.waitForToast('success', SUCCESS_MESSAGES.story.saved);
 
-			// Verify story appears in list
-			const storiesCount = await homePage.getStoriesCount();
-			expect(storiesCount).toBe(1);
-		});
+				// Verify story appears in list
+				const storiesCount = await homePage.getStoriesCount();
+				expect(storiesCount).toBe(1);
+			}
+		);
 	});
 
 	test.describe('Timeout scenarios', () => {
