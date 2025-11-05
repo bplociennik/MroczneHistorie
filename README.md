@@ -149,4 +149,5 @@ npm run test:e2e:ui:local
       zostać użyty (obecnie o3-mini używam)
 - [ ] Dorzucenie testów security + włączenie Github security scanning
 - [ ] Job generujący diagram architektury w oparciu o mermaid
+- [ ] Generowanie dokumentacji OpenAPI lokalnie oraz na github action
 - [ ] ...
