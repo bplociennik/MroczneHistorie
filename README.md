@@ -139,3 +139,14 @@ npm run test:e2e:ui:local
 10. Najbardziej frustrujące były limity dzienne w Claude Pro, które
     potrafiły popsuć fajną zabawę i mój context focus na danym
     ficzerze
+
+### Potencjalne TODO
+
+- [ ] Naprawa testów E2E oznaczonych jako `fixme`
+- [ ] Dodanie dodatkowego środowiska staging i zmiana sposobu deploymentu na manual trigger
+- [ ] Dodanie coverage na testach
+- [ ] Umożliwienie na formularzu generowania wyboru modelu jaki ma
+      zostać użyty (obecnie o3-mini używam)
+- [ ] Dorzucenie testów security + włączenie Github security scanning
+- [ ] Job generujący diagram architektury w oparciu o mermaid
+- [ ] ...
