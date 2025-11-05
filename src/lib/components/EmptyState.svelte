@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 </script>
 
-<div class="hero min-h-[60vh] bg-base-200 rounded-lg">
+<div data-testid="empty-state" class="hero min-h-[60vh] bg-base-200 rounded-lg">
 	<div class="hero-content text-center">
 		<div class="max-w-xl">
 			<!-- Icon or illustration -->

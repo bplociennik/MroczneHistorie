@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { toastStore } from '$lib/stores/toasts';
 	import { DIFFICULTY_LABELS, DARKNESS_LABELS } from '$lib/constants/forms';
 	import type { SelectOption } from '$lib/types/viewModels';
 
@@ -66,9 +68,15 @@
 			class="card-body space-y-4"
 			use:enhance={() => {
 				isSubmitting = true;
-				return async ({ update }) => {
-					await update();
+				return async ({ result, update }) => {
 					isSubmitting = false;
+
+					if (result.type === 'redirect') {
+						toastStore.addToast('Historia zaktualizowana pomyślnie', 'success');
+						await goto(resolve(result.location));
+					}
+
+					await update();
 				};
 			}}
 		>
@@ -128,7 +136,9 @@
 			<!-- Subject (Read-Only) -->
 			<fieldset class="fieldset !gap-4">
 				<legend class="fieldset-legend text-base mb-2">Temat historii</legend>
-				<div class="input w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed">
+				<div
+				data-testid="readonly-subject"
+				class="input w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed">
 					{data.story.subject}
 				</div>
 			</fieldset>
@@ -139,6 +149,7 @@
 				<fieldset class="fieldset !gap-4">
 					<legend class="fieldset-legend text-base mb-2">Poziom trudności</legend>
 					<select
+					data-testid="readonly-difficulty"
 						class="select w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed"
 						disabled
 					>
@@ -154,6 +165,7 @@
 				<fieldset class="fieldset !gap-4">
 					<legend class="fieldset-legend text-base mb-2">Poziom mroczności</legend>
 					<select
+					data-testid="readonly-darkness"
 						class="select w-full px-4 py-3 bg-base-300 opacity-60 cursor-not-allowed"
 						disabled
 					>

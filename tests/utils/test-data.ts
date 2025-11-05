@@ -104,7 +104,7 @@ export const BUTTON_LABELS = {
 	save: 'Zapisz',
 	saveChanges: 'Zapisz zmiany',
 	delete: 'Usuń',
-	cancel: 'Anuluj',
+	cancel: 'Powrót do moich historii',
 	edit: 'Edytuj',
 	revealAnswer: 'Odkryj odpowiedź',
 	hideAnswer: 'Ukryj odpowiedź',

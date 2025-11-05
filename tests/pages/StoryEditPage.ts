@@ -41,11 +41,9 @@ export class StoryEditPage extends BasePage {
 	 */
 	async getReadOnlyValues(): Promise<{ subject: string; difficulty: string; darkness: string }> {
 		return {
-			subject: await this.readOnlySubject
-				.inputValue()
-				.catch(() => this.readOnlySubject.textContent() || ''),
-			difficulty: (await this.readOnlyDifficulty.textContent()) || '',
-			darkness: (await this.readOnlyDarkness.textContent()) || ''
+			subject: (await this.readOnlySubject.textContent()) || '',
+			difficulty: await this.readOnlyDifficulty.inputValue(),
+			darkness: await this.readOnlyDarkness.inputValue()
 		};
 	}
 

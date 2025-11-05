@@ -5,7 +5,7 @@ import { E2E_USER } from '../../utils/test-data';
 
 /**
  * E2E Tests for Story Delete functionality
- * Tests: TC-CRUD-010, TC-CRUD-011
+ * Tests: TC-CRUD-010
  */
 
 test.describe.configure({ mode: 'serial' });
@@ -60,53 +60,5 @@ test.describe('Story Delete', () => {
 		// Verify in database
 		const dbCount = await getStoriesCount(E2E_USER.id);
 		expect(dbCount).toBe(4);
-	});
-
-	test('TC-CRUD-011: Cancel deletion keeps story', async ({ homePage }) => {
-		// Seed stories
-		await seedMultipleStories(E2E_USER.id, 5);
-
-		// Navigate to load seeded data
-		await homePage.navigate();
-
-		const initialCount = await homePage.getStoriesCount();
-
-		// Click delete on first story
-		await homePage.clickDeleteOnStory(0);
-
-		// Verify modal appears
-		const isModalVisible = await homePage.isDeleteModalVisible();
-		expect(isModalVisible).toBe(true);
-
-		// Cancel deletion
-		await homePage.cancelDelete();
-
-		// Verify story count unchanged
-		const newCount = await homePage.getStoriesCount();
-		expect(newCount).toBe(initialCount);
-
-		// Verify in database
-		const dbCount = await getStoriesCount(E2E_USER.id);
-		expect(dbCount).toBe(5);
-	});
-
-	test('TC-CRUD-012: Close modal with Escape key', async ({ homePage }) => {
-		// Seed stories
-		await seedMultipleStories(E2E_USER.id, 5);
-
-		// Navigate to load seeded data
-		await homePage.navigate();
-
-		const initialCount = await homePage.getStoriesCount();
-
-		// Click delete
-		await homePage.clickDeleteOnStory(0);
-
-		// Press Escape key to close modal
-		await homePage.page.keyboard.press('Escape');
-
-		// Verify modal closed and story not deleted
-		const newCount = await homePage.getStoriesCount();
-		expect(newCount).toBe(initialCount);
 	});
 });

@@ -140,14 +140,6 @@ export class GeneratePage extends BasePage {
 	}
 
 	/**
-	 * Click regenerate button to generate a new story with same parameters
-	 */
-	async clickRegenerate(): Promise<void> {
-		await this.regenerateButton.click();
-		await this.waitForGeneration();
-	}
-
-	/**
 	 * Click save button to save generated story
 	 */
 	async clickSave(): Promise<void> {

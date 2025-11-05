@@ -157,7 +157,7 @@ export const actions: Actions = {
 			};
 		}
 
-		// 7. Success - redirect to story list
-		throw redirect(303, '/');
+		// 7. Success - redirect to story detail page
+		throw redirect(303, `/stories/${params.id}`);
 	}
 };

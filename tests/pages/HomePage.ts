@@ -27,6 +27,8 @@ export class HomePage extends BasePage {
 	 */
 	async navigate(): Promise<void> {
 		await this.goto(ROUTES.home);
+		// Wait for page to fully load including all network requests
+		await this.page.waitForLoadState('networkidle');
 		// Wait for one of the possible page states to be visible
 		await Promise.race([
 			this.storyCards

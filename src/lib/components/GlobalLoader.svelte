@@ -4,6 +4,7 @@
 
 {#if $loadingStore.isLoading}
 	<div
+		data-testid="global-loader"
 		class="fixed inset-0 z-50 flex items-center justify-center bg-base-300/90 backdrop-blur-sm"
 		role="alert"
 		aria-live="polite"
